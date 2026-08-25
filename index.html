@@ -1,0 +1,607 @@
+<title>Rice & Shine Order Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Karla:ital,wght@0,400..700;1,400..700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --rice: #f7eee6;
+    --rice-2: #efe3d6;
+    --card: #fffbf6;
+    --nori: #24312a;
+    --nori-2: #33443a;
+    --ink: #241d16;
+    --ink-soft: #6b6157;
+    --line: #e2d5c4;
+    --tea: #c96a2c;
+    --tea-ink: #ffffff;
+    --salmon: #d97a63;
+    --salmon-soft: #f6e3dc;
+    --matcha: #4f7a45;
+    --matcha-soft: #e4ede0;
+    --warn: #a94430;
+    --warn-soft: #f5ddd5;
+    --shadow: 0 1px 2px rgba(36, 29, 22, 0.06), 0 8px 20px -12px rgba(36, 29, 22, 0.25);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --rice: #171e19;
+      --rice-2: #1f2a22;
+      --card: #202b23;
+      --nori: #0f1512;
+      --nori-2: #2a362e;
+      --ink: #f1e9dd;
+      --ink-soft: #a9a093;
+      --line: #37453b;
+      --tea: #e8934a;
+      --tea-ink: #201205;
+      --salmon: #eda08e;
+      --salmon-soft: #3a2a27;
+      --matcha: #8ab97b;
+      --matcha-soft: #24332450;
+      --warn: #e08a76;
+      --warn-soft: #3a241f;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 24px -14px rgba(0, 0, 0, 0.6);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --rice: #171e19;
+    --rice-2: #1f2a22;
+    --card: #202b23;
+    --nori: #0f1512;
+    --nori-2: #2a362e;
+    --ink: #f1e9dd;
+    --ink-soft: #a9a093;
+    --line: #37453b;
+    --tea: #e8934a;
+    --tea-ink: #201205;
+    --salmon: #eda08e;
+    --salmon-soft: #3a2a27;
+    --matcha: #8ab97b;
+    --matcha-soft: #24332450;
+    --warn: #e08a76;
+    --warn-soft: #3a241f;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 24px -14px rgba(0, 0, 0, 0.6);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--rice);
+    color: var(--ink);
+    font-family: "Karla", ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 28px 20px 80px;
+  }
+
+  header.top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 22px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  .brand .mark {
+    font-family: "Bricolage Grotesque", ui-sans-serif, sans-serif;
+    font-weight: 700;
+    font-size: 1.5rem;
+    letter-spacing: -0.01em;
+  }
+
+  .brand .sub {
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .statbar {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 22px;
+  }
+
+  .stat {
+    background: var(--nori);
+    color: var(--rice);
+    border-radius: 14px;
+    padding: 14px 16px;
+    box-shadow: var(--shadow);
+  }
+
+  .stat .n {
+    font-family: "Space Mono", ui-monospace, monospace;
+    font-weight: 700;
+    font-size: 1.5rem;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+  }
+
+  .stat .l {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    opacity: 0.75;
+    margin-top: 3px;
+  }
+
+  .stat.accent { background: var(--tea); color: var(--tea-ink); }
+
+  nav.tabs {
+    display: inline-flex;
+    background: var(--rice-2);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 4px;
+    gap: 4px;
+    margin-bottom: 20px;
+  }
+
+  nav.tabs button {
+    font-family: inherit;
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: var(--ink-soft);
+    background: transparent;
+    border: none;
+    border-radius: 999px;
+    padding: 8px 18px;
+    cursor: pointer;
+  }
+
+  nav.tabs button[aria-selected="true"] {
+    background: var(--nori);
+    color: var(--rice);
+  }
+
+  nav.tabs button:focus-visible { outline: 2px solid var(--tea); outline-offset: 2px; }
+
+  section[hidden] { display: none; }
+
+  /* ---- Orders view ---- */
+  .order-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+  }
+
+  .ticket {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 16px 18px 18px;
+    box-shadow: var(--shadow);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .ticket .who {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .ticket .who .name {
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    line-height: 1.25;
+  }
+
+  .ticket .who .handle {
+    display: block;
+    font-family: "Space Mono", ui-monospace, monospace;
+    font-size: 0.76rem;
+    color: var(--ink-soft);
+    margin-top: 1px;
+  }
+
+  .badge {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 4px 9px;
+    border-radius: 999px;
+    white-space: nowrap;
+    flex: none;
+  }
+
+  .badge.paid { background: var(--matcha-soft); color: var(--matcha); }
+  .badge.unpaid { background: var(--warn-soft); color: var(--warn); }
+
+  .items {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    border-top: 1px dashed var(--line);
+    border-bottom: 1px dashed var(--line);
+    padding: 10px 0;
+  }
+
+  .items li {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 0.88rem;
+  }
+
+  .items li .qty {
+    font-family: "Space Mono", monospace;
+    color: var(--ink-soft);
+    margin-right: 6px;
+  }
+
+  .items li .price {
+    font-family: "Space Mono", monospace;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-soft);
+    flex: none;
+  }
+
+  .items li .price.comp { color: var(--matcha); }
+
+  .meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .pickup {
+    font-size: 0.84rem;
+  }
+
+  .pickup .d { font-weight: 700; }
+
+  .total {
+    font-family: "Space Mono", monospace;
+    font-weight: 700;
+    font-size: 1.15rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .pay-method {
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+  }
+
+  .pay-method b { color: var(--ink); font-weight: 700; }
+
+  .note {
+    background: var(--salmon-soft);
+    color: var(--ink);
+    border-left: 3px solid var(--salmon);
+    border-radius: 0 8px 8px 0;
+    padding: 7px 10px;
+    font-size: 0.82rem;
+    line-height: 1.35;
+  }
+
+  .note b { color: var(--salmon); text-transform: uppercase; font-size: 0.68rem; letter-spacing: 0.05em; display: block; margin-bottom: 2px; }
+
+  /* ---- Prep view ---- */
+  .day-block {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+
+  .day-head {
+    background: var(--nori);
+    color: var(--rice);
+    padding: 14px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .day-head .date {
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+  }
+
+  .day-head .count {
+    font-family: "Space Mono", monospace;
+    font-size: 0.82rem;
+    opacity: 0.85;
+  }
+
+  .tally {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 10px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .tally-item {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+
+  .tally-item .qty {
+    font-family: "Space Mono", monospace;
+    font-weight: 700;
+    font-size: 1.3rem;
+    color: var(--tea);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tally-item .name { font-size: 0.88rem; }
+
+  .roster {
+    padding: 6px 20px 14px;
+  }
+
+  .roster-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 0.86rem;
+    align-items: baseline;
+  }
+
+  .roster-row:last-child { border-bottom: none; }
+
+  .roster-row .who { font-weight: 700; }
+  .roster-row .time { font-family: "Space Mono", monospace; color: var(--ink-soft); font-size: 0.8rem; }
+  .roster-row .what { color: var(--ink-soft); flex: 1; margin: 0 12px; }
+
+  footer.foot {
+    margin-top: 30px;
+    font-size: 0.76rem;
+    color: var(--ink-soft);
+    text-align: center;
+  }
+
+  @media (max-width: 640px) {
+    .statbar { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <span class="mark">rice&shine</span>
+      <span class="sub">order board</span>
+    </div>
+  </header>
+
+  <div class="statbar" id="statbar"></div>
+
+  <nav class="tabs" role="tablist" aria-label="View">
+    <button role="tab" id="tab-orders" aria-selected="true" aria-controls="view-orders">Orders</button>
+    <button role="tab" id="tab-prep" aria-selected="false" aria-controls="view-prep">Prep by Day</button>
+  </nav>
+
+  <section id="view-orders" role="tabpanel" aria-labelledby="tab-orders">
+    <div class="order-grid" id="orderGrid"></div>
+  </section>
+
+  <section id="view-prep" role="tabpanel" aria-labelledby="tab-prep" hidden>
+    <div id="prepList"></div>
+  </section>
+
+  <footer class="foot">Rice &amp; Shine · Instagram DM order log · updated manually until the live bot goes live</footer>
+</div>
+
+<script>
+  const ORDERS = [
+    {
+      name: "Adi Luna", handle: "adiluna",
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Orange Thai Tea", price: 0, comp: true },
+        { qty: 1, name: "Green Thai Tea", price: 4 }
+      ],
+      total: 19,
+      pickupDate: "2026-08-29", pickupTime: "1:00 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "gabsxserrato", handle: "gabsxserrato",
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
+        { qty: 1, name: "Vietnamese Coffee", price: 4 }
+      ],
+      total: 19,
+      pickupDate: "2026-08-29", pickupTime: "10:00 AM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "Jessica Alma Flores", handle: "jessicaalmaflores",
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 2, name: "Vietnamese Coffee", price: 4, comp: false, note: "1 complimentary" }
+      ],
+      total: 19,
+      pickupDate: "2026-08-29", pickupTime: "12:00 PM",
+      paid: false, payMethod: "Not discussed yet",
+      notes: ""
+    },
+    {
+      name: "Jessica Harris", handle: "jessicaharris",
+      items: [
+        { qty: 2, name: "Personal Tray", price: 30 },
+        { qty: 1, name: "Green Thai Tea", price: 4 }
+      ],
+      total: 34,
+      pickupDate: "2026-08-29", pickupTime: "8:00 AM",
+      paid: true, payMethod: "Venmo — paid in full",
+      notes: "Thai tea with ice"
+    },
+    {
+      name: "Lex", handle: "lex",
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true }
+      ],
+      total: 15,
+      pickupDate: "2026-08-29", pickupTime: "12:30 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: "Green Thai Tea: almond milk, half sugar"
+    },
+    {
+      name: "Yazmin Garcia", handle: "yazmingarcia",
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true }
+      ],
+      total: 15,
+      pickupDate: "2026-08-29", pickupTime: "12:00 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    }
+  ];
+
+  function fmtMoney(n) { return "$" + n.toFixed(2).replace(/\.00$/, ""); }
+
+  function fmtDate(iso) {
+    const [y, m, d] = iso.split("-").map(Number);
+    const dt = new Date(Date.UTC(y, m - 1, d));
+    return dt.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", timeZone: "UTC" });
+  }
+
+  // ---- Stat bar ----
+  function renderStats() {
+    const total = ORDERS.length;
+    const revenue = ORDERS.reduce((s, o) => s + o.total, 0);
+    const unpaid = ORDERS.filter(o => !o.paid).length;
+    const days = [...new Set(ORDERS.map(o => o.pickupDate))].sort();
+    const nextDay = days[0];
+    const el = document.getElementById("statbar");
+    el.innerHTML = `
+      <div class="stat accent"><div class="n">${total}</div><div class="l">Open orders</div></div>
+      <div class="stat"><div class="n">${fmtMoney(revenue)}</div><div class="l">Total value</div></div>
+      <div class="stat"><div class="n">${unpaid}</div><div class="l">Awaiting payment</div></div>
+      <div class="stat"><div class="n">${nextDay ? fmtDate(nextDay).split(",")[0] : "—"}</div><div class="l">Next pickup day</div></div>
+    `;
+  }
+
+  // ---- Orders view ----
+  function renderOrders() {
+    const grid = document.getElementById("orderGrid");
+    grid.innerHTML = ORDERS.map(o => `
+      <article class="ticket">
+        <div class="who">
+          <div>
+            <div class="name">${o.name}</div>
+            <span class="handle">@${o.handle}</span>
+          </div>
+          <span class="badge ${o.paid ? "paid" : "unpaid"}">${o.paid ? "Paid" : "Unpaid"}</span>
+        </div>
+        <ul class="items">
+          ${o.items.map(i => `
+            <li>
+              <span><span class="qty">${i.qty}×</span>${i.name}${i.note ? ` <span style="color:var(--ink-soft)">(${i.note})</span>` : ""}</span>
+              <span class="price ${i.comp ? "comp" : ""}">${i.comp ? "comp" : fmtMoney(i.price)}</span>
+            </li>
+          `).join("")}
+        </ul>
+        <div class="meta-row">
+          <div class="pickup"><span class="d">${fmtDate(o.pickupDate).split(",")[0]}</span> · ${o.pickupTime}</div>
+          <div class="total">${fmtMoney(o.total)}</div>
+        </div>
+        <div class="pay-method">Payment: <b>${o.payMethod}</b></div>
+        ${o.notes ? `<div class="note"><b>Kitchen note</b>${o.notes}</div>` : ""}
+      </article>
+    `).join("");
+  }
+
+  // ---- Prep by day view ----
+  function renderPrep() {
+    const byDay = {};
+    for (const o of ORDERS) {
+      (byDay[o.pickupDate] ||= []).push(o);
+    }
+    const days = Object.keys(byDay).sort();
+    const el = document.getElementById("prepList");
+    el.innerHTML = days.map(day => {
+      const orders = byDay[day].slice().sort((a, b) => a.pickupTime.localeCompare(b.pickupTime));
+      const tally = {};
+      for (const o of orders) {
+        for (const i of o.items) {
+          tally[i.name] = (tally[i.name] || 0) + i.qty;
+        }
+      }
+      const tallyEntries = Object.entries(tally).sort((a, b) => b[1] - a[1]);
+      return `
+        <div class="day-block">
+          <div class="day-head">
+            <div class="date">${fmtDate(day)}</div>
+            <div class="count">${orders.length} order${orders.length === 1 ? "" : "s"} · ${fmtMoney(orders.reduce((s, o) => s + o.total, 0))}</div>
+          </div>
+          <div class="tally">
+            ${tallyEntries.map(([name, qty]) => `
+              <div class="tally-item"><span class="qty">${qty}</span><span class="name">${name}</span></div>
+            `).join("")}
+          </div>
+          <div class="roster">
+            ${orders.map(o => `
+              <div class="roster-row">
+                <span class="who">${o.name}</span>
+                <span class="what">${o.items.map(i => `${i.qty}× ${i.name}`).join(", ")}</span>
+                <span class="time">${o.pickupTime}</span>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  // ---- Tabs ----
+  const tabOrders = document.getElementById("tab-orders");
+  const tabPrep = document.getElementById("tab-prep");
+  const viewOrders = document.getElementById("view-orders");
+  const viewPrep = document.getElementById("view-prep");
+
+  function activate(tab) {
+    const isOrders = tab === "orders";
+    tabOrders.setAttribute("aria-selected", String(isOrders));
+    tabPrep.setAttribute("aria-selected", String(!isOrders));
+    viewOrders.hidden = !isOrders;
+    viewPrep.hidden = isOrders;
+  }
+  tabOrders.addEventListener("click", () => activate("orders"));
+  tabPrep.addEventListener("click", () => activate("prep"));
+
+  renderStats();
+  renderOrders();
+  renderPrep();
+</script>
