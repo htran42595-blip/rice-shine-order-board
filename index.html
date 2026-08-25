@@ -4,15 +4,15 @@
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Karla:ital,wght@0,400..700;1,400..700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --rice: #f7eee6;
-    --rice-2: #efe3d6;
-    --card: #fffbf6;
-    --nori: #24312a;
-    --nori-2: #33443a;
-    --ink: #241d16;
-    --ink-soft: #6b6157;
-    --line: #e2d5c4;
-    --tea: #c96a2c;
+    --rice: #f8f2c2;
+    --rice-2: #efe4a8;
+    --card: #fffdf3;
+    --nori: #2c2140;
+    --nori-2: #453361;
+    --ink: #251a38;
+    --ink-soft: #6f6280;
+    --line: #e6dcef;
+    --tea: #7a58ad;
     --tea-ink: #ffffff;
     --salmon: #d97a63;
     --salmon-soft: #f6e3dc;
@@ -20,21 +20,21 @@
     --matcha-soft: #e4ede0;
     --warn: #a94430;
     --warn-soft: #f5ddd5;
-    --shadow: 0 1px 2px rgba(36, 29, 22, 0.06), 0 8px 20px -12px rgba(36, 29, 22, 0.25);
+    --shadow: 0 1px 2px rgba(37, 26, 56, 0.07), 0 8px 20px -12px rgba(37, 26, 56, 0.3);
   }
 
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --rice: #171e19;
-      --rice-2: #1f2a22;
-      --card: #202b23;
-      --nori: #0f1512;
-      --nori-2: #2a362e;
-      --ink: #f1e9dd;
-      --ink-soft: #a9a093;
-      --line: #37453b;
-      --tea: #e8934a;
-      --tea-ink: #201205;
+      --rice: #191420;
+      --rice-2: #221b2c;
+      --card: #251e30;
+      --nori: #0f0b16;
+      --nori-2: #382c4c;
+      --ink: #f1e9da;
+      --ink-soft: #ada0be;
+      --line: #3b3049;
+      --tea: #c9a9ee;
+      --tea-ink: #241635;
       --salmon: #eda08e;
       --salmon-soft: #3a2a27;
       --matcha: #8ab97b;
@@ -46,16 +46,16 @@
   }
 
   :root[data-theme="dark"] {
-    --rice: #171e19;
-    --rice-2: #1f2a22;
-    --card: #202b23;
-    --nori: #0f1512;
-    --nori-2: #2a362e;
-    --ink: #f1e9dd;
-    --ink-soft: #a9a093;
-    --line: #37453b;
-    --tea: #e8934a;
-    --tea-ink: #201205;
+    --rice: #191420;
+    --rice-2: #221b2c;
+    --card: #251e30;
+    --nori: #0f0b16;
+    --nori-2: #382c4c;
+    --ink: #f1e9da;
+    --ink-soft: #ada0be;
+    --line: #3b3049;
+    --tea: #c9a9ee;
+    --tea-ink: #241635;
     --salmon: #eda08e;
     --salmon-soft: #3a2a27;
     --matcha: #8ab97b;
@@ -101,6 +101,7 @@
     font-weight: 700;
     font-size: 1.5rem;
     letter-spacing: -0.01em;
+    color: var(--tea);
   }
 
   .brand .sub {
