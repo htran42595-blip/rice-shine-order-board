@@ -20,6 +20,16 @@
     --matcha-soft: #e4ede0;
     --warn: #a94430;
     --warn-soft: #f5ddd5;
+    --tg-1: #1f7a8c;
+    --tg-1-bg: #e1eef1;
+    --tg-2: #b8860b;
+    --tg-2-bg: #f6ecd6;
+    --tg-3: #b23a6b;
+    --tg-3-bg: #f5e0ea;
+    --tg-4: #3f5f9e;
+    --tg-4-bg: #e2e8f5;
+    --tg-5: #6b8e23;
+    --tg-5-bg: #eaf0dc;
     --shadow: 0 1px 2px rgba(37, 26, 56, 0.07), 0 8px 20px -12px rgba(37, 26, 56, 0.3);
   }
 
@@ -41,6 +51,16 @@
       --matcha-soft: #24332450;
       --warn: #e08a76;
       --warn-soft: #3a241f;
+      --tg-1: #5fd0e6;
+      --tg-1-bg: #142b30;
+      --tg-2: #e3bc55;
+      --tg-2-bg: #332a14;
+      --tg-3: #e58bb6;
+      --tg-3-bg: #331f29;
+      --tg-4: #8fa8e6;
+      --tg-4-bg: #1f2636;
+      --tg-5: #a7cf6e;
+      --tg-5-bg: #232c16;
       --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 24px -14px rgba(0, 0, 0, 0.6);
     }
   }
@@ -62,6 +82,16 @@
     --matcha-soft: #24332450;
     --warn: #e08a76;
     --warn-soft: #3a241f;
+    --tg-1: #5fd0e6;
+    --tg-1-bg: #142b30;
+    --tg-2: #e3bc55;
+    --tg-2-bg: #332a14;
+    --tg-3: #e58bb6;
+    --tg-3-bg: #331f29;
+    --tg-4: #8fa8e6;
+    --tg-4-bg: #1f2636;
+    --tg-5: #a7cf6e;
+    --tg-5-bg: #232c16;
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 24px -14px rgba(0, 0, 0, 0.6);
   }
 
@@ -345,6 +375,114 @@
 
   .note b { color: var(--salmon); text-transform: uppercase; font-size: 0.68rem; letter-spacing: 0.05em; display: block; margin-bottom: 2px; }
 
+  .subtabs {
+    display: inline-flex;
+    background: var(--rice-2);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 3px;
+    gap: 3px;
+    margin-bottom: 16px;
+  }
+
+  .subtabs button {
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--ink-soft);
+    background: transparent;
+    border: none;
+    border-radius: 999px;
+    padding: 6px 14px;
+    cursor: pointer;
+  }
+
+  .subtabs button[aria-selected="true"] {
+    background: var(--tea);
+    color: var(--tea-ink);
+  }
+
+  .subtabs button:focus-visible { outline: 2px solid var(--tea); outline-offset: 2px; }
+
+  .empty-state {
+    color: var(--ink-soft);
+    font-size: 0.9rem;
+    padding: 30px 10px;
+    text-align: center;
+    grid-column: 1 / -1;
+  }
+
+  .ticket.tg-1 { border-left: 4px solid var(--tg-1); }
+  .ticket.tg-2 { border-left: 4px solid var(--tg-2); }
+  .ticket.tg-3 { border-left: 4px solid var(--tg-3); }
+  .ticket.tg-4 { border-left: 4px solid var(--tg-4); }
+  .ticket.tg-5 { border-left: 4px solid var(--tg-5); }
+
+  .group-tag {
+    align-self: flex-start;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 999px;
+  }
+
+  .group-tag.tg-1 { color: var(--tg-1); background: var(--tg-1-bg); }
+  .group-tag.tg-2 { color: var(--tg-2); background: var(--tg-2-bg); }
+  .group-tag.tg-3 { color: var(--tg-3); background: var(--tg-3-bg); }
+  .group-tag.tg-4 { color: var(--tg-4); background: var(--tg-4-bg); }
+  .group-tag.tg-5 { color: var(--tg-5); background: var(--tg-5-bg); }
+
+  .ticket.is-complete { opacity: 0.68; }
+
+  .ticket-foot {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 2px;
+  }
+
+  .toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .toggle input { position: absolute; opacity: 0; width: 0; height: 0; }
+
+  .toggle .track {
+    width: 34px;
+    height: 20px;
+    background: var(--line);
+    border-radius: 999px;
+    position: relative;
+    flex: none;
+    transition: background 0.15s ease;
+  }
+
+  .toggle .track::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--card);
+    box-shadow: var(--shadow);
+    transition: transform 0.15s ease;
+  }
+
+  .toggle input:checked + .track { background: var(--matcha); }
+  .toggle input:checked + .track::after { transform: translateX(14px); }
+  .toggle input:focus-visible + .track { outline: 2px solid var(--tea); outline-offset: 2px; }
+
+  .toggle .tlabel {
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: var(--ink-soft);
+  }
+
   /* ---- Prep view ---- */
   .day-block {
     background: var(--card);
@@ -479,7 +617,12 @@
   </nav>
 
   <section id="view-orders" role="tabpanel" aria-labelledby="tab-orders">
-    <div class="order-grid" id="orderGrid"></div>
+    <nav class="subtabs" role="tablist" aria-label="Order status">
+      <button role="tab" id="subtab-active" aria-selected="true" aria-controls="orderGridActive">Active Orders</button>
+      <button role="tab" id="subtab-completed" aria-selected="false" aria-controls="orderGridCompleted">Completed Orders</button>
+    </nav>
+    <div class="order-grid" id="orderGridActive" role="tabpanel" aria-labelledby="subtab-active"></div>
+    <div class="order-grid" id="orderGridCompleted" role="tabpanel" aria-labelledby="subtab-completed" hidden></div>
   </section>
 
   <section id="view-prep" role="tabpanel" aria-labelledby="tab-prep" hidden>
@@ -569,6 +712,14 @@
     return dt.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", timeZone: "UTC" });
   }
 
+  // Short, unambiguous date like "Thu, Aug 29" — used on order cards so it's
+  // never confused with a different week's Thursday.
+  function fmtShortDate(iso) {
+    const [y, m, d] = iso.split("-").map(Number);
+    const dt = new Date(Date.UTC(y, m - 1, d));
+    return dt.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" });
+  }
+
   // Turns "1:00 PM" into minutes-since-midnight so orders can be sorted chronologically.
   function timeToMinutes(t) {
     const m = /(\d+):(\d+)\s*(AM|PM)/i.exec(t || "");
@@ -594,6 +745,67 @@
       else if (n.includes("personal tray")) personal += i.qty;
     }
     return { personal, shareable, portions: personal * 1 + shareable * 3 };
+  }
+
+  // ---- Completed-order tracking ----
+  // Whether an order's been picked up / fulfilled lives in the viewer's own
+  // browser (localStorage), not in the ORDERS array — the dashboard is
+  // redeployed fresh each week, so there's no server to store this on. Each
+  // order gets a content-based key (not just its position in the array) so a
+  // page reload keeps the right orders marked complete, and so last week's
+  // completions don't accidentally carry over onto this week's new orders.
+  const COMPLETED_STORAGE_KEY = "riceShineCompletedOrders";
+
+  function orderKey(o) {
+    return [o.handle, o.pickupDate, o.pickupTime, o.total, o.items.map(i => `${i.qty}x${i.name}`).join(",")].join("|");
+  }
+
+  let completedSet = new Set();
+  try {
+    completedSet = new Set(JSON.parse(localStorage.getItem(COMPLETED_STORAGE_KEY) || "[]"));
+  } catch (e) {
+    // Private browsing / storage disabled — completion just won't persist across reloads.
+  }
+
+  function persistCompleted() {
+    try {
+      localStorage.setItem(COMPLETED_STORAGE_KEY, JSON.stringify([...completedSet]));
+    } catch (e) {}
+  }
+
+  function isCompleted(o) {
+    return completedSet.has(orderKey(o));
+  }
+
+  function toggleCompleted(o) {
+    const key = orderKey(o);
+    if (completedSet.has(key)) completedSet.delete(key);
+    else completedSet.add(key);
+    persistCompleted();
+  }
+
+  // ---- Same-time grouping ----
+  // Orders sharing an exact pickup date + time are the ones being handed
+  // over back-to-back, so tag them with a shared color to make that obvious
+  // at a glance.
+  const GROUP_PALETTE = ["tg-1", "tg-2", "tg-3", "tg-4", "tg-5"];
+
+  function timeGroupKey(o) {
+    return `${o.pickupDate}T${o.pickupTime}`;
+  }
+
+  function computeTimeGroups(list) {
+    const counts = {};
+    for (const o of list) counts[timeGroupKey(o)] = (counts[timeGroupKey(o)] || 0) + 1;
+    const classes = {};
+    let i = 0;
+    for (const [key, count] of Object.entries(counts)) {
+      if (count > 1) {
+        classes[key] = GROUP_PALETTE[i % GROUP_PALETTE.length];
+        i++;
+      }
+    }
+    return { classes, counts };
   }
 
   // ---- Payment method chips ----
@@ -639,26 +851,32 @@
   }
 
   // ---- Stat bar ----
+  // Based on active (not-yet-completed) orders only, so the numbers always
+  // reflect what's actually still outstanding.
   function renderStats() {
-    const total = ORDERS.length;
-    const revenue = ORDERS.reduce((s, o) => s + o.total, 0);
-    const unpaid = ORDERS.filter(o => !o.paid).length;
-    const days = [...new Set(ORDERS.map(o => o.pickupDate))].sort();
+    const active = ORDERS.filter(o => !isCompleted(o));
+    const total = active.length;
+    const revenue = active.reduce((s, o) => s + o.total, 0);
+    const unpaid = active.filter(o => !o.paid).length;
+    const days = [...new Set(active.map(o => o.pickupDate))].sort();
     const nextDay = days[0];
     const el = document.getElementById("statbar");
     el.innerHTML = `
       <div class="stat accent"><div class="n">${total}</div><div class="l">Open orders</div></div>
       <div class="stat"><div class="n">${fmtMoney(revenue)}</div><div class="l">Total value</div></div>
       <div class="stat"><div class="n">${unpaid}</div><div class="l">Awaiting payment</div></div>
-      <div class="stat"><div class="n">${nextDay ? fmtDate(nextDay).split(",")[0] : "—"}</div><div class="l">Next pickup day</div></div>
+      <div class="stat"><div class="n">${nextDay ? fmtShortDate(nextDay) : "—"}</div><div class="l">Next pickup day</div></div>
     `;
   }
 
   // ---- Orders view ----
-  function renderOrders() {
-    const grid = document.getElementById("orderGrid");
-    grid.innerHTML = ordersByPickup(ORDERS).map(o => `
-      <article class="ticket">
+  function renderTicket(o, idx, groups) {
+    const gk = timeGroupKey(o);
+    const gcls = groups.classes[gk];
+    const gcount = groups.counts[gk];
+    const completed = isCompleted(o);
+    return `
+      <article class="ticket ${gcls || ""} ${completed ? "is-complete" : ""}">
         <div class="who">
           <div>
             <div class="name">${o.name}</div>
@@ -675,23 +893,72 @@
           `).join("")}
         </ul>
         <div class="meta-row">
-          <div class="pickup"><span class="d">${fmtDate(o.pickupDate).split(",")[0]}</span> · ${o.pickupTime}</div>
+          <div class="pickup"><span class="d">${fmtShortDate(o.pickupDate)}</span> · ${o.pickupTime}</div>
           <div class="total">${fmtMoney(o.total)}</div>
         </div>
+        ${gcls ? `<div class="group-tag ${gcls}">⏰ Same time as ${gcount - 1} other order${gcount - 1 === 1 ? "" : "s"}</div>` : ""}
         ${renderPayMethod(o.payMethod)}
         ${o.notes ? `<div class="note"><b>Kitchen note</b>${o.notes}</div>` : ""}
+        <div class="ticket-foot">
+          <label class="toggle" title="${completed ? "Move back to active" : "Mark as picked up / completed"}">
+            <input type="checkbox" class="complete-toggle" data-idx="${idx}" ${completed ? "checked" : ""}>
+            <span class="track"></span>
+            <span class="tlabel">${completed ? "Completed" : "Mark complete"}</span>
+          </label>
+        </div>
       </article>
-    `).join("");
+    `;
+  }
+
+  function wireToggles(gridEl, list) {
+    gridEl.querySelectorAll(".complete-toggle").forEach(input => {
+      input.addEventListener("change", () => {
+        toggleCompleted(list[Number(input.dataset.idx)]);
+        renderOrders();
+        renderStats();
+        renderPrep();
+      });
+    });
+  }
+
+  function renderOrders() {
+    const sorted = ordersByPickup(ORDERS);
+    const groups = computeTimeGroups(sorted);
+    const active = sorted.filter(o => !isCompleted(o));
+    const completed = sorted.filter(o => isCompleted(o));
+
+    const gridActive = document.getElementById("orderGridActive");
+    const gridCompleted = document.getElementById("orderGridCompleted");
+
+    gridActive.innerHTML = active.length
+      ? active.map((o, idx) => renderTicket(o, idx, groups)).join("")
+      : `<div class="empty-state">All caught up — no active orders right now.</div>`;
+
+    gridCompleted.innerHTML = completed.length
+      ? completed.map((o, idx) => renderTicket(o, idx, groups)).join("")
+      : `<div class="empty-state">No completed orders yet.</div>`;
+
+    wireToggles(gridActive, active);
+    wireToggles(gridCompleted, completed);
+
+    subtabActive.textContent = `Active Orders (${active.length})`;
+    subtabCompleted.textContent = `Completed Orders (${completed.length})`;
   }
 
   // ---- Prep by day view ----
+  // Only counts orders that haven't been marked complete yet — once
+  // something's picked up, it should drop off the "still need to prep" list.
   function renderPrep() {
     const byDay = {};
-    for (const o of ORDERS) {
+    for (const o of ORDERS.filter(o => !isCompleted(o))) {
       (byDay[o.pickupDate] ||= []).push(o);
     }
     const days = Object.keys(byDay).sort();
     const el = document.getElementById("prepList");
+    if (!days.length) {
+      el.innerHTML = `<div class="empty-state">Nothing left to prep — every order's been completed.</div>`;
+      return;
+    }
     el.innerHTML = days.map(day => {
       const orders = byDay[day].slice().sort((a, b) => timeToMinutes(a.pickupTime) - timeToMinutes(b.pickupTime));
       const tally = {};
@@ -756,6 +1023,22 @@
   }
   tabOrders.addEventListener("click", () => activate("orders"));
   tabPrep.addEventListener("click", () => activate("prep"));
+
+  // ---- Orders / Completed subtabs ----
+  const subtabActive = document.getElementById("subtab-active");
+  const subtabCompleted = document.getElementById("subtab-completed");
+  const gridActiveEl = document.getElementById("orderGridActive");
+  const gridCompletedEl = document.getElementById("orderGridCompleted");
+
+  function activateSub(which) {
+    const isActive = which === "active";
+    subtabActive.setAttribute("aria-selected", String(isActive));
+    subtabCompleted.setAttribute("aria-selected", String(!isActive));
+    gridActiveEl.hidden = !isActive;
+    gridCompletedEl.hidden = isActive;
+  }
+  subtabActive.addEventListener("click", () => activateSub("active"));
+  subtabCompleted.addEventListener("click", () => activateSub("completed"));
 
   renderStats();
   renderOrders();
