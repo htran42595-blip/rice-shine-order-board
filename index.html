@@ -141,6 +141,28 @@
     letter-spacing: 0.08em;
   }
 
+  .lang-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--nori);
+    color: var(--rice);
+    border: none;
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    flex: none;
+  }
+
+  .lang-toggle .lang-globe { font-size: 1.05rem; line-height: 1; }
+  .lang-toggle .lang-code { font-family: "Space Mono", ui-monospace, monospace; letter-spacing: 0.03em; }
+  .lang-toggle:hover, .lang-toggle:focus-visible { filter: brightness(1.15); outline: none; }
+  .lang-toggle:active { transform: scale(0.96); }
+
   .statbar {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1084,16 +1106,19 @@
   <header class="top">
     <div class="brand">
       <span class="mark">rice&shine</span>
-      <span class="sub">order board</span>
+      <span class="sub" data-i18n="brand_sub">order board</span>
     </div>
+    <button type="button" id="langToggle" class="lang-toggle">
+      <span class="lang-globe" aria-hidden="true">🌐</span><span class="lang-code" id="langCode">EN</span>
+    </button>
   </header>
 
   <div class="statbar" id="statbar"></div>
 
   <nav class="tabs" role="tablist" aria-label="View">
-    <button role="tab" id="tab-orders" aria-selected="true" aria-controls="view-orders">Orders</button>
-    <button role="tab" id="tab-prep" aria-selected="false" aria-controls="view-prep">Prep by Day</button>
-    <button role="tab" id="tab-history" aria-selected="false" aria-controls="view-history">History</button>
+    <button role="tab" id="tab-orders" aria-selected="true" aria-controls="view-orders" data-i18n="tab_orders">Orders</button>
+    <button role="tab" id="tab-prep" aria-selected="false" aria-controls="view-prep" data-i18n="tab_prep">Prep by Day</button>
+    <button role="tab" id="tab-history" aria-selected="false" aria-controls="view-history" data-i18n="tab_history">History</button>
   </nav>
 
   <section id="view-orders" role="tabpanel" aria-labelledby="tab-orders">
@@ -1112,10 +1137,10 @@
   <section id="view-history" role="tabpanel" aria-labelledby="tab-history" hidden>
     <div class="hist-filterbar">
       <div class="window-pills" role="group" aria-label="Time window">
-        <button type="button" data-window="7" aria-pressed="false">Last week</button>
-        <button type="button" data-window="30" aria-pressed="false">Last month</button>
-        <button type="button" data-window="90" aria-pressed="false">Last quarter</button>
-        <button type="button" data-window="all" aria-pressed="true">All time</button>
+        <button type="button" data-window="7" aria-pressed="false" data-i18n="window_week">Last week</button>
+        <button type="button" data-window="30" aria-pressed="false" data-i18n="window_month">Last month</button>
+        <button type="button" data-window="90" aria-pressed="false" data-i18n="window_quarter">Last quarter</button>
+        <button type="button" data-window="all" aria-pressed="true" data-i18n="window_all">All time</button>
       </div>
       <div class="hist-note" id="histRangeNote"></div>
     </div>
@@ -1124,13 +1149,13 @@
 
     <div class="hist-card">
       <div class="hist-card-head">
-        <div class="title">Itemized breakdown</div>
-        <div class="sub">What sold, by revenue, for the selected window</div>
+        <div class="title" data-i18n="hist_itemized_title">Itemized breakdown</div>
+        <div class="sub" data-i18n="hist_itemized_sub">What sold, by revenue, for the selected window</div>
       </div>
       <div class="hist-card-body">
         <table class="hist-itemized">
           <thead>
-            <tr><th>Item</th><th class="num">Qty</th><th class="num">Revenue</th></tr>
+            <tr><th data-i18n="th_item">Item</th><th class="num" data-i18n="th_qty">Qty</th><th class="num" data-i18n="th_revenue">Revenue</th></tr>
           </thead>
           <tbody id="histItemizedBody"></tbody>
         </table>
@@ -1140,32 +1165,32 @@
     <div class="hist-charts">
       <div class="hist-card">
         <div class="hist-card-head">
-          <div class="title">Orders by pickup day</div>
-          <div class="sub">Which day people pick up their food</div>
+          <div class="title" data-i18n="hist_dow_title">Orders by pickup day</div>
+          <div class="sub" data-i18n="hist_dow_sub">Which day people pick up their food</div>
         </div>
         <div class="hist-card-body" id="histDayOfWeek"></div>
       </div>
 
       <div class="hist-card">
         <div class="hist-card-head">
-          <div class="title">Orders by time of day</div>
-          <div class="sub" id="histTimeOfDaySub">When people place their orders</div>
+          <div class="title" data-i18n="hist_tod_title">Orders by time of day</div>
+          <div class="sub" id="histTimeOfDaySub" data-i18n="hist_tod_sub">When people place their orders</div>
         </div>
         <div class="hist-card-body" id="histTimeOfDay"></div>
       </div>
 
       <div class="hist-card">
         <div class="hist-card-head">
-          <div class="title">Tray size preference</div>
-          <div class="sub">Personal vs. shareable</div>
+          <div class="title" data-i18n="hist_tray_title">Tray size preference</div>
+          <div class="sub" data-i18n="hist_tray_sub">Personal vs. shareable</div>
         </div>
         <div class="hist-card-body" id="histTraySize"></div>
       </div>
 
       <div class="hist-card">
         <div class="hist-card-head">
-          <div class="title">Drink preference</div>
-          <div class="sub">Which drink people pick most</div>
+          <div class="title" data-i18n="hist_drinks_title">Drink preference</div>
+          <div class="sub" data-i18n="hist_drinks_sub">Which drink people pick most</div>
         </div>
         <div class="hist-card-body" id="histDrinks"></div>
       </div>
@@ -1173,13 +1198,13 @@
 
     <div class="hist-card">
       <div class="hist-card-head">
-        <div class="title">Returning buyers</div>
-        <div class="sub">Customers with more than one order, all-time — most orders first</div>
+        <div class="title" data-i18n="hist_returning_title">Returning buyers</div>
+        <div class="sub" data-i18n="hist_returning_sub">Customers with more than one order, all-time — most orders first</div>
       </div>
       <div class="hist-card-body">
         <table class="hist-itemized">
           <thead>
-            <tr><th>Buyer</th><th class="num">Orders</th><th class="num">Total spent</th></tr>
+            <tr><th data-i18n="th_buyer">Buyer</th><th class="num" data-i18n="th_orders">Orders</th><th class="num" data-i18n="th_total_spent">Total spent</th></tr>
           </thead>
           <tbody id="histReturningBody"></tbody>
         </table>
@@ -1188,13 +1213,13 @@
 
     <div class="hist-card">
       <div class="hist-card-head">
-        <div class="title">Biggest buyers</div>
-        <div class="sub">Total spent, all-time — highest first</div>
+        <div class="title" data-i18n="hist_biggest_title">Biggest buyers</div>
+        <div class="sub" data-i18n="hist_biggest_sub">Total spent, all-time — highest first</div>
       </div>
       <div class="hist-card-body">
         <table class="hist-itemized">
           <thead>
-            <tr><th>Buyer</th><th class="num">Total spent</th><th class="num">Orders</th></tr>
+            <tr><th data-i18n="th_buyer">Buyer</th><th class="num" data-i18n="th_total_spent">Total spent</th><th class="num" data-i18n="th_orders">Orders</th></tr>
           </thead>
           <tbody id="histBiggestBody"></tbody>
         </table>
@@ -1204,16 +1229,16 @@
     <div class="hist-card">
       <div class="hist-card-head with-action">
         <div>
-          <div class="title">Buyer experience log</div>
-          <div class="sub">No-shows, late payments, last-minute changes, late pickups — logged from order cards, shown here regardless of the time window above</div>
+          <div class="title" data-i18n="hist_explog_title">Buyer experience log</div>
+          <div class="sub" data-i18n="hist_explog_sub">No-shows, late payments, last-minute changes, late pickups — logged from order cards, shown here regardless of the time window above</div>
         </div>
-        <button type="button" class="exp-export-btn" id="expExportBtn">Export CSV</button>
+        <button type="button" class="exp-export-btn" id="expExportBtn" data-i18n="btn_export_csv">Export CSV</button>
       </div>
       <div class="hist-card-body" id="expLogBody"></div>
     </div>
   </section>
 
-  <footer class="foot">Rice &amp; Shine · Instagram DM order log · orders received Aug 23–27, 2026 · updated manually until the live bot goes live</footer>
+  <footer class="foot" data-i18n="footer">Rice &amp; Shine · Instagram DM order log · orders received Aug 23–27, 2026 · updated manually until the live bot goes live</footer>
 </div>
 
 <script>
@@ -1709,12 +1734,356 @@
     }
   ];
 
+  // ---- Language / i18n (PREVIEW FEATURE) ----
+  // Everything below in this block is UI-chrome translation only — labels,
+  // headers, buttons, tooltips, empty-state prose. Order DATA (buyer names,
+  // handles, free-text kitchen notes, payment-method strings, dollar
+  // amounts) is never touched by any of this; it's transcribed verbatim
+  // from real Instagram DMs and must read identically in both languages.
+  // Persisted separately from every other localStorage key already used by
+  // this dashboard (completed-orders, seen/flagged, buyer history, buyer
+  // experience log) so toggling language can never collide with or corrupt
+  // any of that existing data.
+  const LANG_STORAGE_KEY = "riceShineLang";
+
+  let currentLang = "en";
+  try {
+    const savedLang = localStorage.getItem(LANG_STORAGE_KEY);
+    if (savedLang === "en" || savedLang === "vi") currentLang = savedLang;
+  } catch (e) {
+    // Private browsing / storage disabled — language choice just won't persist across reloads.
+  }
+
+  function persistLang() {
+    try { localStorage.setItem(LANG_STORAGE_KEY, currentLang); } catch (e) {}
+  }
+
+  // "vi-VN" gets native Vietnamese weekday/month names and date order for
+  // free via Intl — no manual date-word dictionary needed.
+  function localeCode() { return currentLang === "vi" ? "vi-VN" : "en-US"; }
+
+  const STRINGS = {
+    en: {
+      brand_sub: "order board",
+      tab_orders: "Orders",
+      tab_prep: "Prep by Day",
+      tab_history: "History",
+      subtab_active: "Active Orders",
+      subtab_completed: "Completed Orders",
+      label_unreviewed: "unreviewed",
+      stat_open_orders: "Open orders",
+      stat_total_value: "Total value",
+      stat_awaiting_payment: "Awaiting payment",
+      stat_next_pickup: "Next pickup day",
+      window_week: "Last week",
+      window_month: "Last month",
+      window_quarter: "Last quarter",
+      window_all: "All time",
+      hist_stat_total_orders: "Total orders",
+      hist_stat_total_income: "Total income",
+      hist_stat_avg_order: "Avg order value",
+      hist_itemized_title: "Itemized breakdown",
+      hist_itemized_sub: "What sold, by revenue, for the selected window",
+      th_item: "Item",
+      th_qty: "Qty",
+      th_revenue: "Revenue",
+      hist_dow_title: "Orders by pickup day",
+      hist_dow_sub: "Which day people pick up their food",
+      hist_tod_title: "Orders by time of day",
+      hist_tod_sub: "When people place their orders",
+      hist_tray_title: "Tray size preference",
+      hist_tray_sub: "Personal vs. shareable",
+      hist_drinks_title: "Drink preference",
+      hist_drinks_sub: "Which drink people pick most",
+      hist_returning_title: "Returning buyers",
+      hist_returning_sub: "Customers with more than one order, all-time — most orders first",
+      th_buyer: "Buyer",
+      th_orders: "Orders",
+      th_total_spent: "Total spent",
+      hist_biggest_title: "Biggest buyers",
+      hist_biggest_sub: "Total spent, all-time — highest first",
+      hist_explog_title: "Buyer experience log",
+      hist_explog_sub: "No-shows, late payments, last-minute changes, late pickups — logged from order cards, shown here regardless of the time window above",
+      btn_export_csv: "Export CSV",
+      th_issues: "Issues",
+      th_logged: "Logged",
+      footer: "Rice & Shine · Instagram DM order log · orders received Aug 23–27, 2026 · updated manually until the live bot goes live",
+      empty_no_active: "All caught up — no active orders right now.",
+      empty_no_completed: "No completed orders yet.",
+      empty_prep_done: "Nothing left to prep — every order's been completed.",
+      empty_no_orders_window: "No orders in this window yet.",
+      empty_no_repeat_buyers: "No repeat buyers yet — this fills in once the same handle orders more than once, across any week.",
+      empty_no_orders_logged: "No orders logged yet.",
+      empty_no_orders_logged_window: "No orders logged in this window yet.",
+      empty_explog: "Nothing logged yet — tap \"📝 Log experience\" on any order card to start building this out.",
+      btn_show_less: "Show less",
+      badge_paid: "Paid",
+      badge_unpaid: "Unpaid",
+      label_kitchen_note: "Kitchen note",
+      label_payment: "Payment:",
+      comp_label: "comp",
+      toggle_completed: "Completed",
+      toggle_mark_complete: "Mark complete",
+      toggle_title_move_back: "Move back to active",
+      toggle_title_mark_done: "Mark as picked up / completed",
+      exp_log_btn: "📝 Log experience",
+      exp_log_btn_title: "Optional — log a no-show, late payment, last-minute change, or late pickup",
+      exp_save_btn: "Save entry",
+      exp_note_placeholder: "Optional note — what happened, any context worth remembering",
+      exp_del_title: "Delete this entry",
+      exp_empty_customer: "No past entries for this customer yet.",
+      flag_new: "New",
+      flag_updated: "Updated",
+      flag_new_title: "New order — tap to mark reviewed",
+      flag_updated_title: "Order updated — tap to mark reviewed",
+      prep_portions_label: "Portions to prep",
+      tod_morning: "Morning (12–11am)",
+      tod_midday: "Midday (11am–2pm)",
+      tod_afternoon: "Afternoon (2–5pm)",
+      tod_evening: "Evening (5pm+)",
+      exp_tag_no_show: "No-show",
+      exp_tag_late_payment: "Late payment",
+      exp_tag_last_minute_change: "Last-minute change",
+      exp_tag_late_pickup: "Late pickup",
+      csv_handle: "Handle",
+      csv_total_issues: "Total issues for buyer",
+      csv_date: "Date",
+      csv_tags: "Tags",
+      csv_note: "Note",
+      csv_pickup_date: "Order pickup date",
+      switch_to_vietnamese: "Switch to Vietnamese",
+      switch_to_english: "Switch to English",
+    },
+    vi: {
+      brand_sub: "bảng theo dõi đơn hàng",
+      tab_orders: "Đơn hàng",
+      tab_prep: "Chuẩn bị theo ngày",
+      tab_history: "Lịch sử",
+      subtab_active: "Đơn đang xử lý",
+      subtab_completed: "Đơn đã hoàn tất",
+      label_unreviewed: "chưa xem",
+      stat_open_orders: "Đơn đang mở",
+      stat_total_value: "Tổng giá trị",
+      stat_awaiting_payment: "Chờ thanh toán",
+      stat_next_pickup: "Ngày lấy hàng kế tiếp",
+      window_week: "Tuần trước",
+      window_month: "Tháng trước",
+      window_quarter: "Quý trước",
+      window_all: "Từ trước đến nay",
+      hist_stat_total_orders: "Tổng số đơn",
+      hist_stat_total_income: "Tổng doanh thu",
+      hist_stat_avg_order: "Giá trị đơn trung bình",
+      hist_itemized_title: "Chi tiết theo món",
+      hist_itemized_sub: "Món nào bán chạy, tính theo doanh thu, trong khoảng thời gian đã chọn",
+      th_item: "Món",
+      th_qty: "SL",
+      th_revenue: "Doanh thu",
+      hist_dow_title: "Đơn hàng theo ngày lấy",
+      hist_dow_sub: "Khách thường lấy hàng vào ngày nào",
+      hist_tod_title: "Đơn hàng theo giờ trong ngày",
+      hist_tod_sub: "Khách thường đặt hàng vào lúc nào",
+      hist_tray_title: "Khay được chọn nhiều",
+      hist_tray_sub: "Khay cá nhân so với khay chia sẻ",
+      hist_drinks_title: "Thức uống được chọn nhiều",
+      hist_drinks_sub: "Thức uống nào khách chọn nhiều nhất",
+      hist_returning_title: "Khách quay lại",
+      hist_returning_sub: "Khách đã đặt hơn một lần, tính từ trước đến nay — nhiều đơn nhất lên đầu",
+      th_buyer: "Khách hàng",
+      th_orders: "Số đơn",
+      th_total_spent: "Tổng chi tiêu",
+      hist_biggest_title: "Khách chi tiêu nhiều nhất",
+      hist_biggest_sub: "Tổng chi tiêu, tính từ trước đến nay — cao nhất lên đầu",
+      hist_explog_title: "Nhật ký trải nghiệm khách hàng",
+      hist_explog_sub: "Khách không đến lấy, trả tiền trễ, đổi ý phút chót, lấy hàng trễ — được ghi từ các thẻ đơn hàng, hiển thị ở đây bất kể khoảng thời gian đã chọn ở trên",
+      btn_export_csv: "Xuất file CSV",
+      th_issues: "Sự cố",
+      th_logged: "Thời gian ghi",
+      footer: "Rice & Shine · Nhật ký đơn hàng qua tin nhắn Instagram · đơn nhận từ 23–27/8/2026 · cập nhật thủ công cho đến khi có bot tự động",
+      empty_no_active: "Đã xử lý hết — hiện không có đơn nào đang chờ.",
+      empty_no_completed: "Chưa có đơn nào hoàn tất.",
+      empty_prep_done: "Không còn gì cần chuẩn bị — mọi đơn đã hoàn tất.",
+      empty_no_orders_window: "Chưa có đơn nào trong khoảng thời gian này.",
+      empty_no_repeat_buyers: "Chưa có khách quay lại — mục này sẽ có dữ liệu khi cùng một tài khoản đặt hàng hơn một lần, ở bất kỳ tuần nào.",
+      empty_no_orders_logged: "Chưa có đơn nào được ghi nhận.",
+      empty_no_orders_logged_window: "Chưa có đơn nào được ghi nhận trong khoảng thời gian này.",
+      empty_explog: "Chưa có ghi chú nào — bấm \"📝 Ghi trải nghiệm\" trên bất kỳ thẻ đơn hàng nào để bắt đầu.",
+      btn_show_less: "Thu gọn",
+      badge_paid: "Đã trả",
+      badge_unpaid: "Chưa trả",
+      label_kitchen_note: "Ghi chú bếp",
+      label_payment: "Thanh toán:",
+      comp_label: "Ưu đãi",
+      toggle_completed: "Đã hoàn tất",
+      toggle_mark_complete: "Đánh dấu hoàn tất",
+      toggle_title_move_back: "Chuyển lại về đang xử lý",
+      toggle_title_mark_done: "Đánh dấu đã lấy hàng / hoàn tất",
+      exp_log_btn: "📝 Ghi trải nghiệm",
+      exp_log_btn_title: "Không bắt buộc — ghi lại việc khách không đến, trả tiền trễ, đổi ý phút chót, hoặc lấy hàng trễ",
+      exp_save_btn: "Lưu ghi chú",
+      exp_note_placeholder: "Ghi chú thêm (không bắt buộc) — chuyện gì đã xảy ra, điều gì đáng nhớ",
+      exp_del_title: "Xóa ghi chú này",
+      exp_empty_customer: "Chưa có ghi chú nào cho khách này.",
+      flag_new: "Mới",
+      flag_updated: "Đã sửa",
+      flag_new_title: "Đơn mới — bấm để đánh dấu đã xem",
+      flag_updated_title: "Đơn đã được sửa — bấm để đánh dấu đã xem",
+      prep_portions_label: "Phần cần chuẩn bị",
+      tod_morning: "Sáng sớm (12 giờ khuya–11 giờ sáng)",
+      tod_midday: "Trưa (11 giờ sáng–2 giờ chiều)",
+      tod_afternoon: "Chiều (2–5 giờ chiều)",
+      tod_evening: "Tối (sau 5 giờ chiều)",
+      exp_tag_no_show: "Không đến lấy",
+      exp_tag_late_payment: "Trả tiền trễ",
+      exp_tag_last_minute_change: "Đổi ý phút chót",
+      exp_tag_late_pickup: "Lấy hàng trễ",
+      csv_handle: "Tài khoản",
+      csv_total_issues: "Tổng số sự cố của khách",
+      csv_date: "Ngày",
+      csv_tags: "Nhãn",
+      csv_note: "Ghi chú",
+      csv_pickup_date: "Ngày lấy hàng của đơn",
+      switch_to_vietnamese: "Chuyển sang tiếng Việt",
+      switch_to_english: "Chuyển sang tiếng Anh",
+    },
+  };
+
+  // English fallback for any key missing from the Vietnamese dictionary.
+  function t(key) {
+    const dict = STRINGS[currentLang] || STRINGS.en;
+    if (dict[key] !== undefined) return dict[key];
+    return STRINGS.en[key] !== undefined ? STRINGS.en[key] : key;
+  }
+
+  // A handful of strings need a count baked in (pluralization in English;
+  // Vietnamese doesn't inflect for number, so its half of each pair is just
+  // the number dropped in). Small and explicit beats a generic templating
+  // engine for a list this short.
+  function strShowMore(n) {
+    return currentLang === "vi" ? `Xem thêm ${n}` : `Show ${n} more`;
+  }
+  function strGroupTag(n) {
+    return currentLang === "vi" ? `⏰ Trùng giờ với ${n} đơn khác` : `⏰ Same time as ${n} other order${n === 1 ? "" : "s"}`;
+  }
+  function strHistoryBadgeAria(n) {
+    return currentLang === "vi"
+      ? `${n} sự cố đã ghi nhận trước đây với khách này — bấm để xem chi tiết`
+      : `${n} past logged issue${n === 1 ? "" : "s"} for this customer — tap for details`;
+  }
+  function strOrderCount(n) {
+    return currentLang === "vi" ? `${n} đơn` : `${n} order${n === 1 ? "" : "s"}`;
+  }
+  function strPersonalTray(n) {
+    return currentLang === "vi" ? `${n} khay cá nhân` : `${n} personal tray${n === 1 ? "" : "s"}`;
+  }
+  function strShareableTray(n) {
+    return currentLang === "vi" ? `${n} khay chia sẻ (×3)` : `${n} shareable tray${n === 1 ? "" : "s"} (×3)`;
+  }
+  function strHistRangeAll(n) {
+    return currentLang === "vi" ? `${n} đơn được ghi nhận, tính từ trước đến nay` : `${n} order${n === 1 ? "" : "s"} logged, all time`;
+  }
+  function strIssueCount(n) {
+    return currentLang === "vi" ? `${n} sự cố` : `${n} issue${n === 1 ? "" : "s"}`;
+  }
+  function strHistRangeWindow(n, days) {
+    return currentLang === "vi" ? `${n} đơn trong ${days} ngày qua` : `${n} order${n === 1 ? "" : "s"} in the last ${days} days`;
+  }
+  function strTimeOfDaySub(unknownCount) {
+    const base = t("hist_tod_sub");
+    if (!unknownCount) return base;
+    return currentLang === "vi"
+      ? `${base} (${unknownCount} đơn không có giờ ghi nhận bị loại ra)`
+      : `${base} (${unknownCount} order${unknownCount === 1 ? "" : "s"} with no logged time excluded)`;
+  }
+
+  // Fixed, recurring tray/drink/addon vocabulary that actually appears in
+  // ORDERS item names — translated only when it's an exact match, so any
+  // future item name not in this list just falls back to whatever's in the
+  // data untouched rather than showing blank or breaking.
+  const ITEM_NAME_VI = {
+    "Personal Tray": "Khay cá nhân",
+    "Shareable Tray": "Khay lớn",
+    "Green Thai Tea": "Trà Thái xanh",
+    "Orange Thai Tea": "Trà Thái cam",
+    "Vietnamese Coffee": "Cà phê sữa đá",
+    "Extra Cucumber": "Thêm dưa leo",
+    "Drink (flavor TBD)": "Thức uống (chưa chọn vị)",
+  };
+
+  function translateItemName(name) {
+    if (currentLang !== "vi") return name;
+    return ITEM_NAME_VI[name] || name;
+  }
+
+  // Item-level notes (e.g. "1 complimentary") are a small fixed vocabulary
+  // that repeats across orders, not free-form order data, so they get the
+  // same exact-match-with-fallback translation treatment as item names.
+  const ITEM_NOTE_VI = {
+    "1 complimentary": "1 phần ưu đãi",
+    "1,000th follower giveaway": "Quà tặng follower thứ 1.000",
+  };
+
+  function translateItemNote(note) {
+    if (currentLang !== "vi") return note;
+    return ITEM_NOTE_VI[note] || note;
+  }
+
+  // Kitchen notes (order.notes) are genuinely free text from the DM threads,
+  // but Tony asked for these translated too — so unlike buyer names/handles,
+  // this is a manually-curated exact-match dictionary of the notes that
+  // actually appear in this week's ORDERS, with fallback to the original
+  // English for any note not yet covered (a future untranslated note should
+  // still show up rather than disappear).
+  const ORDER_NOTE_VI = {
+    "Thai tea with ice": "Trà Thái có đá",
+    "Green Thai Tea: almond milk, half sugar": "Trà Thái xanh: sữa hạnh nhân, nửa đường",
+    "Drink flavor not chosen yet — confirm at pickup": "Chưa chọn vị thức uống — xác nhận lúc lấy hàng",
+    "Never sent a final confirmation \"yes\" in thread — verify before prep": "Chưa gửi lời xác nhận \"đồng ý\" cuối cùng trong đoạn tin nhắn — kiểm tra lại trước khi chuẩn bị",
+    "No pickup time given in thread — assumed 1:00 PM Sat 8/29 per Tony": "Không có giờ lấy hàng trong đoạn tin nhắn — tạm tính 1:00 chiều Thứ Bảy 29/8 theo Tony",
+    "Manually logged by Tony — thread wasn't in the DM export (Instagram Message Requests, not main inbox)": "Tony tự nhập thủ công — đoạn tin nhắn không có trong bản xuất DM (nằm trong mục Yêu cầu tin nhắn Instagram, không phải hộp thư chính)",
+    "Manually logged by Tony — could not verify against a matching DM thread": "Tony tự nhập thủ công — không thể đối chiếu với đoạn tin nhắn tương ứng",
+    "Already picked up": "Đã lấy hàng",
+    "Requested light spiciness": "Yêu cầu ít cay",
+    "Says they'll pay cash": "Nói sẽ trả bằng tiền mặt",
+    "Pending customer's final confirmation — added per Tony's instruction": "Đang chờ khách xác nhận lần cuối — thêm vào theo yêu cầu của Tony",
+  };
+
+  function translateOrderNote(notes) {
+    if (currentLang !== "vi") return notes;
+    return ORDER_NOTE_VI[notes] || notes;
+  }
+
+  const DOW_LABELS_VI = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
+
+  function dowLabel(i) {
+    return currentLang === "vi" ? DOW_LABELS_VI[i] : DOW_NAMES[i];
+  }
+
+  // Sets .textContent on every static data-i18n element (header/footer,
+  // tab and subtab-window labels, card titles/subs, table <th> headers).
+  // Anything rendered dynamically (order cards, prep lists, chart rows,
+  // buyer tables) is handled inside its own render function instead, since
+  // it needs to rebuild anyway.
+  function applyStaticI18n() {
+    document.querySelectorAll("[data-i18n]").forEach((el) => {
+      el.textContent = t(el.dataset.i18n);
+    });
+    document.documentElement.lang = currentLang === "vi" ? "vi" : "en";
+    const codeEl = document.getElementById("langCode");
+    if (codeEl) codeEl.textContent = currentLang === "vi" ? "VI" : "EN";
+    const toggleBtn = document.getElementById("langToggle");
+    if (toggleBtn) {
+      const label = currentLang === "vi" ? t("switch_to_english") : t("switch_to_vietnamese");
+      toggleBtn.title = label;
+      toggleBtn.setAttribute("aria-label", label);
+    }
+  }
+
   function fmtMoney(n) { return "$" + n.toFixed(2).replace(/\.00$/, ""); }
 
   function fmtDate(iso) {
     const [y, m, d] = iso.split("-").map(Number);
     const dt = new Date(Date.UTC(y, m - 1, d));
-    return dt.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", timeZone: "UTC" });
+    return dt.toLocaleDateString(localeCode(), { weekday: "long", month: "long", day: "numeric", timeZone: "UTC" });
   }
 
   // Short, unambiguous date like "Thu, Aug 29" — used on order cards so it's
@@ -1722,7 +2091,7 @@
   function fmtShortDate(iso) {
     const [y, m, d] = iso.split("-").map(Number);
     const dt = new Date(Date.UTC(y, m - 1, d));
-    return dt.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" });
+    return dt.toLocaleDateString(localeCode(), { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" });
   }
 
   // Turns "1:00 PM" into minutes-since-midnight so orders can be sorted chronologically.
@@ -1927,14 +2296,17 @@
   const EXPERIENCE_STORAGE_KEY = "riceShineBuyerExperience";
 
   const EXPERIENCE_TAGS = [
-    { key: "no-show", label: "No-show" },
-    { key: "late-payment", label: "Late payment" },
-    { key: "last-minute-change", label: "Last-minute change" },
-    { key: "late-pickup", label: "Late pickup" },
+    { key: "no-show", i18n: "exp_tag_no_show" },
+    { key: "late-payment", i18n: "exp_tag_late_payment" },
+    { key: "last-minute-change", i18n: "exp_tag_last_minute_change" },
+    { key: "late-pickup", i18n: "exp_tag_late_pickup" },
   ];
 
+  // The tag KEY (e.g. "no-show") is what's stored in localStorage entries —
+  // that never changes with language. Only the displayed label does.
   function experienceTagLabel(key) {
-    return EXPERIENCE_TAGS.find((t) => t.key === key)?.label || key;
+    const found = EXPERIENCE_TAGS.find((tag) => tag.key === key);
+    return found ? t(found.i18n) : key;
   }
 
   let experienceLog = [];
@@ -1991,7 +2363,7 @@
 
   function fmtDateTime(iso) {
     const dt = new Date(iso);
-    return dt.toLocaleString("en-US", {
+    return dt.toLocaleString(localeCode(), {
       month: "short", day: "numeric", year: "numeric",
       hour: "numeric", minute: "2-digit",
     });
@@ -2005,7 +2377,7 @@
   function downloadExperienceCsv() {
     // Same order as the on-screen log: buyers with the most issues first,
     // so a skim of the CSV top-to-bottom reads the same as the dashboard.
-    const rows = [["Buyer", "Handle", "Total issues for buyer", "Date", "Tags", "Note", "Order pickup date"]];
+    const rows = [[t("th_buyer"), t("csv_handle"), t("csv_total_issues"), t("csv_date"), t("csv_tags"), t("csv_note"), t("csv_pickup_date")]];
     groupExperienceByBuyer().forEach((g) => {
       g.entries.forEach((e) => {
         rows.push([
@@ -2079,7 +2451,8 @@
     if (/\bcash\b/i.test(mainPart)) found.push(PAY_ICONS.cash);
 
     if (!found.length) {
-      return `<div class="pay-row"><span>Payment:</span> <b style="color:var(--ink)">${payStr}</b></div>`;
+      // payStr itself is free-text order data (e.g. "Not discussed yet") — never translated.
+      return `<div class="pay-row"><span>${t("label_payment")}</span> <b style="color:var(--ink)">${payStr}</b></div>`;
     }
 
     const chips = found.map(m => `
@@ -2090,7 +2463,7 @@
 
     return `
       <div class="pay-row">
-        <span>Payment:</span>
+        <span>${t("label_payment")}</span>
         <span class="pay-chips">${chips}</span>
         ${note ? `<span class="pay-note">${note}</span>` : ""}
       </div>
@@ -2109,10 +2482,10 @@
     const nextDay = days[0];
     const el = document.getElementById("statbar");
     el.innerHTML = `
-      <div class="stat accent"><div class="n">${total}</div><div class="l">Open orders</div></div>
-      <div class="stat"><div class="n">${fmtMoney(revenue)}</div><div class="l">Total value</div></div>
-      <div class="stat"><div class="n">${unpaid}</div><div class="l">Awaiting payment</div></div>
-      <div class="stat"><div class="n">${nextDay ? fmtShortDate(nextDay) : "—"}</div><div class="l">Next pickup day</div></div>
+      <div class="stat accent"><div class="n">${total}</div><div class="l">${t("stat_open_orders")}</div></div>
+      <div class="stat"><div class="n">${fmtMoney(revenue)}</div><div class="l">${t("stat_total_value")}</div></div>
+      <div class="stat"><div class="n">${unpaid}</div><div class="l">${t("stat_awaiting_payment")}</div></div>
+      <div class="stat"><div class="n">${nextDay ? fmtShortDate(nextDay) : "—"}</div><div class="l">${t("stat_next_pickup")}</div></div>
     `;
   }
 
@@ -2129,16 +2502,16 @@
     return `
       <article class="ticket ${gcls || ""} ${completed ? "is-complete" : ""} ${flag ? "is-flagged" : ""}">
         ${flag ? `
-          <button type="button" class="flag-badge" data-idx="${idx}" title="${flag === "new" ? "New order" : "Order updated"} — tap to mark reviewed" aria-label="${flag === "new" ? "New order" : "Order updated"} — tap to mark reviewed">
-            <span class="flag-asterisk">*</span><span>${flag === "new" ? "New" : "Updated"}</span>
+          <button type="button" class="flag-badge" data-idx="${idx}" title="${flag === "new" ? t("flag_new_title") : t("flag_updated_title")}" aria-label="${flag === "new" ? t("flag_new_title") : t("flag_updated_title")}">
+            <span class="flag-asterisk">*</span><span>${flag === "new" ? t("flag_new") : t("flag_updated")}</span>
           </button>
         ` : ""}
         <div class="who">
           <div>
-            <div class="name">${o.name}${expEntries.length ? `<button type="button" class="history-badge" data-idx="${idx}" aria-expanded="${histOpen}" aria-label="${expEntries.length} past logged issue${expEntries.length === 1 ? "" : "s"} for this customer — tap for details">⚠ ${expEntries.length}</button>` : ""}</div>
+            <div class="name">${o.name}${expEntries.length ? `<button type="button" class="history-badge" data-idx="${idx}" aria-expanded="${histOpen}" aria-label="${strHistoryBadgeAria(expEntries.length)}">⚠ ${expEntries.length}</button>` : ""}</div>
             <span class="handle">@${o.handle}</span>
           </div>
-          <span class="badge ${o.paid ? "paid" : "unpaid"}">${o.paid ? "Paid" : "Unpaid"}</span>
+          <span class="badge ${o.paid ? "paid" : "unpaid"}">${o.paid ? t("badge_paid") : t("badge_unpaid")}</span>
         </div>
         ${histOpen && expEntries.length ? `
           <div class="history-summary">
@@ -2154,8 +2527,8 @@
         <ul class="items">
           ${o.items.map(i => `
             <li>
-              <span><span class="qty">${i.qty}×</span>${i.name}${i.note ? ` <span style="color:var(--ink-soft)">(${i.note})</span>` : ""}</span>
-              <span class="price ${i.comp ? "comp" : ""}">${i.comp ? "comp" : fmtMoney(i.price)}</span>
+              <span><span class="qty">${i.qty}×</span>${translateItemName(i.name)}${i.note ? ` <span style="color:var(--ink-soft)">(${translateItemNote(i.note)})</span>` : ""}</span>
+              <span class="price ${i.comp ? "comp" : ""}">${i.comp ? t("comp_label") : fmtMoney(i.price)}</span>
             </li>
           `).join("")}
         </ul>
@@ -2163,17 +2536,17 @@
           <div class="pickup"><span class="d">${fmtShortDate(o.pickupDate)}</span> · ${o.pickupTime}</div>
           <div class="total">${fmtMoney(o.total)}</div>
         </div>
-        ${gcls ? `<div class="group-tag ${gcls}">⏰ Same time as ${gcount - 1} other order${gcount - 1 === 1 ? "" : "s"}</div>` : ""}
+        ${gcls ? `<div class="group-tag ${gcls}">${strGroupTag(gcount - 1)}</div>` : ""}
         ${renderPayMethod(o.payMethod)}
-        ${o.notes ? `<div class="note"><b>Kitchen note</b>${o.notes}</div>` : ""}
+        ${o.notes ? `<div class="note"><b>${t("label_kitchen_note")}</b>${translateOrderNote(o.notes)}</div>` : ""}
         <div class="ticket-foot">
-          <button type="button" class="exp-toggle-btn ${expEntries.length ? "has-entries" : ""}" data-idx="${idx}" aria-expanded="${expOpen}" title="Optional — log a no-show, late payment, last-minute change, or late pickup">
-            📝 Log experience${expEntries.length ? ` (${expEntries.length})` : ""}
+          <button type="button" class="exp-toggle-btn ${expEntries.length ? "has-entries" : ""}" data-idx="${idx}" aria-expanded="${expOpen}" title="${t("exp_log_btn_title")}">
+            ${t("exp_log_btn")}${expEntries.length ? ` (${expEntries.length})` : ""}
           </button>
-          <label class="toggle" title="${completed ? "Move back to active" : "Mark as picked up / completed"}">
+          <label class="toggle" title="${completed ? t("toggle_title_move_back") : t("toggle_title_mark_done")}">
             <input type="checkbox" class="complete-toggle" data-idx="${idx}" ${completed ? "checked" : ""}>
             <span class="track"></span>
-            <span class="tlabel">${completed ? "Completed" : "Mark complete"}</span>
+            <span class="tlabel">${completed ? t("toggle_completed") : t("toggle_mark_complete")}</span>
           </label>
         </div>
         ${expOpen ? renderExpPanel(o, idx, expEntries) : ""}
@@ -2185,15 +2558,15 @@
     return `
       <div class="exp-panel" data-idx="${idx}">
         <div class="exp-tags">
-          ${EXPERIENCE_TAGS.map(t => `
+          ${EXPERIENCE_TAGS.map(tag => `
             <label class="exp-tag-check">
-              <input type="checkbox" class="exp-tag-input" value="${t.key}">
-              ${t.label}
+              <input type="checkbox" class="exp-tag-input" value="${tag.key}">
+              ${experienceTagLabel(tag.key)}
             </label>
           `).join("")}
         </div>
-        <textarea class="exp-note-input" placeholder="Optional note — what happened, any context worth remembering"></textarea>
-        <button type="button" class="exp-save-btn" data-idx="${idx}">Save entry</button>
+        <textarea class="exp-note-input" placeholder="${t("exp_note_placeholder")}"></textarea>
+        <button type="button" class="exp-save-btn" data-idx="${idx}">${t("exp_save_btn")}</button>
         ${entries.length ? `
           <div class="exp-entries">
             ${entries.map(e => `
@@ -2203,11 +2576,11 @@
                   ${e.tags.length ? `<div class="exp-entry-tags">${e.tags.map(tk => `<span class="exp-pill">${experienceTagLabel(tk)}</span>`).join("")}</div>` : ""}
                   ${e.note ? `<div class="exp-entry-note">${escapeHtml(e.note)}</div>` : ""}
                 </div>
-                <button type="button" class="exp-entry-del" data-id="${e.id}" title="Delete this entry" aria-label="Delete this entry">×</button>
+                <button type="button" class="exp-entry-del" data-id="${e.id}" title="${t("exp_del_title")}" aria-label="${t("exp_del_title")}">×</button>
               </div>
             `).join("")}
           </div>
-        ` : `<div class="exp-empty">No past entries for this customer yet.</div>`}
+        ` : `<div class="exp-empty">${t("exp_empty_customer")}</div>`}
       </div>
     `;
   }
@@ -2294,11 +2667,11 @@
 
     gridActive.innerHTML = active.length
       ? active.map((o, idx) => renderTicket(o, idx, groups)).join("")
-      : `<div class="empty-state">All caught up — no active orders right now.</div>`;
+      : `<div class="empty-state">${t("empty_no_active")}</div>`;
 
     gridCompleted.innerHTML = completed.length
       ? completed.map((o, idx) => renderTicket(o, idx, groups)).join("")
-      : `<div class="empty-state">No completed orders yet.</div>`;
+      : `<div class="empty-state">${t("empty_no_completed")}</div>`;
 
     wireToggles(gridActive, active);
     wireToggles(gridCompleted, completed);
@@ -2308,8 +2681,8 @@
     wireExperience(gridCompleted, completed);
 
     const activeFlagged = active.filter(o => orderFlag(o)).length;
-    subtabActive.innerHTML = `Active Orders (${active.length})${activeFlagged ? `<span class="flag-count">${activeFlagged} unreviewed</span>` : ""}`;
-    subtabCompleted.textContent = `Completed Orders (${completed.length})`;
+    subtabActive.innerHTML = `${t("subtab_active")} (${active.length})${activeFlagged ? `<span class="flag-count">${activeFlagged} ${t("label_unreviewed")}</span>` : ""}`;
+    subtabCompleted.textContent = `${t("subtab_completed")} (${completed.length})`;
   }
 
   // ---- Prep by day view ----
@@ -2323,7 +2696,7 @@
     const days = Object.keys(byDay).sort();
     const el = document.getElementById("prepList");
     if (!days.length) {
-      el.innerHTML = `<div class="empty-state">Nothing left to prep — every order's been completed.</div>`;
+      el.innerHTML = `<div class="empty-state">${t("empty_prep_done")}</div>`;
       return;
     }
     el.innerHTML = days.map(day => {
@@ -2338,34 +2711,34 @@
 
       let dayPersonal = 0, dayShareable = 0;
       for (const o of orders) {
-        const t = trayPortions(o.items);
-        dayPersonal += t.personal;
-        dayShareable += t.shareable;
+        const portions = trayPortions(o.items);
+        dayPersonal += portions.personal;
+        dayShareable += portions.shareable;
       }
       const dayPortions = dayPersonal * 1 + dayShareable * 3;
       const trayBits = [];
-      if (dayPersonal) trayBits.push(`${dayPersonal} personal tray${dayPersonal === 1 ? "" : "s"}`);
-      if (dayShareable) trayBits.push(`${dayShareable} shareable tray${dayShareable === 1 ? "" : "s"} (×3)`);
+      if (dayPersonal) trayBits.push(strPersonalTray(dayPersonal));
+      if (dayShareable) trayBits.push(strShareableTray(dayShareable));
 
       return `
         <div class="day-block">
           <div class="day-head">
             <div class="date">${fmtDate(day)}</div>
             <div class="right">
-              <div class="count">${orders.length} order${orders.length === 1 ? "" : "s"} · ${fmtMoney(orders.reduce((s, o) => s + o.total, 0))}${trayBits.length ? ` · ${trayBits.join(", ")}` : ""}</div>
-              <div class="portions-badge"><div class="n">${dayPortions}</div><div class="l">Portions to prep</div></div>
+              <div class="count">${strOrderCount(orders.length)} · ${fmtMoney(orders.reduce((s, o) => s + o.total, 0))}${trayBits.length ? ` · ${trayBits.join(", ")}` : ""}</div>
+              <div class="portions-badge"><div class="n">${dayPortions}</div><div class="l">${t("prep_portions_label")}</div></div>
             </div>
           </div>
           <div class="tally">
             ${tallyEntries.map(([name, qty]) => `
-              <div class="tally-item"><span class="qty">${qty}</span><span class="name">${name}</span></div>
+              <div class="tally-item"><span class="qty">${qty}</span><span class="name">${translateItemName(name)}</span></div>
             `).join("")}
           </div>
           <div class="roster">
             ${orders.map(o => `
               <div class="roster-row">
                 <span class="who">${o.name}</span>
-                <span class="what">${o.items.map(i => `${i.qty}× ${i.name}`).join(", ")}</span>
+                <span class="what">${o.items.map(i => `${i.qty}× ${translateItemName(i.name)}`).join(", ")}</span>
                 <span class="time">${o.pickupTime}</span>
               </div>
             `).join("")}
@@ -2435,7 +2808,7 @@
     return `
       <tr class="show-more-row">
         <td colspan="${colspan}">
-          <button type="button" class="show-more-btn ${toggleClass}">${expanded ? "Show less" : `Show ${remaining} more`}</button>
+          <button type="button" class="show-more-btn ${toggleClass}">${expanded ? t("btn_show_less") : strShowMore(remaining)}</button>
         </td>
       </tr>
     `;
@@ -2447,7 +2820,7 @@
   // marks-and-anatomy.md and color-formula.md.
   function hbarChart(rows) {
     if (!rows.length || rows.every((r) => r.value === 0)) {
-      return `<div class="empty-state">No orders in this window yet.</div>`;
+      return `<div class="empty-state">${t("empty_no_orders_window")}</div>`;
     }
     const max = Math.max(...rows.map((r) => r.value), 1);
     return rows.map((r) => {
@@ -2466,9 +2839,9 @@
     const totalIncome = list.reduce((s, o) => s + o.total, 0);
     const avg = totalOrders ? totalIncome / totalOrders : 0;
     document.getElementById("histStats").innerHTML = `
-      <div class="stat accent"><div class="n">${totalOrders}</div><div class="l">Total orders</div></div>
-      <div class="stat"><div class="n">${fmtMoney(totalIncome)}</div><div class="l">Total income</div></div>
-      <div class="stat"><div class="n">${fmtMoney(avg)}</div><div class="l">Avg order value</div></div>
+      <div class="stat accent"><div class="n">${totalOrders}</div><div class="l">${t("hist_stat_total_orders")}</div></div>
+      <div class="stat"><div class="n">${fmtMoney(totalIncome)}</div><div class="l">${t("hist_stat_total_income")}</div></div>
+      <div class="stat"><div class="n">${fmtMoney(avg)}</div><div class="l">${t("hist_stat_avg_order")}</div></div>
     `;
   }
 
@@ -2486,9 +2859,9 @@
     const body = document.getElementById("histItemizedBody");
     body.innerHTML = rows.length
       ? rows.map(([name, v]) => `
-          <tr><td>${escapeHtml(name)}</td><td class="num">${v.qty}</td><td class="num">${fmtMoney(v.revenue)}</td></tr>
+          <tr><td>${escapeHtml(translateItemName(name))}</td><td class="num">${v.qty}</td><td class="num">${fmtMoney(v.revenue)}</td></tr>
         `).join("")
-      : `<tr><td colspan="3" class="empty-state">No orders in this window yet.</td></tr>`;
+      : `<tr><td colspan="3" class="empty-state">${t("empty_no_orders_window")}</td></tr>`;
   }
 
   function renderHistDayOfWeek(list) {
@@ -2497,7 +2870,7 @@
       const d = parsePickupDate(o);
       if (d) counts[d.getUTCDay()]++;
     });
-    const rows = DOW_NAMES.map((name, i) => ({ label: name, value: counts[i], color: "var(--tea)" }));
+    const rows = DOW_NAMES.map((name, i) => ({ label: dowLabel(i), value: counts[i], color: "var(--tea)" }));
     document.getElementById("histDayOfWeek").innerHTML = hbarChart(rows);
   }
 
@@ -2505,10 +2878,10 @@
     const known = list.filter((o) => o.orderTime);
     const unknownCount = list.length - known.length;
     const buckets = [
-      { label: "Morning (12–11am)", test: (m) => m < 11 * 60 },
-      { label: "Midday (11am–2pm)", test: (m) => m >= 11 * 60 && m < 14 * 60 },
-      { label: "Afternoon (2–5pm)", test: (m) => m >= 14 * 60 && m < 17 * 60 },
-      { label: "Evening (5pm+)", test: (m) => m >= 17 * 60 },
+      { i18n: "tod_morning", test: (m) => m < 11 * 60 },
+      { i18n: "tod_midday", test: (m) => m >= 11 * 60 && m < 14 * 60 },
+      { i18n: "tod_afternoon", test: (m) => m >= 14 * 60 && m < 17 * 60 },
+      { i18n: "tod_evening", test: (m) => m >= 17 * 60 },
     ];
     const counts = buckets.map(() => 0);
     known.forEach((o) => {
@@ -2517,11 +2890,9 @@
       const idx = buckets.findIndex((b) => b.test(mins));
       if (idx >= 0) counts[idx]++;
     });
-    const rows = buckets.map((b, i) => ({ label: b.label, value: counts[i], color: "var(--tea)" }));
+    const rows = buckets.map((b, i) => ({ label: t(b.i18n), value: counts[i], color: "var(--tea)" }));
     document.getElementById("histTimeOfDay").innerHTML = hbarChart(rows);
-    document.getElementById("histTimeOfDaySub").textContent = unknownCount > 0
-      ? `When people place their orders (${unknownCount} order${unknownCount === 1 ? "" : "s"} with no logged time excluded)`
-      : "When people place their orders";
+    document.getElementById("histTimeOfDaySub").textContent = strTimeOfDaySub(unknownCount);
   }
 
   function renderHistTraySize(list) {
@@ -2531,8 +2902,8 @@
       else if (/shareable tray/i.test(it.name)) shareable += it.qty;
     }));
     const rows = [
-      { label: "Personal Tray", value: personal, color: "var(--tg-1)" },
-      { label: "Shareable Tray", value: shareable, color: "var(--tg-2)" },
+      { label: translateItemName("Personal Tray"), value: personal, color: "var(--tg-1)" },
+      { label: translateItemName("Shareable Tray"), value: shareable, color: "var(--tg-2)" },
     ];
     document.getElementById("histTraySize").innerHTML = hbarChart(rows);
   }
@@ -2546,7 +2917,7 @@
     list.forEach((o) => o.items.forEach((it) => {
       if (Object.prototype.hasOwnProperty.call(counts, it.name)) counts[it.name] += it.qty;
     }));
-    const rows = DRINK_NAMES.map((n) => ({ label: n, value: counts[n], color: DRINK_COLORS[n] }));
+    const rows = DRINK_NAMES.map((n) => ({ label: translateItemName(n), value: counts[n], color: DRINK_COLORS[n] }));
     document.getElementById("histDrinks").innerHTML = hbarChart(rows);
   }
 
@@ -2564,7 +2935,7 @@
       .filter((b) => b.count >= 2)
       .sort((a, b) => b.count - a.count || b.total - a.total);
     if (!rows.length) {
-      body.innerHTML = `<tr><td colspan="3" class="empty-state">No repeat buyers yet — this fills in once the same handle orders more than once, across any week.</td></tr>`;
+      body.innerHTML = `<tr><td colspan="3" class="empty-state">${t("empty_no_repeat_buyers")}</td></tr>`;
       return;
     }
     const shown = returningExpanded ? rows : rows.slice(0, TOP_N);
@@ -2582,7 +2953,7 @@
     if (!body) return;
     const rows = buyerOrderSummary().sort((a, b) => b.total - a.total || b.count - a.count);
     if (!rows.length) {
-      body.innerHTML = `<tr><td colspan="3" class="empty-state">No orders logged yet.</td></tr>`;
+      body.innerHTML = `<tr><td colspan="3" class="empty-state">${t("empty_no_orders_logged")}</td></tr>`;
       return;
     }
     const shown = biggestExpanded ? rows : rows.slice(0, TOP_N);
@@ -2597,9 +2968,9 @@
 
   function renderHistRangeNote(days, list) {
     const el = document.getElementById("histRangeNote");
-    if (!list.length) { el.textContent = "No orders logged in this window yet."; return; }
+    if (!list.length) { el.textContent = t("empty_no_orders_logged_window"); return; }
     const dates = list.map((o) => o.orderDate).sort();
-    const label = days === "all" ? `${list.length} order${list.length === 1 ? "" : "s"} logged, all time` : `${list.length} order${list.length === 1 ? "" : "s"} in the last ${days} days`;
+    const label = days === "all" ? strHistRangeAll(list.length) : strHistRangeWindow(list.length, days);
     el.textContent = dates[0] === dates[dates.length - 1]
       ? `${label} · ${fmtShortDate(dates[0])}`
       : `${label} · ${fmtShortDate(dates[0])}–${fmtShortDate(dates[dates.length - 1])}`;
@@ -2634,7 +3005,7 @@
     const body = document.getElementById("expLogBody");
     if (!body) return;
     if (!experienceLog.length) {
-      body.innerHTML = `<div class="exp-empty">Nothing logged yet — tap "📝 Log experience" on any order card to start building this out.</div>`;
+      body.innerHTML = `<div class="exp-empty">${t("empty_explog")}</div>`;
       return;
     }
     const groups = groupExperienceByBuyer();
@@ -2642,13 +3013,13 @@
     body.innerHTML = `
       <table class="exp-log-table">
         <thead>
-          <tr><th>Buyer</th><th>Issues</th><th>Logged</th></tr>
+          <tr><th>${t("th_buyer")}</th><th>${t("th_issues")}</th><th>${t("th_logged")}</th></tr>
         </thead>
         <tbody>
           ${shown.map((g) => `
             <tr>
               <td>${escapeHtml(g.name)}<br><span class="handle">@${escapeHtml(g.handle)}</span></td>
-              <td><span class="exp-count-pill">${g.count} issue${g.count === 1 ? "" : "s"}</span></td>
+              <td><span class="exp-count-pill">${strIssueCount(g.count)}</span></td>
               <td>
                 <div class="exp-log-buyer-entries">
                   ${g.entries.map((e) => `
@@ -2658,7 +3029,7 @@
                         ${e.tags.length ? `<div class="exp-entry-tags">${e.tags.map((tk) => `<span class="exp-pill">${experienceTagLabel(tk)}</span>`).join("")}</div>` : ""}
                         ${e.note ? `<div class="exp-entry-note">${escapeHtml(e.note)}</div>` : ""}
                       </div>
-                      <button type="button" class="exp-entry-del" data-id="${e.id}" title="Delete this entry" aria-label="Delete this entry">×</button>
+                      <button type="button" class="exp-entry-del" data-id="${e.id}" title="${t("exp_del_title")}" aria-label="${t("exp_del_title")}">×</button>
                     </div>
                   `).join("")}
                 </div>
@@ -2742,9 +3113,25 @@
   subtabActive.addEventListener("click", () => activateSub("active"));
   subtabCompleted.addEventListener("click", () => activateSub("completed"));
 
-  renderStats();
-  renderOrders();
-  renderPrep();
-  renderHistory();
-  renderExperienceLog();
+  // ---- Language toggle (PREVIEW FEATURE) ----
+  // Runs the full set of top-level render calls, same set as the initial
+  // load below — nothing here is a partial refresh, so every visible
+  // section (stat bar, both order grids, prep-by-day, every History card,
+  // the experience log) updates immediately, in place, with no reload.
+  function renderAll() {
+    applyStaticI18n();
+    renderStats();
+    renderOrders();
+    renderPrep();
+    renderHistory();
+    renderExperienceLog();
+  }
+
+  document.getElementById("langToggle").addEventListener("click", () => {
+    currentLang = currentLang === "en" ? "vi" : "en";
+    persistLang();
+    renderAll();
+  });
+
+  renderAll();
 </script>
