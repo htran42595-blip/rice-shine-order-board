@@ -822,8 +822,8 @@
     <div class="hist-charts">
       <div class="hist-card">
         <div class="hist-card-head">
-          <div class="title">Orders by day of week</div>
-          <div class="sub">When people place their orders</div>
+          <div class="title">Orders by pickup day</div>
+          <div class="sub">Which day people pick up their food</div>
         </div>
         <div class="hist-card-body" id="histDayOfWeek"></div>
       </div>
@@ -854,7 +854,7 @@
     </div>
   </section>
 
-  <footer class="foot">Rice &amp; Shine · Instagram DM order log · orders received Aug 23–28, 2026 · updated manually until the live bot goes live</footer>
+  <footer class="foot">Rice &amp; Shine · Instagram DM order log · orders received Aug 23–27, 2026 · updated manually until the live bot goes live</footer>
 </div>
 
 <script>
@@ -1213,7 +1213,7 @@
       total: 15,
       orderDate: "2026-08-27", orderTime: "13:35",
       pickupDate: "2026-08-27", pickupTime: "5:45 PM",
-      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      paid: true, payMethod: "Confirmed paid in DM (\"Got the payment. Tysm\") — method not specified",
       notes: ""
     },
     {
@@ -1223,7 +1223,7 @@
         { qty: 1, name: "Orange Thai Tea", price: 0, comp: true }
       ],
       total: 15,
-      orderDate: "2026-08-28", orderTime: "14:54",
+      orderDate: "2026-08-27", orderTime: "14:54",
       pickupDate: "2026-08-28", pickupTime: "5:45 PM",
       paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
       notes: ""
@@ -1235,7 +1235,7 @@
         { qty: 2, name: "Vietnamese Coffee", price: 4, note: "1 complimentary" }
       ],
       total: 19,
-      orderDate: "2026-08-28", orderTime: "11:02",
+      orderDate: "2026-08-27", orderTime: "11:02",
       pickupDate: "2026-08-28", pickupTime: "10:30 AM",
       paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
       notes: ""
@@ -1246,7 +1246,7 @@
         { qty: 1, name: "Shareable Tray", price: 45 }
       ],
       total: 45,
-      orderDate: "2026-08-28", orderTime: "15:44",
+      orderDate: "2026-08-27", orderTime: "15:44",
       pickupDate: "2026-08-27", pickupTime: "7:00 PM",
       paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
       notes: ""
@@ -1259,7 +1259,7 @@
         { qty: 1, name: "Vietnamese Coffee", price: 0, comp: true }
       ],
       total: 90,
-      orderDate: "2026-08-28", orderTime: "14:22",
+      orderDate: "2026-08-27", orderTime: "14:22",
       pickupDate: "2026-08-29", pickupTime: "2:00 PM",
       paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
       notes: ""
@@ -1271,10 +1271,10 @@
         { qty: 4, name: "Green Thai Tea", price: 12, note: "1 complimentary" }
       ],
       total: 57,
-      orderDate: "2026-08-28", orderTime: "12:39",
-      pickupDate: "2026-08-29", pickupTime: "2:00 PM",
+      orderDate: "2026-08-27", orderTime: "12:39",
+      pickupDate: "2026-08-28", pickupTime: "2:00 PM",
       paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
-      notes: "Pickup date read as 08/28 in the DM, but the customer's own words (\"order for tomorrow\", \"see you tomorrow!\") point to 08/29 — corrected here; worth confirming."
+      notes: ""
     },
     {
       name: "Victoria Tyana", handle: "victoria_tyana",
@@ -1283,7 +1283,7 @@
         { qty: 1, name: "Green Thai Tea", price: 4 }
       ],
       total: 19,
-      orderDate: "2026-08-28", orderTime: "13:13",
+      orderDate: "2026-08-27", orderTime: "13:13",
       pickupDate: "2026-08-29", pickupTime: "12:00 PM",
       paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
       notes: ""
@@ -1294,7 +1294,7 @@
         { qty: 1, name: "Personal Tray", price: 15 }
       ],
       total: 15,
-      orderDate: "2026-08-28", orderTime: "07:06",
+      orderDate: "2026-08-27", orderTime: "07:06",
       pickupDate: "2026-08-28", pickupTime: "5:45 PM",
       paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
       notes: ""
@@ -1624,6 +1624,15 @@
     return new Date(Date.UTC(y, m - 1, d));
   }
 
+  // pickupDate is a required field on every order (unlike orderDate, which
+  // can be null for a manually-logged order with no known placement time),
+  // so this doesn't need the same null-safety as parseOrderDate.
+  function parsePickupDate(o) {
+    if (!o.pickupDate) return null;
+    const [y, m, d] = o.pickupDate.split("-").map(Number);
+    return new Date(Date.UTC(y, m - 1, d));
+  }
+
   function ordersInWindow(days) {
     if (days === "all") return ORDERS.slice();
     const cutoff = new Date();
@@ -1696,7 +1705,7 @@
   function renderHistDayOfWeek(list) {
     const counts = [0, 0, 0, 0, 0, 0, 0];
     list.forEach((o) => {
-      const d = parseOrderDate(o);
+      const d = parsePickupDate(o);
       if (d) counts[d.getUTCDay()]++;
     });
     const rows = DOW_NAMES.map((name, i) => ({ label: name, value: counts[i], color: "var(--tea)" }));
