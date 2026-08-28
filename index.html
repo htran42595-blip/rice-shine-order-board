@@ -2159,12 +2159,14 @@
   }
 
   // ---- Completion sound ----
-  // A little "cha-ching" cue when an order gets marked complete. Synthesized
-  // with the Web Audio API rather than an external sound file, so there's
-  // nothing to fetch or ship — it works offline and the file stays a single
-  // HTML page. The AudioContext is created lazily on first use, right when
-  // Tony taps a toggle, which counts as the user gesture browsers require
-  // before any audio can play.
+  // A heavier "cha-CHUNK" cue when an order gets marked complete — a pair of
+  // low mechanical thuds (like a slot machine lever/reel-stop) followed by a
+  // quick ascending jackpot-style chime run. Synthesized with the Web Audio
+  // API rather than an external sound file, so there's nothing to fetch or
+  // ship — it works offline and the file stays a single HTML page. The
+  // AudioContext is created lazily on first use, right when Tony taps a
+  // toggle, which counts as the user gesture browsers require before any
+  // audio can play.
   let chaChingCtx = null;
   function playChaChing() {
     try {
@@ -2173,38 +2175,59 @@
       const ctx = chaChingCtx;
       const now = ctx.currentTime;
 
-      // "Cha" — a quick filtered noise burst, like a mechanical register clunk.
-      const bufferSize = Math.floor(ctx.sampleRate * 0.06);
-      const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-      const data = noiseBuffer.getChannelData(0);
-      for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
-      const noise = ctx.createBufferSource();
-      noise.buffer = noiseBuffer;
-      const noiseFilter = ctx.createBiquadFilter();
-      noiseFilter.type = "bandpass";
-      noiseFilter.frequency.value = 1200;
-      noiseFilter.Q.value = 0.7;
-      const noiseGain = ctx.createGain();
-      noiseGain.gain.setValueAtTime(0.35, now);
-      noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
-      noise.connect(noiseFilter).connect(noiseGain).connect(ctx.destination);
-      noise.start(now);
-      noise.stop(now + 0.07);
-
-      // "Ching" — a bright two-note bell, right after the clunk.
-      const bellStart = now + 0.05;
-      [1567.98, 2093.0].forEach((freq, i) => {
+      // A single heavy mechanical thud: a pitch-dropping triangle tone
+      // layered with low-passed noise, for weight and grit.
+      function thud(start, freqFrom, freqTo, dur, peak) {
         const osc = ctx.createOscillator();
-        osc.type = "sine";
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(freqFrom, start);
+        osc.frequency.exponentialRampToValueAtTime(freqTo, start + dur);
+        const oscGain = ctx.createGain();
+        oscGain.gain.setValueAtTime(0.0001, start);
+        oscGain.gain.exponentialRampToValueAtTime(peak, start + 0.012);
+        oscGain.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+        osc.connect(oscGain).connect(ctx.destination);
+        osc.start(start);
+        osc.stop(start + dur);
+
+        const bufferSize = Math.floor(ctx.sampleRate * dur);
+        const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const data = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+        const noise = ctx.createBufferSource();
+        noise.buffer = noiseBuffer;
+        const noiseFilter = ctx.createBiquadFilter();
+        noiseFilter.type = "lowpass";
+        noiseFilter.frequency.value = 500;
+        const noiseGain = ctx.createGain();
+        noiseGain.gain.setValueAtTime(peak * 0.6, start);
+        noiseGain.gain.exponentialRampToValueAtTime(0.001, start + dur * 0.8);
+        noise.connect(noiseFilter).connect(noiseGain).connect(ctx.destination);
+        noise.start(start);
+        noise.stop(start + dur);
+      }
+
+      // "Cha" — a lighter first thud, like a lever pull...
+      thud(now, 180, 90, 0.09, 0.3);
+      // "CHUNK" — then a heavier, lower second thud, like the reels locking in.
+      thud(now + 0.1, 140, 55, 0.16, 0.45);
+
+      // A quick ascending run of bright square-wave chimes right after,
+      // like a slot machine's coin-payout flourish.
+      const notes = [784.0, 987.77, 1174.66, 1567.98]; // G5, B5, D6, G6
+      const flourishStart = now + 0.24;
+      notes.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        osc.type = "square";
         osc.frequency.value = freq;
         const gain = ctx.createGain();
-        const start = bellStart + i * 0.03;
+        const start = flourishStart + i * 0.045;
         gain.gain.setValueAtTime(0.0001, start);
-        gain.gain.exponentialRampToValueAtTime(0.25, start + 0.01);
-        gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.5);
+        gain.gain.exponentialRampToValueAtTime(0.12, start + 0.008);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.22);
         osc.connect(gain).connect(ctx.destination);
         osc.start(start);
-        osc.stop(start + 0.5);
+        osc.stop(start + 0.22);
       });
     } catch (e) {
       // Audio unsupported/blocked — this is a nice-to-have, never worth
