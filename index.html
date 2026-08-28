@@ -325,6 +325,10 @@
      about how a customer behaved, so it shouldn't visually compete with
      the thing that's telling him to look at the card right now. Reuses
      --salmon, the same color already used for kitchen notes. */
+  /* A button, not a hover tooltip — tooltips don't work on tap (iPad/phone),
+     and even on desktop a wall of text on hover forces you to read it every
+     time you pass over a card. Tap to expand a short summary, tap again to
+     collapse; nothing shows until you ask for it. */
   .history-badge {
     display: inline-flex;
     align-items: center;
@@ -332,12 +336,33 @@
     margin-left: 6px;
     background: var(--salmon-soft);
     color: var(--salmon);
+    border: none;
     border-radius: 999px;
     padding: 1px 7px;
+    font-family: inherit;
     font-size: 0.68rem;
     font-weight: 700;
-    cursor: default;
+    cursor: pointer;
   }
+
+  .history-badge:hover, .history-badge:focus-visible { box-shadow: 0 0 0 2px var(--salmon-soft); outline: none; }
+
+  .history-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    background: var(--rice-2);
+    border-radius: 10px;
+    padding: 9px 11px;
+  }
+
+  .history-summary-row {
+    font-size: 0.78rem;
+    padding-bottom: 7px;
+    border-bottom: 1px dashed var(--line);
+  }
+
+  .history-summary-row:last-child { padding-bottom: 0; border-bottom: none; }
 
   .exp-toggle-btn {
     display: inline-flex;
@@ -451,6 +476,23 @@
     padding: 1px 8px;
     font-size: 0.68rem;
     font-weight: 700;
+  }
+
+  .exp-count-pill {
+    display: inline-block;
+    background: var(--salmon-soft);
+    color: var(--salmon);
+    border-radius: 999px;
+    padding: 3px 12px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .exp-log-buyer-entries {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   }
 
   .exp-entry-note { margin-top: 4px; color: var(--ink); }
@@ -1841,6 +1883,12 @@
   // which is fine since it's just "is this panel open," not data.
   const openExpPanels = new Set();
 
+  // Same idea, for the small ⚠ N badge's collapsed summary — separate from
+  // openExpPanels since tapping the badge (quick glance at history) and
+  // tapping "Log experience" (opens the full form) are different actions
+  // that can be open independently of each other.
+  const openHistoryBadges = new Set();
+
   function fmtDateTime(iso) {
     const dt = new Date(iso);
     return dt.toLocaleString("en-US", {
@@ -1855,20 +1903,22 @@
   }
 
   function downloadExperienceCsv() {
-    const rows = [["Date", "Customer", "Handle", "Tags", "Note", "Order pickup date"]];
-    experienceLog
-      .slice()
-      .sort((a, b) => b.date.localeCompare(a.date))
-      .forEach((e) => {
+    // Same order as the on-screen log: buyers with the most issues first,
+    // so a skim of the CSV top-to-bottom reads the same as the dashboard.
+    const rows = [["Buyer", "Handle", "Total issues for buyer", "Date", "Tags", "Note", "Order pickup date"]];
+    groupExperienceByBuyer().forEach((g) => {
+      g.entries.forEach((e) => {
         rows.push([
+          g.name,
+          g.handle,
+          g.count,
           fmtDateTime(e.date),
-          e.name,
-          e.handle,
           e.tags.map(experienceTagLabel).join("; "),
           e.note,
           e.pickupDate || "",
         ]);
       });
+    });
     const csv = rows.map((r) => r.map(csvField).join(",")).join("\r\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -1975,6 +2025,7 @@
     const flag = orderFlag(o);
     const expEntries = experienceForHandle(o.handle);
     const expOpen = openExpPanels.has(orderIdentity(o));
+    const histOpen = openHistoryBadges.has(orderIdentity(o));
     return `
       <article class="ticket ${gcls || ""} ${completed ? "is-complete" : ""} ${flag ? "is-flagged" : ""}">
         ${flag ? `
@@ -1984,11 +2035,22 @@
         ` : ""}
         <div class="who">
           <div>
-            <div class="name">${o.name}${expEntries.length ? `<span class="history-badge" title="${expEntries.length} past logged issue${expEntries.length === 1 ? "" : "s"} for this customer: ${expEntries.map(e => `${fmtDateTime(e.date)} — ${e.tags.map(experienceTagLabel).join(", ") || "note only"}`).join(" | ")}">⚠ ${expEntries.length}</span>` : ""}</div>
+            <div class="name">${o.name}${expEntries.length ? `<button type="button" class="history-badge" data-idx="${idx}" aria-expanded="${histOpen}" aria-label="${expEntries.length} past logged issue${expEntries.length === 1 ? "" : "s"} for this customer — tap for details">⚠ ${expEntries.length}</button>` : ""}</div>
             <span class="handle">@${o.handle}</span>
           </div>
           <span class="badge ${o.paid ? "paid" : "unpaid"}">${o.paid ? "Paid" : "Unpaid"}</span>
         </div>
+        ${histOpen && expEntries.length ? `
+          <div class="history-summary">
+            ${expEntries.map(e => `
+              <div class="history-summary-row">
+                <div class="exp-date">${fmtDateTime(e.date)}</div>
+                ${e.tags.length ? `<div class="exp-entry-tags">${e.tags.map(tk => `<span class="exp-pill">${experienceTagLabel(tk)}</span>`).join("")}</div>` : ""}
+                ${e.note ? `<div class="exp-entry-note">${escapeHtml(e.note)}</div>` : ""}
+              </div>
+            `).join("")}
+          </div>
+        ` : ""}
         <ul class="items">
           ${o.items.map(i => `
             <li>
@@ -2080,6 +2142,15 @@
   }
 
   function wireExperience(gridEl, list) {
+    gridEl.querySelectorAll(".history-badge").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const id = orderIdentity(list[Number(btn.dataset.idx)]);
+        if (openHistoryBadges.has(id)) openHistoryBadges.delete(id);
+        else openHistoryBadges.add(id);
+        renderOrders();
+      });
+    });
+
     gridEl.querySelectorAll(".exp-toggle-btn").forEach(btn => {
       btn.addEventListener("click", () => {
         const id = orderIdentity(list[Number(btn.dataset.idx)]);
@@ -2375,27 +2446,56 @@
   // time" window pills above — it's a paper trail, not a stat, so an entry
   // should never look like it "disappeared" just because the window
   // changed. Always the full log, newest first.
+  // One row per buyer, not per incident — the point of this view is
+  // spotting who's a repeat problem, so their whole record needs to be
+  // together, ranked by how many times something's been logged (most
+  // first). Within a buyer's own entries, newest still leads since that's
+  // the most actionable one to remember.
+  function groupExperienceByBuyer() {
+    const byHandle = {};
+    experienceLog.forEach((e) => {
+      (byHandle[e.handle] ||= []).push(e);
+    });
+    const groups = Object.values(byHandle).map((entries) => {
+      const sorted = entries.slice().sort((a, b) => b.date.localeCompare(a.date));
+      return { handle: sorted[0].handle, name: sorted[0].name, entries: sorted, count: sorted.length };
+    });
+    groups.sort((a, b) => b.count - a.count || b.entries[0].date.localeCompare(a.entries[0].date));
+    return groups;
+  }
+
   function renderExperienceLog() {
     const body = document.getElementById("expLogBody");
     if (!body) return;
-    const entries = experienceLog.slice().sort((a, b) => b.date.localeCompare(a.date));
-    if (!entries.length) {
+    if (!experienceLog.length) {
       body.innerHTML = `<div class="exp-empty">Nothing logged yet — tap "📝 Log experience" on any order card to start building this out.</div>`;
       return;
     }
+    const groups = groupExperienceByBuyer();
     body.innerHTML = `
       <table class="exp-log-table">
         <thead>
-          <tr><th>Date</th><th>Customer</th><th>Tags</th><th>Note</th><th></th></tr>
+          <tr><th>Buyer</th><th>Issues</th><th>Logged</th></tr>
         </thead>
         <tbody>
-          ${entries.map(e => `
+          ${groups.map((g) => `
             <tr>
-              <td class="exp-date">${fmtDateTime(e.date)}</td>
-              <td>${escapeHtml(e.name)}<br><span class="handle">@${escapeHtml(e.handle)}</span></td>
-              <td>${e.tags.length ? `<div class="exp-entry-tags">${e.tags.map(tk => `<span class="exp-pill">${experienceTagLabel(tk)}</span>`).join("")}</div>` : "—"}</td>
-              <td>${e.note ? escapeHtml(e.note) : "—"}</td>
-              <td><button type="button" class="exp-entry-del" data-id="${e.id}" title="Delete this entry" aria-label="Delete this entry">×</button></td>
+              <td>${escapeHtml(g.name)}<br><span class="handle">@${escapeHtml(g.handle)}</span></td>
+              <td><span class="exp-count-pill">${g.count} issue${g.count === 1 ? "" : "s"}</span></td>
+              <td>
+                <div class="exp-log-buyer-entries">
+                  ${g.entries.map((e) => `
+                    <div class="exp-entry" data-id="${e.id}">
+                      <div>
+                        <div class="exp-date">${fmtDateTime(e.date)}</div>
+                        ${e.tags.length ? `<div class="exp-entry-tags">${e.tags.map((tk) => `<span class="exp-pill">${experienceTagLabel(tk)}</span>`).join("")}</div>` : ""}
+                        ${e.note ? `<div class="exp-entry-note">${escapeHtml(e.note)}</div>` : ""}
+                      </div>
+                      <button type="button" class="exp-entry-del" data-id="${e.id}" title="Delete this entry" aria-label="Delete this entry">×</button>
+                    </div>
+                  `).join("")}
+                </div>
+              </td>
             </tr>
           `).join("")}
         </tbody>
