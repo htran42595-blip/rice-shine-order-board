@@ -1521,7 +1521,10 @@
   // not meant to be billing-grade precise.
   const DOW_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
+  // Returns null (rather than throwing) if a future week's order is missing
+  // orderDate — keeps one bad/blank record from breaking the whole tab.
   function parseOrderDate(o) {
+    if (!o.orderDate) return null;
     const [y, m, d] = o.orderDate.split("-").map(Number);
     return new Date(Date.UTC(y, m - 1, d));
   }
@@ -1531,7 +1534,12 @@
     const cutoff = new Date();
     cutoff.setUTCHours(0, 0, 0, 0);
     cutoff.setUTCDate(cutoff.getUTCDate() - days);
-    return ORDERS.filter((o) => parseOrderDate(o) >= cutoff);
+    // Orders with no orderDate can't be placed in a rolling window, so they
+    // only ever show up under "All time".
+    return ORDERS.filter((o) => {
+      const d = parseOrderDate(o);
+      return d && d >= cutoff;
+    });
   }
 
   function escapeHtml(s) {
@@ -1592,7 +1600,10 @@
 
   function renderHistDayOfWeek(list) {
     const counts = [0, 0, 0, 0, 0, 0, 0];
-    list.forEach((o) => { counts[parseOrderDate(o).getUTCDay()]++; });
+    list.forEach((o) => {
+      const d = parseOrderDate(o);
+      if (d) counts[d.getUTCDay()]++;
+    });
     const rows = DOW_NAMES.map((name, i) => ({ label: name, value: counts[i], color: "var(--tea)" }));
     document.getElementById("histDayOfWeek").innerHTML = hbarChart(rows);
   }
