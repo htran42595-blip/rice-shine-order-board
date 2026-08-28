@@ -601,6 +601,165 @@
   @media (max-width: 640px) {
     .statbar { grid-template-columns: repeat(2, 1fr); }
   }
+
+  /* ---- History view ---- */
+  .hist-filterbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .window-pills {
+    display: inline-flex;
+    background: var(--rice-2);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 4px;
+    gap: 4px;
+  }
+
+  .window-pills button {
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--ink-soft);
+    background: transparent;
+    border: none;
+    border-radius: 999px;
+    padding: 7px 15px;
+    cursor: pointer;
+  }
+
+  .window-pills button[aria-pressed="true"] {
+    background: var(--tea);
+    color: var(--tea-ink);
+  }
+
+  .window-pills button:focus-visible { outline: 2px solid var(--tea); outline-offset: 2px; }
+
+  .hist-note {
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+  }
+
+  .hist-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .hist-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+
+  .hist-card-head { padding: 14px 20px 4px; }
+
+  .hist-card-head .title {
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-weight: 700;
+    font-size: 1.02rem;
+  }
+
+  .hist-card-head .sub {
+    font-size: 0.76rem;
+    color: var(--ink-soft);
+    margin-top: 2px;
+  }
+
+  .hist-card-body { padding: 10px 20px 18px; }
+
+  .hbar-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 0;
+  }
+
+  .hbar-row .hbar-label {
+    width: 112px;
+    flex: none;
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+    text-align: right;
+  }
+
+  .hbar-row .hbar-track {
+    flex: 1;
+    background: var(--rice-2);
+    border-radius: 4px;
+    height: 22px;
+    position: relative;
+  }
+
+  .hbar-row .hbar-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    border-radius: 0 4px 4px 0;
+    min-width: 3px;
+  }
+
+  .hbar-row .hbar-value {
+    width: 56px;
+    flex: none;
+    font-family: "Space Mono", monospace;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .hist-itemized {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.86rem;
+  }
+
+  .hist-itemized th {
+    text-align: left;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-soft);
+    padding: 0 0 8px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .hist-itemized td {
+    padding: 9px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .hist-itemized tr:last-child td { border-bottom: none; }
+
+  .hist-itemized td.num, .hist-itemized th.num {
+    text-align: right;
+    font-family: "Space Mono", monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .hist-charts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .hist-charts .hist-card { margin-bottom: 0; }
+
+  @media (max-width: 780px) {
+    .hist-stats { grid-template-columns: 1fr; }
+    .hist-charts { grid-template-columns: 1fr; }
+    .hbar-row .hbar-label { width: 88px; font-size: 0.76rem; }
+  }
 </style>
 
 <div class="wrap">
@@ -616,6 +775,7 @@
   <nav class="tabs" role="tablist" aria-label="View">
     <button role="tab" id="tab-orders" aria-selected="true" aria-controls="view-orders">Orders</button>
     <button role="tab" id="tab-prep" aria-selected="false" aria-controls="view-prep">Prep by Day</button>
+    <button role="tab" id="tab-history" aria-selected="false" aria-controls="view-history">History</button>
   </nav>
 
   <section id="view-orders" role="tabpanel" aria-labelledby="tab-orders">
@@ -631,6 +791,69 @@
     <div id="prepList"></div>
   </section>
 
+  <section id="view-history" role="tabpanel" aria-labelledby="tab-history" hidden>
+    <div class="hist-filterbar">
+      <div class="window-pills" role="group" aria-label="Time window">
+        <button type="button" data-window="7" aria-pressed="false">Last week</button>
+        <button type="button" data-window="30" aria-pressed="false">Last month</button>
+        <button type="button" data-window="90" aria-pressed="false">Last quarter</button>
+        <button type="button" data-window="all" aria-pressed="true">All time</button>
+      </div>
+      <div class="hist-note" id="histRangeNote"></div>
+    </div>
+
+    <div class="hist-stats" id="histStats"></div>
+
+    <div class="hist-card">
+      <div class="hist-card-head">
+        <div class="title">Itemized breakdown</div>
+        <div class="sub">What sold, by revenue, for the selected window</div>
+      </div>
+      <div class="hist-card-body">
+        <table class="hist-itemized">
+          <thead>
+            <tr><th>Item</th><th class="num">Qty</th><th class="num">Revenue</th></tr>
+          </thead>
+          <tbody id="histItemizedBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="hist-charts">
+      <div class="hist-card">
+        <div class="hist-card-head">
+          <div class="title">Orders by day of week</div>
+          <div class="sub">When people place their orders</div>
+        </div>
+        <div class="hist-card-body" id="histDayOfWeek"></div>
+      </div>
+
+      <div class="hist-card">
+        <div class="hist-card-head">
+          <div class="title">Orders by time of day</div>
+          <div class="sub" id="histTimeOfDaySub">When people place their orders</div>
+        </div>
+        <div class="hist-card-body" id="histTimeOfDay"></div>
+      </div>
+
+      <div class="hist-card">
+        <div class="hist-card-head">
+          <div class="title">Tray size preference</div>
+          <div class="sub">Personal vs. shareable</div>
+        </div>
+        <div class="hist-card-body" id="histTraySize"></div>
+      </div>
+
+      <div class="hist-card">
+        <div class="hist-card-head">
+          <div class="title">Drink preference</div>
+          <div class="sub">Which drink people pick most</div>
+        </div>
+        <div class="hist-card-body" id="histDrinks"></div>
+      </div>
+    </div>
+  </section>
+
   <footer class="foot">Rice &amp; Shine · Instagram DM order log · orders received Aug 23–27, 2026 · updated manually until the live bot goes live</footer>
 </div>
 
@@ -644,6 +867,7 @@
         { qty: 1, name: "Green Thai Tea", price: 4 }
       ],
       total: 19,
+      orderDate: "2026-08-25", orderTime: "03:04",
       pickupDate: "2026-08-29", pickupTime: "1:00 PM",
       paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
       notes: ""
@@ -656,6 +880,7 @@
         { qty: 1, name: "Vietnamese Coffee", price: 4 }
       ],
       total: 19,
+      orderDate: "2026-08-24", orderTime: "19:29",
       pickupDate: "2026-08-29", pickupTime: "10:00 AM",
       paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
       notes: ""
@@ -667,6 +892,7 @@
         { qty: 2, name: "Vietnamese Coffee", price: 4, comp: false, note: "1 complimentary" }
       ],
       total: 19,
+      orderDate: "2026-08-25", orderTime: "00:49",
       pickupDate: "2026-08-29", pickupTime: "12:00 PM",
       paid: false, payMethod: "Not discussed yet",
       notes: ""
@@ -678,6 +904,7 @@
         { qty: 1, name: "Green Thai Tea", price: 4 }
       ],
       total: 34,
+      orderDate: "2026-08-23", orderTime: "00:50",
       pickupDate: "2026-08-29", pickupTime: "8:00 AM",
       paid: true, payMethod: "Venmo — paid in full",
       notes: "Thai tea with ice"
@@ -689,6 +916,7 @@
         { qty: 1, name: "Green Thai Tea", price: 0, comp: true }
       ],
       total: 15,
+      orderDate: "2026-08-24", orderTime: "21:18",
       pickupDate: "2026-08-29", pickupTime: "12:30 PM",
       paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
       notes: "Green Thai Tea: almond milk, half sugar"
@@ -700,6 +928,7 @@
         { qty: 1, name: "Green Thai Tea", price: 0, comp: true }
       ],
       total: 15,
+      orderDate: "2026-08-25", orderTime: "03:08",
       pickupDate: "2026-08-29", pickupTime: "12:00 PM",
       paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
       notes: ""
@@ -712,6 +941,7 @@
         { qty: 2, name: "Vietnamese Coffee", price: 4 }
       ],
       total: 12,
+      orderDate: "2026-08-25", orderTime: "05:59",
       pickupDate: "2026-08-29", pickupTime: "11:00 AM",
       paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
       notes: ""
@@ -723,6 +953,7 @@
         { qty: 1, name: "Orange Thai Tea", price: 0, comp: true }
       ],
       total: 15,
+      orderDate: "2026-08-25", orderTime: "04:10",
       pickupDate: "2026-08-29", pickupTime: "1:00 PM",
       paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
       notes: ""
@@ -735,6 +966,7 @@
         { qty: 1, name: "Orange Thai Tea", price: 4 }
       ],
       total: 19,
+      orderDate: "2026-08-25", orderTime: "05:58",
       pickupDate: "2026-08-29", pickupTime: "12:00 PM",
       paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
       notes: ""
@@ -746,6 +978,7 @@
         { qty: 1, name: "Green Thai Tea", price: 0, comp: true }
       ],
       total: 15,
+      orderDate: "2026-08-25", orderTime: "03:40",
       pickupDate: "2026-08-29", pickupTime: "2:00 PM",
       paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
       notes: ""
@@ -757,6 +990,7 @@
         { qty: 1, name: "Drink (flavor TBD)", price: 0, comp: true }
       ],
       total: 0,
+      orderDate: "2026-08-25", orderTime: "04:08",
       pickupDate: "2026-08-29", pickupTime: "1:00 PM",
       paid: true, payMethod: "N/A — complimentary (1,000th follower giveaway)",
       notes: "Drink flavor not chosen yet — confirm at pickup"
@@ -768,6 +1002,7 @@
         { qty: 2, name: "Vietnamese Coffee", price: 4 }
       ],
       total: 23,
+      orderDate: "2026-08-25", orderTime: "06:35",
       pickupDate: "2026-08-29", pickupTime: "10:00–11:00 AM",
       paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
       notes: "Never sent a final confirmation \"yes\" in thread — verify before prep"
@@ -780,6 +1015,7 @@
         { qty: 1, name: "Orange Thai Tea", price: 0, comp: true }
       ],
       total: 15,
+      orderDate: "2026-08-25", orderTime: "06:44",
       pickupDate: "2026-08-29", pickupTime: "1:00 PM",
       paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
       notes: "No pickup time given in thread — assumed 1:00 PM Sat 8/29 per Tony"
@@ -792,6 +1028,7 @@
         { qty: 1, name: "Orange Thai Tea", price: 4 }
       ],
       total: 19,
+      orderDate: "2026-08-25", orderTime: "06:48",
       pickupDate: "2026-08-30", pickupTime: "11:30 AM",
       paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
       notes: ""
@@ -804,6 +1041,7 @@
         { qty: 1, name: "Extra Cucumber", price: 0, comp: true }
       ],
       total: 60,
+      orderDate: "2026-08-26", orderTime: null,
       pickupDate: "2026-08-29", pickupTime: "5:45 PM",
       paid: true, payMethod: "Apple Pay — paid $70 ($10 over, likely a tip)",
       notes: "Manually logged by Tony — thread wasn't in the DM export (Instagram Message Requests, not main inbox)"
@@ -815,6 +1053,7 @@
         { qty: 1, name: "Green Thai Tea", price: 0, comp: true }
       ],
       total: 30,
+      orderDate: "2026-08-26", orderTime: null,
       pickupDate: "2026-08-29", pickupTime: "3:00 PM",
       paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
       notes: ""
@@ -828,6 +1067,7 @@
         { qty: 1, name: "Orange Thai Tea", price: 4 }
       ],
       total: 57,
+      orderDate: "2026-08-26", orderTime: null,
       pickupDate: "2026-08-29", pickupTime: "2:00 PM",
       paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
       notes: ""
@@ -839,6 +1079,7 @@
         { qty: 3, name: "Orange Thai Tea", price: 8, note: "1 complimentary" }
       ],
       total: 53,
+      orderDate: "2026-08-26", orderTime: null,
       pickupDate: "2026-08-29", pickupTime: "1:00 PM",
       paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
       notes: ""
@@ -850,6 +1091,7 @@
         { qty: 1, name: "Vietnamese Coffee", price: 0, comp: true }
       ],
       total: 15,
+      orderDate: "2026-08-26", orderTime: null,
       pickupDate: "2026-08-29", pickupTime: "11:00 AM",
       paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
       notes: ""
@@ -860,6 +1102,7 @@
         { qty: 1, name: "Personal Tray", price: 15 }
       ],
       total: 15,
+      orderDate: "2026-08-26", orderTime: null,
       pickupDate: "2026-08-29", pickupTime: "9:30 AM",
       paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
       notes: "Manually logged by Tony — could not verify against a matching DM thread"
@@ -871,6 +1114,7 @@
         { qty: 1, name: "Green Thai Tea", price: 0, comp: true }
       ],
       total: 15,
+      orderDate: "2026-08-26", orderTime: null,
       pickupDate: "2026-08-29", pickupTime: "9:30 AM",
       paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
       notes: ""
@@ -882,6 +1126,7 @@
         { qty: 2, name: "Green Thai Tea", price: 4, note: "1 complimentary" }
       ],
       total: 49,
+      orderDate: "2026-08-26", orderTime: null,
       pickupDate: "2026-08-30", pickupTime: "2:00 PM",
       paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
       notes: ""
@@ -892,6 +1137,7 @@
         { qty: 2, name: "Personal Tray", price: 30 }
       ],
       total: 30,
+      orderDate: "2026-08-26", orderTime: null,
       pickupDate: "2026-08-30", pickupTime: "1:00 PM",
       paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
       notes: ""
@@ -904,6 +1150,7 @@
         { qty: 1, name: "Orange Thai Tea", price: 4 }
       ],
       total: 49,
+      orderDate: "2026-08-26", orderTime: null,
       pickupDate: "2026-08-26", pickupTime: "6:00 PM",
       paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
       notes: "Pickup is TODAY"
@@ -915,6 +1162,7 @@
         { qty: 1, name: "Vietnamese Coffee", price: 0, comp: true }
       ],
       total: 15,
+      orderDate: "2026-08-26", orderTime: "14:43",
       pickupDate: "2026-08-26", pickupTime: "5:30 PM",
       paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
       notes: "Already picked up"
@@ -926,6 +1174,7 @@
         { qty: 1, name: "Vietnamese Coffee", price: 0, comp: true }
       ],
       total: 45,
+      orderDate: "2026-08-26", orderTime: "16:20",
       pickupDate: "2026-08-27", pickupTime: "6:00 PM",
       paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
       notes: ""
@@ -937,6 +1186,7 @@
         { qty: 1, name: "Orange Thai Tea", price: 0, comp: true }
       ],
       total: 15,
+      orderDate: "2026-08-26", orderTime: "09:53",
       pickupDate: "2026-08-27", pickupTime: "5:30 PM",
       paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
       notes: "Requested light spiciness"
@@ -949,6 +1199,7 @@
         { qty: 1, name: "Orange Thai Tea", price: 0, comp: true }
       ],
       total: 49,
+      orderDate: "2026-08-27", orderTime: "12:00",
       pickupDate: "2026-08-29", pickupTime: "5:30 PM",
       paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
       notes: "Says they'll pay cash"
@@ -1259,21 +1510,192 @@
     }).join("");
   }
 
+  // ---- History / Insights ----
+  // Order-placed date/time (orderDate / orderTime) comes from the DM log's
+  // own timestamp column, as logged (mostly UTC where Instagram supplied a
+  // precise time; a handful of manually-logged orders only have a date, or
+  // a date + time with no timezone recorded — see references/deploy-and-
+  // data-sources.md). Treated as UTC here for consistent, timezone-drift-
+  // free date math, same convention the rest of this file already uses for
+  // pickupDate. Good enough for "which day/time do people order" insights;
+  // not meant to be billing-grade precise.
+  const DOW_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+  function parseOrderDate(o) {
+    const [y, m, d] = o.orderDate.split("-").map(Number);
+    return new Date(Date.UTC(y, m - 1, d));
+  }
+
+  function ordersInWindow(days) {
+    if (days === "all") return ORDERS.slice();
+    const cutoff = new Date();
+    cutoff.setUTCHours(0, 0, 0, 0);
+    cutoff.setUTCDate(cutoff.getUTCDate() - days);
+    return ORDERS.filter((o) => parseOrderDate(o) >= cutoff);
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+    }[c]));
+  }
+
+  // Thin horizontal bars, one fixed hue per row (never a magnitude ramp on
+  // nominal categories), 4px rounded data-end / square baseline via CSS,
+  // always paired with a visible direct value label — see dataviz skill's
+  // marks-and-anatomy.md and color-formula.md.
+  function hbarChart(rows) {
+    if (!rows.length || rows.every((r) => r.value === 0)) {
+      return `<div class="empty-state">No orders in this window yet.</div>`;
+    }
+    const max = Math.max(...rows.map((r) => r.value), 1);
+    return rows.map((r) => {
+      const pct = r.value > 0 ? Math.max((r.value / max) * 100, 4) : 0;
+      return `
+        <div class="hbar-row">
+          <div class="hbar-label">${escapeHtml(r.label)}</div>
+          <div class="hbar-track"><div class="hbar-fill" style="width:${pct}%; background:${r.color || "var(--tea)"}"></div></div>
+          <div class="hbar-value">${r.value}</div>
+        </div>`;
+    }).join("");
+  }
+
+  function renderHistStats(list) {
+    const totalOrders = list.length;
+    const totalIncome = list.reduce((s, o) => s + o.total, 0);
+    const avg = totalOrders ? totalIncome / totalOrders : 0;
+    document.getElementById("histStats").innerHTML = `
+      <div class="stat accent"><div class="n">${totalOrders}</div><div class="l">Total orders</div></div>
+      <div class="stat"><div class="n">${fmtMoney(totalIncome)}</div><div class="l">Total income</div></div>
+      <div class="stat"><div class="n">${fmtMoney(avg)}</div><div class="l">Avg order value</div></div>
+    `;
+  }
+
+  function renderHistItemized(list) {
+    const byItem = new Map();
+    list.forEach((o) => {
+      o.items.forEach((it) => {
+        const cur = byItem.get(it.name) || { qty: 0, revenue: 0 };
+        cur.qty += it.qty;
+        cur.revenue += it.price || 0;
+        byItem.set(it.name, cur);
+      });
+    });
+    const rows = [...byItem.entries()].sort((a, b) => b[1].revenue - a[1].revenue);
+    const body = document.getElementById("histItemizedBody");
+    body.innerHTML = rows.length
+      ? rows.map(([name, v]) => `
+          <tr><td>${escapeHtml(name)}</td><td class="num">${v.qty}</td><td class="num">${fmtMoney(v.revenue)}</td></tr>
+        `).join("")
+      : `<tr><td colspan="3" class="empty-state">No orders in this window yet.</td></tr>`;
+  }
+
+  function renderHistDayOfWeek(list) {
+    const counts = [0, 0, 0, 0, 0, 0, 0];
+    list.forEach((o) => { counts[parseOrderDate(o).getUTCDay()]++; });
+    const rows = DOW_NAMES.map((name, i) => ({ label: name, value: counts[i], color: "var(--tea)" }));
+    document.getElementById("histDayOfWeek").innerHTML = hbarChart(rows);
+  }
+
+  function renderHistTimeOfDay(list) {
+    const known = list.filter((o) => o.orderTime);
+    const unknownCount = list.length - known.length;
+    const buckets = [
+      { label: "Morning (12–11am)", test: (m) => m < 11 * 60 },
+      { label: "Midday (11am–2pm)", test: (m) => m >= 11 * 60 && m < 14 * 60 },
+      { label: "Afternoon (2–5pm)", test: (m) => m >= 14 * 60 && m < 17 * 60 },
+      { label: "Evening (5pm+)", test: (m) => m >= 17 * 60 },
+    ];
+    const counts = buckets.map(() => 0);
+    known.forEach((o) => {
+      const [h, m] = o.orderTime.split(":").map(Number);
+      const mins = h * 60 + m;
+      const idx = buckets.findIndex((b) => b.test(mins));
+      if (idx >= 0) counts[idx]++;
+    });
+    const rows = buckets.map((b, i) => ({ label: b.label, value: counts[i], color: "var(--tea)" }));
+    document.getElementById("histTimeOfDay").innerHTML = hbarChart(rows);
+    document.getElementById("histTimeOfDaySub").textContent = unknownCount > 0
+      ? `When people place their orders (${unknownCount} order${unknownCount === 1 ? "" : "s"} with no logged time excluded)`
+      : "When people place their orders";
+  }
+
+  function renderHistTraySize(list) {
+    let personal = 0, shareable = 0;
+    list.forEach((o) => o.items.forEach((it) => {
+      if (/personal tray/i.test(it.name)) personal += it.qty;
+      else if (/shareable tray/i.test(it.name)) shareable += it.qty;
+    }));
+    const rows = [
+      { label: "Personal Tray", value: personal, color: "var(--tg-1)" },
+      { label: "Shareable Tray", value: shareable, color: "var(--tg-2)" },
+    ];
+    document.getElementById("histTraySize").innerHTML = hbarChart(rows);
+  }
+
+  const DRINK_NAMES = ["Green Thai Tea", "Orange Thai Tea", "Vietnamese Coffee"];
+  const DRINK_COLORS = { "Green Thai Tea": "var(--tg-1)", "Orange Thai Tea": "var(--tg-2)", "Vietnamese Coffee": "var(--tg-3)" };
+
+  function renderHistDrinks(list) {
+    const counts = {};
+    DRINK_NAMES.forEach((n) => { counts[n] = 0; });
+    list.forEach((o) => o.items.forEach((it) => {
+      if (Object.prototype.hasOwnProperty.call(counts, it.name)) counts[it.name] += it.qty;
+    }));
+    const rows = DRINK_NAMES.map((n) => ({ label: n, value: counts[n], color: DRINK_COLORS[n] }));
+    document.getElementById("histDrinks").innerHTML = hbarChart(rows);
+  }
+
+  function renderHistRangeNote(days, list) {
+    const el = document.getElementById("histRangeNote");
+    if (!list.length) { el.textContent = "No orders logged in this window yet."; return; }
+    const dates = list.map((o) => o.orderDate).sort();
+    const label = days === "all" ? `${list.length} order${list.length === 1 ? "" : "s"} logged, all time` : `${list.length} order${list.length === 1 ? "" : "s"} in the last ${days} days`;
+    el.textContent = dates[0] === dates[dates.length - 1]
+      ? `${label} · ${fmtShortDate(dates[0])}`
+      : `${label} · ${fmtShortDate(dates[0])}–${fmtShortDate(dates[dates.length - 1])}`;
+  }
+
+  let currentWindow = "all";
+  function renderHistory() {
+    const list = ordersInWindow(currentWindow);
+    renderHistStats(list);
+    renderHistItemized(list);
+    renderHistDayOfWeek(list);
+    renderHistTimeOfDay(list);
+    renderHistTraySize(list);
+    renderHistDrinks(list);
+    renderHistRangeNote(currentWindow, list);
+  }
+
+  const windowPillButtons = Array.from(document.querySelectorAll(".window-pills button"));
+  windowPillButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      currentWindow = btn.dataset.window === "all" ? "all" : Number(btn.dataset.window);
+      windowPillButtons.forEach((b) => b.setAttribute("aria-pressed", String(b === btn)));
+      renderHistory();
+    });
+  });
+
   // ---- Tabs ----
   const tabOrders = document.getElementById("tab-orders");
   const tabPrep = document.getElementById("tab-prep");
+  const tabHistory = document.getElementById("tab-history");
   const viewOrders = document.getElementById("view-orders");
   const viewPrep = document.getElementById("view-prep");
+  const viewHistory = document.getElementById("view-history");
 
   function activate(tab) {
-    const isOrders = tab === "orders";
-    tabOrders.setAttribute("aria-selected", String(isOrders));
-    tabPrep.setAttribute("aria-selected", String(!isOrders));
-    viewOrders.hidden = !isOrders;
-    viewPrep.hidden = isOrders;
+    tabOrders.setAttribute("aria-selected", String(tab === "orders"));
+    tabPrep.setAttribute("aria-selected", String(tab === "prep"));
+    tabHistory.setAttribute("aria-selected", String(tab === "history"));
+    viewOrders.hidden = tab !== "orders";
+    viewPrep.hidden = tab !== "prep";
+    viewHistory.hidden = tab !== "history";
   }
   tabOrders.addEventListener("click", () => activate("orders"));
   tabPrep.addEventListener("click", () => activate("prep"));
+  tabHistory.addEventListener("click", () => activate("history"));
 
   // ---- Orders / Completed subtabs ----
   const subtabActive = document.getElementById("subtab-active");
@@ -1294,4 +1716,5 @@
   renderStats();
   renderOrders();
   renderPrep();
+  renderHistory();
 </script>
