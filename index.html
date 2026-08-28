@@ -2158,6 +2158,60 @@
     persistCompleted();
   }
 
+  // ---- Completion sound ----
+  // A little "cha-ching" cue when an order gets marked complete. Synthesized
+  // with the Web Audio API rather than an external sound file, so there's
+  // nothing to fetch or ship — it works offline and the file stays a single
+  // HTML page. The AudioContext is created lazily on first use, right when
+  // Tony taps a toggle, which counts as the user gesture browsers require
+  // before any audio can play.
+  let chaChingCtx = null;
+  function playChaChing() {
+    try {
+      if (!chaChingCtx) chaChingCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (chaChingCtx.state === "suspended") chaChingCtx.resume();
+      const ctx = chaChingCtx;
+      const now = ctx.currentTime;
+
+      // "Cha" — a quick filtered noise burst, like a mechanical register clunk.
+      const bufferSize = Math.floor(ctx.sampleRate * 0.06);
+      const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = noiseBuffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+      const noise = ctx.createBufferSource();
+      noise.buffer = noiseBuffer;
+      const noiseFilter = ctx.createBiquadFilter();
+      noiseFilter.type = "bandpass";
+      noiseFilter.frequency.value = 1200;
+      noiseFilter.Q.value = 0.7;
+      const noiseGain = ctx.createGain();
+      noiseGain.gain.setValueAtTime(0.35, now);
+      noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+      noise.connect(noiseFilter).connect(noiseGain).connect(ctx.destination);
+      noise.start(now);
+      noise.stop(now + 0.07);
+
+      // "Ching" — a bright two-note bell, right after the clunk.
+      const bellStart = now + 0.05;
+      [1567.98, 2093.0].forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        osc.type = "sine";
+        osc.frequency.value = freq;
+        const gain = ctx.createGain();
+        const start = bellStart + i * 0.03;
+        gain.gain.setValueAtTime(0.0001, start);
+        gain.gain.exponentialRampToValueAtTime(0.25, start + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.5);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(start);
+        osc.stop(start + 0.5);
+      });
+    } catch (e) {
+      // Audio unsupported/blocked — this is a nice-to-have, never worth
+      // breaking the actual completion toggle over.
+    }
+  }
+
   // ---- New / updated order tracking ----
   // Tony reviews 30-40 cards a week; scanning all of them for the handful
   // that are new or changed is the actual pain point. This flags an order
@@ -2594,7 +2648,10 @@
         // that alone is enough to clear a pending new/updated flag too —
         // one less tap for the common case where he reads the card and
         // immediately marks it done.
-        if (isCompleted(o)) acknowledgeOrder(o);
+        if (isCompleted(o)) {
+          acknowledgeOrder(o);
+          playChaChing();
+        }
         renderOrders();
         renderStats();
         renderPrep();
