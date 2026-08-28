@@ -1153,6 +1153,36 @@
     </div>
 
     <div class="hist-card">
+      <div class="hist-card-head">
+        <div class="title">Returning buyers</div>
+        <div class="sub">Customers with more than one order, all-time — most orders first</div>
+      </div>
+      <div class="hist-card-body">
+        <table class="hist-itemized">
+          <thead>
+            <tr><th>Buyer</th><th class="num">Orders</th><th class="num">Total spent</th></tr>
+          </thead>
+          <tbody id="histReturningBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="hist-card">
+      <div class="hist-card-head">
+        <div class="title">Biggest buyers</div>
+        <div class="sub">Total spent, all-time — highest first</div>
+      </div>
+      <div class="hist-card-body">
+        <table class="hist-itemized">
+          <thead>
+            <tr><th>Buyer</th><th class="num">Total spent</th><th class="num">Orders</th></tr>
+          </thead>
+          <tbody id="histBiggestBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="hist-card">
       <div class="hist-card-head with-action">
         <div>
           <div class="title">Buyer experience log</div>
@@ -1816,6 +1846,56 @@
     persistSeen();
   }
 
+  // ---- Buyer order history (Returning buyers / Biggest buyers) ----
+  // The ORDERS array is replaced fresh every week (just that week's ~30-40
+  // orders), so "returning" and "biggest" buyer status has to be remembered
+  // in the viewer's own browser or it would reset to zero every refresh.
+  // Keyed by the same stable orderIdentity used for new/updated flags: a
+  // page reload during the same week never double-counts an order, and if
+  // a price gets corrected later (e.g. via a live DM browse), re-loading
+  // just overwrites that one order's stored total instead of adding a
+  // second entry for it.
+  const BUYER_HISTORY_STORAGE_KEY = "riceShineBuyerOrderHistory";
+
+  let buyerHistory = {};
+  try {
+    buyerHistory = JSON.parse(localStorage.getItem(BUYER_HISTORY_STORAGE_KEY) || "{}");
+  } catch (e) {
+    buyerHistory = {};
+  }
+
+  ORDERS.forEach(o => {
+    buyerHistory[orderIdentity(o)] = {
+      handle: o.handle,
+      name: o.name,
+      total: o.total,
+      orderDate: o.orderDate || "",
+      orderTime: o.orderTime || "",
+    };
+  });
+
+  try {
+    localStorage.setItem(BUYER_HISTORY_STORAGE_KEY, JSON.stringify(buyerHistory));
+  } catch (e) {}
+
+  // One row per buyer (by handle), summed across every order ever recorded
+  // for them in this browser — not just whatever's in this week's ORDERS.
+  // Picks the most recent order's spelling of their name, same idea as
+  // groupExperienceByBuyer below.
+  function buyerOrderSummary() {
+    const byHandle = {};
+    Object.values(buyerHistory).forEach((e) => {
+      (byHandle[e.handle] ||= []).push(e);
+    });
+    return Object.values(byHandle).map((entries) => {
+      const sorted = entries.slice().sort((a, b) =>
+        (b.orderDate || "").localeCompare(a.orderDate || "") || (b.orderTime || "").localeCompare(a.orderTime || "")
+      );
+      const total = entries.reduce((s, e) => s + e.total, 0);
+      return { handle: sorted[0].handle, name: sorted[0].name, count: entries.length, total };
+    });
+  }
+
   // ---- Buyer experience log ----
   // An optional, append-only paper trail on how a pickup actually went —
   // no-show, late payment, last-minute change, late pickup — kept per
@@ -2432,6 +2512,34 @@
     document.getElementById("histDrinks").innerHTML = hbarChart(rows);
   }
 
+  // Deliberately NOT filtered by the window pills, same reasoning as the
+  // buyer experience log — "returning" and "biggest" are about a buyer's
+  // whole relationship with the business, not just orders in the last N
+  // days, so these always read from the all-time buyerHistory above.
+  function renderReturningBuyers() {
+    const body = document.getElementById("histReturningBody");
+    if (!body) return;
+    const rows = buyerOrderSummary()
+      .filter((b) => b.count >= 2)
+      .sort((a, b) => b.count - a.count || b.total - a.total);
+    body.innerHTML = rows.length
+      ? rows.map((b) => `
+          <tr><td>${escapeHtml(b.name)}<br><span class="handle">@${escapeHtml(b.handle)}</span></td><td class="num">${b.count}</td><td class="num">${fmtMoney(b.total)}</td></tr>
+        `).join("")
+      : `<tr><td colspan="3" class="empty-state">No repeat buyers yet — this fills in once the same handle orders more than once, across any week.</td></tr>`;
+  }
+
+  function renderBiggestBuyers() {
+    const body = document.getElementById("histBiggestBody");
+    if (!body) return;
+    const rows = buyerOrderSummary().sort((a, b) => b.total - a.total || b.count - a.count);
+    body.innerHTML = rows.length
+      ? rows.map((b) => `
+          <tr><td>${escapeHtml(b.name)}<br><span class="handle">@${escapeHtml(b.handle)}</span></td><td class="num">${fmtMoney(b.total)}</td><td class="num">${b.count}</td></tr>
+        `).join("")
+      : `<tr><td colspan="3" class="empty-state">No orders logged yet.</td></tr>`;
+  }
+
   function renderHistRangeNote(days, list) {
     const el = document.getElementById("histRangeNote");
     if (!list.length) { el.textContent = "No orders logged in this window yet."; return; }
@@ -2521,6 +2629,8 @@
     renderHistTimeOfDay(list);
     renderHistTraySize(list);
     renderHistDrinks(list);
+    renderReturningBuyers();
+    renderBiggestBuyers();
     renderHistRangeNote(currentWindow, list);
   }
 
