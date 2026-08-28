@@ -319,6 +319,203 @@
     font-weight: 700;
   }
 
+  /* ---- Buyer experience log ---- */
+  /* Deliberately a different hue from the --warn "new/updated" flag above —
+     this isn't an alert about the order, it's Tony's own optional note
+     about how a customer behaved, so it shouldn't visually compete with
+     the thing that's telling him to look at the card right now. Reuses
+     --salmon, the same color already used for kitchen notes. */
+  .history-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    margin-left: 6px;
+    background: var(--salmon-soft);
+    color: var(--salmon);
+    border-radius: 999px;
+    padding: 1px 7px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    cursor: default;
+  }
+
+  .exp-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: none;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 5px 11px;
+    font-family: inherit;
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .exp-toggle-btn:hover, .exp-toggle-btn:focus-visible { border-color: var(--salmon); color: var(--salmon); }
+  .exp-toggle-btn.has-entries { border-color: var(--salmon); color: var(--salmon); background: var(--salmon-soft); }
+
+  .exp-panel {
+    border-top: 1px dashed var(--line);
+    padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .exp-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .exp-tag-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.78rem;
+    background: var(--rice-2);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 5px 11px;
+    cursor: pointer;
+  }
+
+  .exp-tag-check input { margin: 0; accent-color: var(--salmon); }
+  .exp-tag-check:has(input:checked) { background: var(--salmon-soft); border-color: var(--salmon); color: var(--salmon); font-weight: 700; }
+
+  .exp-note-input {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 8px 10px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    background: var(--card);
+    color: var(--ink);
+    resize: vertical;
+    min-height: 44px;
+  }
+
+  .exp-note-input:focus-visible { outline: 2px solid var(--tea); outline-offset: 1px; }
+
+  .exp-save-btn {
+    align-self: flex-start;
+    background: var(--tea);
+    color: var(--tea-ink);
+    border: none;
+    border-radius: 999px;
+    padding: 7px 16px;
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .exp-save-btn:hover { filter: brightness(1.15); }
+
+  .exp-entries {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 180px;
+    overflow-y: auto;
+  }
+
+  .exp-entry {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 0.78rem;
+    background: var(--rice-2);
+    border-radius: 10px;
+    padding: 7px 9px;
+  }
+
+  .exp-entry .exp-date {
+    color: var(--ink-soft);
+    font-family: "Space Mono", ui-monospace, monospace;
+    font-size: 0.7rem;
+  }
+
+  .exp-entry-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; }
+
+  .exp-pill {
+    background: var(--salmon-soft);
+    color: var(--salmon);
+    border-radius: 999px;
+    padding: 1px 8px;
+    font-size: 0.68rem;
+    font-weight: 700;
+  }
+
+  .exp-entry-note { margin-top: 4px; color: var(--ink); }
+
+  .exp-entry-del {
+    background: none;
+    border: none;
+    color: var(--ink-soft);
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
+    padding: 2px 5px;
+    flex: none;
+  }
+
+  .exp-entry-del:hover { color: var(--warn); }
+
+  .exp-empty { font-size: 0.78rem; color: var(--ink-soft); }
+
+  .hist-card-head.with-action {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .exp-export-btn {
+    flex: none;
+    background: var(--rice-2);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 7px 14px;
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--ink);
+    cursor: pointer;
+  }
+
+  .exp-export-btn:hover { border-color: var(--salmon); color: var(--salmon); }
+
+  .exp-log-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+  }
+
+  .exp-log-table th {
+    text-align: left;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-soft);
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .exp-log-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+
+  .exp-log-table tr:last-child td { border-bottom: none; }
+
   .items {
     list-style: none;
     margin: 0;
@@ -495,7 +692,9 @@
 
   .ticket-foot {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
     margin-top: 2px;
   }
 
@@ -908,6 +1107,17 @@
         </div>
         <div class="hist-card-body" id="histDrinks"></div>
       </div>
+    </div>
+
+    <div class="hist-card">
+      <div class="hist-card-head with-action">
+        <div>
+          <div class="title">Buyer experience log</div>
+          <div class="sub">No-shows, late payments, last-minute changes, late pickups — logged from order cards, shown here regardless of the time window above</div>
+        </div>
+        <button type="button" class="exp-export-btn" id="expExportBtn">Export CSV</button>
+      </div>
+      <div class="hist-card-body" id="expLogBody"></div>
     </div>
   </section>
 
@@ -1563,6 +1773,114 @@
     persistSeen();
   }
 
+  // ---- Buyer experience log ----
+  // An optional, append-only paper trail on how a pickup actually went —
+  // no-show, late payment, last-minute change, late pickup — kept per
+  // customer (by handle) so a pattern across multiple orders is visible,
+  // not just a note on one order. Entirely opt-in: nothing here is wired
+  // into "Mark complete," so completing an order never requires touching
+  // this. Lives in the viewer's own browser (localStorage), same as
+  // completed-order and new/updated tracking, which is why the log view
+  // below ships with a CSV export — it's the only copy that exists.
+  const EXPERIENCE_STORAGE_KEY = "riceShineBuyerExperience";
+
+  const EXPERIENCE_TAGS = [
+    { key: "no-show", label: "No-show" },
+    { key: "late-payment", label: "Late payment" },
+    { key: "last-minute-change", label: "Last-minute change" },
+    { key: "late-pickup", label: "Late pickup" },
+  ];
+
+  function experienceTagLabel(key) {
+    return EXPERIENCE_TAGS.find((t) => t.key === key)?.label || key;
+  }
+
+  let experienceLog = [];
+  try {
+    experienceLog = JSON.parse(localStorage.getItem(EXPERIENCE_STORAGE_KEY) || "[]");
+  } catch (e) {
+    experienceLog = [];
+  }
+
+  function persistExperienceLog() {
+    try {
+      localStorage.setItem(EXPERIENCE_STORAGE_KEY, JSON.stringify(experienceLog));
+    } catch (e) {}
+  }
+
+  // Newest first, so both the per-card panel and the full log read as a
+  // timeline of what happened most recently.
+  function experienceForHandle(handle) {
+    return experienceLog
+      .filter((e) => e.handle === handle)
+      .sort((a, b) => b.date.localeCompare(a.date));
+  }
+
+  function addExperienceEntry(o, tags, note) {
+    experienceLog.push({
+      id: `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      handle: o.handle,
+      name: o.name,
+      date: new Date().toISOString(),
+      pickupDate: o.pickupDate,
+      orderRef: orderIdentity(o),
+      tags: tags.slice(),
+      note: note || "",
+    });
+    persistExperienceLog();
+  }
+
+  function deleteExperienceEntry(id) {
+    experienceLog = experienceLog.filter((e) => e.id !== id);
+    persistExperienceLog();
+  }
+
+  // Which orders currently have their log panel expanded — purely
+  // in-memory UI state (keyed by the same stable order identity used
+  // elsewhere), so it survives a re-render but resets on page reload,
+  // which is fine since it's just "is this panel open," not data.
+  const openExpPanels = new Set();
+
+  function fmtDateTime(iso) {
+    const dt = new Date(iso);
+    return dt.toLocaleString("en-US", {
+      month: "short", day: "numeric", year: "numeric",
+      hour: "numeric", minute: "2-digit",
+    });
+  }
+
+  function csvField(v) {
+    const s = String(v ?? "");
+    return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  }
+
+  function downloadExperienceCsv() {
+    const rows = [["Date", "Customer", "Handle", "Tags", "Note", "Order pickup date"]];
+    experienceLog
+      .slice()
+      .sort((a, b) => b.date.localeCompare(a.date))
+      .forEach((e) => {
+        rows.push([
+          fmtDateTime(e.date),
+          e.name,
+          e.handle,
+          e.tags.map(experienceTagLabel).join("; "),
+          e.note,
+          e.pickupDate || "",
+        ]);
+      });
+    const csv = rows.map((r) => r.map(csvField).join(",")).join("\r\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `rice-shine-buyer-experience-log-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
   // ---- Same-time grouping ----
   // Orders sharing an exact pickup date + time are the ones being handed
   // over back-to-back, so tag them with a shared color to make that obvious
@@ -1655,6 +1973,8 @@
     const gcount = groups.counts[gk];
     const completed = isCompleted(o);
     const flag = orderFlag(o);
+    const expEntries = experienceForHandle(o.handle);
+    const expOpen = openExpPanels.has(orderIdentity(o));
     return `
       <article class="ticket ${gcls || ""} ${completed ? "is-complete" : ""} ${flag ? "is-flagged" : ""}">
         ${flag ? `
@@ -1664,7 +1984,7 @@
         ` : ""}
         <div class="who">
           <div>
-            <div class="name">${o.name}</div>
+            <div class="name">${o.name}${expEntries.length ? `<span class="history-badge" title="${expEntries.length} past logged issue${expEntries.length === 1 ? "" : "s"} for this customer: ${expEntries.map(e => `${fmtDateTime(e.date)} — ${e.tags.map(experienceTagLabel).join(", ") || "note only"}`).join(" | ")}">⚠ ${expEntries.length}</span>` : ""}</div>
             <span class="handle">@${o.handle}</span>
           </div>
           <span class="badge ${o.paid ? "paid" : "unpaid"}">${o.paid ? "Paid" : "Unpaid"}</span>
@@ -1685,13 +2005,48 @@
         ${renderPayMethod(o.payMethod)}
         ${o.notes ? `<div class="note"><b>Kitchen note</b>${o.notes}</div>` : ""}
         <div class="ticket-foot">
+          <button type="button" class="exp-toggle-btn ${expEntries.length ? "has-entries" : ""}" data-idx="${idx}" aria-expanded="${expOpen}" title="Optional — log a no-show, late payment, last-minute change, or late pickup">
+            📝 Log experience${expEntries.length ? ` (${expEntries.length})` : ""}
+          </button>
           <label class="toggle" title="${completed ? "Move back to active" : "Mark as picked up / completed"}">
             <input type="checkbox" class="complete-toggle" data-idx="${idx}" ${completed ? "checked" : ""}>
             <span class="track"></span>
             <span class="tlabel">${completed ? "Completed" : "Mark complete"}</span>
           </label>
         </div>
+        ${expOpen ? renderExpPanel(o, idx, expEntries) : ""}
       </article>
+    `;
+  }
+
+  function renderExpPanel(o, idx, entries) {
+    return `
+      <div class="exp-panel" data-idx="${idx}">
+        <div class="exp-tags">
+          ${EXPERIENCE_TAGS.map(t => `
+            <label class="exp-tag-check">
+              <input type="checkbox" class="exp-tag-input" value="${t.key}">
+              ${t.label}
+            </label>
+          `).join("")}
+        </div>
+        <textarea class="exp-note-input" placeholder="Optional note — what happened, any context worth remembering"></textarea>
+        <button type="button" class="exp-save-btn" data-idx="${idx}">Save entry</button>
+        ${entries.length ? `
+          <div class="exp-entries">
+            ${entries.map(e => `
+              <div class="exp-entry" data-id="${e.id}">
+                <div>
+                  <div class="exp-date">${fmtDateTime(e.date)}</div>
+                  ${e.tags.length ? `<div class="exp-entry-tags">${e.tags.map(tk => `<span class="exp-pill">${experienceTagLabel(tk)}</span>`).join("")}</div>` : ""}
+                  ${e.note ? `<div class="exp-entry-note">${escapeHtml(e.note)}</div>` : ""}
+                </div>
+                <button type="button" class="exp-entry-del" data-id="${e.id}" title="Delete this entry" aria-label="Delete this entry">×</button>
+              </div>
+            `).join("")}
+          </div>
+        ` : `<div class="exp-empty">No past entries for this customer yet.</div>`}
+      </div>
     `;
   }
 
@@ -1724,6 +2079,39 @@
     });
   }
 
+  function wireExperience(gridEl, list) {
+    gridEl.querySelectorAll(".exp-toggle-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const id = orderIdentity(list[Number(btn.dataset.idx)]);
+        if (openExpPanels.has(id)) openExpPanels.delete(id);
+        else openExpPanels.add(id);
+        renderOrders();
+      });
+    });
+
+    gridEl.querySelectorAll(".exp-save-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const o = list[Number(btn.dataset.idx)];
+        const panel = btn.closest(".exp-panel");
+        const tags = [...panel.querySelectorAll(".exp-tag-input:checked")].map(i => i.value);
+        const note = panel.querySelector(".exp-note-input").value.trim();
+        if (!tags.length && !note) return; // nothing entered — don't log an empty row
+        addExperienceEntry(o, tags, note);
+        renderOrders();
+        renderExperienceLog();
+      });
+    });
+
+    gridEl.querySelectorAll(".exp-entry-del").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        deleteExperienceEntry(btn.dataset.id);
+        renderOrders();
+        renderExperienceLog();
+      });
+    });
+  }
+
   function renderOrders() {
     const sorted = ordersByPickup(ORDERS);
     const groups = computeTimeGroups(sorted);
@@ -1745,6 +2133,8 @@
     wireToggles(gridCompleted, completed);
     wireFlags(gridActive, active);
     wireFlags(gridCompleted, completed);
+    wireExperience(gridActive, active);
+    wireExperience(gridCompleted, completed);
 
     const activeFlagged = active.filter(o => orderFlag(o)).length;
     subtabActive.innerHTML = `Active Orders (${active.length})${activeFlagged ? `<span class="flag-count">${activeFlagged} unreviewed</span>` : ""}`;
@@ -1981,6 +2371,47 @@
   }
 
   let currentWindow = "all";
+  // Deliberately NOT filtered by the "Last week / month / quarter / All
+  // time" window pills above — it's a paper trail, not a stat, so an entry
+  // should never look like it "disappeared" just because the window
+  // changed. Always the full log, newest first.
+  function renderExperienceLog() {
+    const body = document.getElementById("expLogBody");
+    if (!body) return;
+    const entries = experienceLog.slice().sort((a, b) => b.date.localeCompare(a.date));
+    if (!entries.length) {
+      body.innerHTML = `<div class="exp-empty">Nothing logged yet — tap "📝 Log experience" on any order card to start building this out.</div>`;
+      return;
+    }
+    body.innerHTML = `
+      <table class="exp-log-table">
+        <thead>
+          <tr><th>Date</th><th>Customer</th><th>Tags</th><th>Note</th><th></th></tr>
+        </thead>
+        <tbody>
+          ${entries.map(e => `
+            <tr>
+              <td class="exp-date">${fmtDateTime(e.date)}</td>
+              <td>${escapeHtml(e.name)}<br><span class="handle">@${escapeHtml(e.handle)}</span></td>
+              <td>${e.tags.length ? `<div class="exp-entry-tags">${e.tags.map(tk => `<span class="exp-pill">${experienceTagLabel(tk)}</span>`).join("")}</div>` : "—"}</td>
+              <td>${e.note ? escapeHtml(e.note) : "—"}</td>
+              <td><button type="button" class="exp-entry-del" data-id="${e.id}" title="Delete this entry" aria-label="Delete this entry">×</button></td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    `;
+    body.querySelectorAll(".exp-entry-del").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        deleteExperienceEntry(btn.dataset.id);
+        renderExperienceLog();
+        renderOrders(); // a history badge on a card may need to update too
+      });
+    });
+  }
+
+  document.getElementById("expExportBtn")?.addEventListener("click", downloadExperienceCsv);
+
   function renderHistory() {
     const list = ordersInWindow(currentWindow);
     renderHistStats(list);
@@ -2041,4 +2472,5 @@
   renderOrders();
   renderPrep();
   renderHistory();
+  renderExperienceLog();
 </script>
