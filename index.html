@@ -2159,76 +2159,18 @@
   }
 
   // ---- Completion sound ----
-  // A heavier "cha-CHUNK" cue when an order gets marked complete — a pair of
-  // low mechanical thuds (like a slot machine lever/reel-stop) followed by a
-  // quick ascending jackpot-style chime run. Synthesized with the Web Audio
-  // API rather than an external sound file, so there's nothing to fetch or
-  // ship — it works offline and the file stays a single HTML page. The
-  // AudioContext is created lazily on first use, right when Tony taps a
-  // toggle, which counts as the user gesture browsers require before any
-  // audio can play.
-  let chaChingCtx = null;
+  // A "cha-ching" cue when an order gets marked complete — a short coin
+  // sound effect Tony picked out (sourced from Freesound, embedded here as
+  // base64 so the dashboard stays a single self-contained HTML file with
+  // nothing external to fetch). Only plays when moving an order INTO
+  // Completed, not when moving one back to Active.
+  const CHA_CHING_SOUND_B64 = "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";
+  let chaChingAudio = null;
   function playChaChing() {
     try {
-      if (!chaChingCtx) chaChingCtx = new (window.AudioContext || window.webkitAudioContext)();
-      if (chaChingCtx.state === "suspended") chaChingCtx.resume();
-      const ctx = chaChingCtx;
-      const now = ctx.currentTime;
-
-      // A single heavy mechanical thud: a pitch-dropping triangle tone
-      // layered with low-passed noise, for weight and grit.
-      function thud(start, freqFrom, freqTo, dur, peak) {
-        const osc = ctx.createOscillator();
-        osc.type = "triangle";
-        osc.frequency.setValueAtTime(freqFrom, start);
-        osc.frequency.exponentialRampToValueAtTime(freqTo, start + dur);
-        const oscGain = ctx.createGain();
-        oscGain.gain.setValueAtTime(0.0001, start);
-        oscGain.gain.exponentialRampToValueAtTime(peak, start + 0.012);
-        oscGain.gain.exponentialRampToValueAtTime(0.0001, start + dur);
-        osc.connect(oscGain).connect(ctx.destination);
-        osc.start(start);
-        osc.stop(start + dur);
-
-        const bufferSize = Math.floor(ctx.sampleRate * dur);
-        const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-        const data = noiseBuffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
-        const noise = ctx.createBufferSource();
-        noise.buffer = noiseBuffer;
-        const noiseFilter = ctx.createBiquadFilter();
-        noiseFilter.type = "lowpass";
-        noiseFilter.frequency.value = 500;
-        const noiseGain = ctx.createGain();
-        noiseGain.gain.setValueAtTime(peak * 0.6, start);
-        noiseGain.gain.exponentialRampToValueAtTime(0.001, start + dur * 0.8);
-        noise.connect(noiseFilter).connect(noiseGain).connect(ctx.destination);
-        noise.start(start);
-        noise.stop(start + dur);
-      }
-
-      // "Cha" — a lighter first thud, like a lever pull...
-      thud(now, 180, 90, 0.09, 0.3);
-      // "CHUNK" — then a heavier, lower second thud, like the reels locking in.
-      thud(now + 0.1, 140, 55, 0.16, 0.45);
-
-      // A quick ascending run of bright square-wave chimes right after,
-      // like a slot machine's coin-payout flourish.
-      const notes = [784.0, 987.77, 1174.66, 1567.98]; // G5, B5, D6, G6
-      const flourishStart = now + 0.24;
-      notes.forEach((freq, i) => {
-        const osc = ctx.createOscillator();
-        osc.type = "square";
-        osc.frequency.value = freq;
-        const gain = ctx.createGain();
-        const start = flourishStart + i * 0.045;
-        gain.gain.setValueAtTime(0.0001, start);
-        gain.gain.exponentialRampToValueAtTime(0.12, start + 0.008);
-        gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.22);
-        osc.connect(gain).connect(ctx.destination);
-        osc.start(start);
-        osc.stop(start + 0.22);
-      });
+      if (!chaChingAudio) chaChingAudio = new Audio("data:audio/mpeg;base64," + CHA_CHING_SOUND_B64);
+      chaChingAudio.currentTime = 0;
+      chaChingAudio.play().catch(() => {});
     } catch (e) {
       // Audio unsupported/blocked — this is a nice-to-have, never worth
       // breaking the actual completion toggle over.
