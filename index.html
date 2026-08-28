@@ -262,6 +262,63 @@
   .badge.paid { background: var(--matcha-soft); color: var(--matcha); }
   .badge.unpaid { background: var(--warn-soft); color: var(--warn); }
 
+  /* ---- New / updated order flag ---- */
+  /* A ring around the whole card plus a corner badge — two cues so it reads
+     as "outstanding" even at a glance across a long grid, not just on close
+     inspection. Reuses the existing --warn "needs attention" color (same
+     family as Unpaid and kitchen notes) so it stays inside the app's palette
+     instead of introducing a clashing new red. */
+  .ticket.is-flagged {
+    box-shadow: 0 0 0 2px var(--warn), var(--shadow);
+  }
+
+  .flag-badge {
+    position: absolute;
+    top: -11px;
+    left: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--warn-soft);
+    color: var(--warn);
+    border: 1.5px solid var(--warn);
+    border-radius: 999px;
+    padding: 3px 10px 3px 8px;
+    font-family: "Space Mono", ui-monospace, monospace;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(37, 26, 56, 0.25);
+    animation: flagPulse 2.2s ease-in-out infinite;
+  }
+
+  .flag-badge .flag-asterisk { font-size: 1rem; line-height: 1; }
+  .flag-badge:hover, .flag-badge:focus-visible { filter: brightness(1.05); transform: scale(1.05); }
+  .flag-badge:active { transform: scale(0.95); }
+
+  @keyframes flagPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(169, 68, 48, 0.4), 0 2px 6px rgba(37, 26, 56, 0.25); }
+    50% { box-shadow: 0 0 0 5px rgba(169, 68, 48, 0), 0 2px 6px rgba(37, 26, 56, 0.25); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .flag-badge { animation: none; }
+  }
+
+  .flag-count {
+    display: inline-block;
+    margin-left: 6px;
+    background: var(--warn-soft);
+    color: var(--warn);
+    border: 1px solid var(--warn);
+    border-radius: 999px;
+    padding: 2px 9px;
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+
   .items {
     list-style: none;
     margin: 0;
@@ -1430,6 +1487,82 @@
     persistCompleted();
   }
 
+  // ---- New / updated order tracking ----
+  // Tony reviews 30-40 cards a week; scanning all of them for the handful
+  // that are new or changed is the actual pain point. This flags an order
+  // "new" or "updated" until he explicitly taps its badge to acknowledge it
+  // — like completed-order tracking, the acknowledged set lives in the
+  // viewer's own browser (localStorage), not the ORDERS array, so it
+  // survives reloads. Nothing here auto-clears on its own: an order that
+  // isn't tapped stays flagged the next time the dashboard is opened too.
+  const SEEN_STORAGE_KEY = "riceShineSeenOrders";
+
+  // A stable identity for the SAME order across a redeploy, even if its
+  // details later change (that's exactly what "updated" needs to detect).
+  // orderDate/orderTime is the DM timestamp — it never changes once logged
+  // — so it's a safer anchor than anything editable like price or pickup
+  // time. Manually-logged orders without a placement time fall back to the
+  // handle alone.
+  function orderIdentity(o) {
+    return (o.orderDate || o.orderTime)
+      ? `${o.handle}__${o.orderDate || ""}__${o.orderTime || ""}`
+      : `${o.handle}__manual`;
+  }
+
+  // Everything about an order that, if it changed, would be worth Tony
+  // seeing again — a price fix, a swapped item, a moved pickup time, etc.
+  function orderFingerprint(o) {
+    return JSON.stringify({
+      name: o.name,
+      items: o.items.map(i => `${i.qty}x${i.name}${i.comp ? "(comp)" : ""}@${i.price}`),
+      total: o.total,
+      pickupDate: o.pickupDate,
+      pickupTime: o.pickupTime,
+      paid: o.paid,
+      payMethod: o.payMethod,
+      notes: o.notes || ""
+    });
+  }
+
+  function persistSeen() {
+    try {
+      localStorage.setItem(SEEN_STORAGE_KEY, JSON.stringify(seenMap));
+    } catch (e) {}
+  }
+
+  let seenMap = null;
+  try {
+    const raw = localStorage.getItem(SEEN_STORAGE_KEY);
+    seenMap = raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    seenMap = null;
+  }
+  if (!seenMap) {
+    // First time this feature has ever run in this browser (or its storage
+    // was cleared) — there's no "last seen" baseline yet, so treat every
+    // order currently on the board as already-reviewed rather than
+    // flagging all 30-40 of them "new" the moment this ships. From here on,
+    // only orders that are genuinely added or edited in a future refresh
+    // will show a flag.
+    seenMap = {};
+    ORDERS.forEach(o => { seenMap[orderIdentity(o)] = orderFingerprint(o); });
+    persistSeen();
+  }
+
+  // Returns "new", "updated", or null (already acknowledged, unchanged).
+  function orderFlag(o) {
+    const id = orderIdentity(o);
+    const fp = orderFingerprint(o);
+    if (!(id in seenMap)) return "new";
+    if (seenMap[id] !== fp) return "updated";
+    return null;
+  }
+
+  function acknowledgeOrder(o) {
+    seenMap[orderIdentity(o)] = orderFingerprint(o);
+    persistSeen();
+  }
+
   // ---- Same-time grouping ----
   // Orders sharing an exact pickup date + time are the ones being handed
   // over back-to-back, so tag them with a shared color to make that obvious
@@ -1521,8 +1654,14 @@
     const gcls = groups.classes[gk];
     const gcount = groups.counts[gk];
     const completed = isCompleted(o);
+    const flag = orderFlag(o);
     return `
-      <article class="ticket ${gcls || ""} ${completed ? "is-complete" : ""}">
+      <article class="ticket ${gcls || ""} ${completed ? "is-complete" : ""} ${flag ? "is-flagged" : ""}">
+        ${flag ? `
+          <button type="button" class="flag-badge" data-idx="${idx}" title="${flag === "new" ? "New order" : "Order updated"} — tap to mark reviewed" aria-label="${flag === "new" ? "New order" : "Order updated"} — tap to mark reviewed">
+            <span class="flag-asterisk">*</span><span>${flag === "new" ? "New" : "Updated"}</span>
+          </button>
+        ` : ""}
         <div class="who">
           <div>
             <div class="name">${o.name}</div>
@@ -1559,10 +1698,28 @@
   function wireToggles(gridEl, list) {
     gridEl.querySelectorAll(".complete-toggle").forEach(input => {
       input.addEventListener("change", () => {
-        toggleCompleted(list[Number(input.dataset.idx)]);
+        const o = list[Number(input.dataset.idx)];
+        toggleCompleted(o);
+        // Completing an order means Tony has obviously just reviewed it, so
+        // that alone is enough to clear a pending new/updated flag too —
+        // one less tap for the common case where he reads the card and
+        // immediately marks it done.
+        if (isCompleted(o)) acknowledgeOrder(o);
         renderOrders();
         renderStats();
         renderPrep();
+      });
+    });
+  }
+
+  function wireFlags(gridEl, list) {
+    gridEl.querySelectorAll(".flag-badge").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        acknowledgeOrder(list[Number(btn.dataset.idx)]);
+        renderOrders();
+        renderStats();
       });
     });
   }
@@ -1586,8 +1743,11 @@
 
     wireToggles(gridActive, active);
     wireToggles(gridCompleted, completed);
+    wireFlags(gridActive, active);
+    wireFlags(gridCompleted, completed);
 
-    subtabActive.textContent = `Active Orders (${active.length})`;
+    const activeFlagged = active.filter(o => orderFlag(o)).length;
+    subtabActive.innerHTML = `Active Orders (${active.length})${activeFlagged ? `<span class="flag-count">${activeFlagged} unreviewed</span>` : ""}`;
     subtabCompleted.textContent = `Completed Orders (${completed.length})`;
   }
 
