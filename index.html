@@ -1045,6 +1045,25 @@
     font-variant-numeric: tabular-nums;
   }
 
+  /* The row that reveals/hides everything past the top 5 on a buyer list —
+     shared by Returning buyers, Biggest buyers, and the Buyer experience
+     log, all of which can otherwise run to 30-40 rows. */
+  .show-more-row td { padding: 10px 0 0; text-align: center; border-bottom: none; }
+
+  .show-more-btn {
+    background: none;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 6px 16px;
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--tea);
+    cursor: pointer;
+  }
+
+  .show-more-btn:hover, .show-more-btn:focus-visible { background: var(--rice-2); outline: none; }
+
   .hist-charts {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2403,6 +2422,25 @@
     }[c]));
   }
 
+  // Returning buyers, Biggest buyers, and the Buyer experience log can all
+  // run to 30-40 rows once a few weeks pass — showing the top 5 by default
+  // keeps the card skimmable, with everything else a tap away. Expanded
+  // state is deliberately in-memory only (not persisted): every fresh
+  // visit starts collapsed again, same as the log-experience panels above.
+  const TOP_N = 5;
+
+  function renderShowMoreRow(total, expanded, colspan, toggleClass) {
+    if (total <= TOP_N) return "";
+    const remaining = total - TOP_N;
+    return `
+      <tr class="show-more-row">
+        <td colspan="${colspan}">
+          <button type="button" class="show-more-btn ${toggleClass}">${expanded ? "Show less" : `Show ${remaining} more`}</button>
+        </td>
+      </tr>
+    `;
+  }
+
   // Thin horizontal bars, one fixed hue per row (never a magnitude ramp on
   // nominal categories), 4px rounded data-end / square baseline via CSS,
   // always paired with a visible direct value label — see dataviz skill's
@@ -2516,28 +2554,45 @@
   // buyer experience log — "returning" and "biggest" are about a buyer's
   // whole relationship with the business, not just orders in the last N
   // days, so these always read from the all-time buyerHistory above.
+  let returningExpanded = false;
+  let biggestExpanded = false;
+
   function renderReturningBuyers() {
     const body = document.getElementById("histReturningBody");
     if (!body) return;
     const rows = buyerOrderSummary()
       .filter((b) => b.count >= 2)
       .sort((a, b) => b.count - a.count || b.total - a.total);
-    body.innerHTML = rows.length
-      ? rows.map((b) => `
-          <tr><td>${escapeHtml(b.name)}<br><span class="handle">@${escapeHtml(b.handle)}</span></td><td class="num">${b.count}</td><td class="num">${fmtMoney(b.total)}</td></tr>
-        `).join("")
-      : `<tr><td colspan="3" class="empty-state">No repeat buyers yet — this fills in once the same handle orders more than once, across any week.</td></tr>`;
+    if (!rows.length) {
+      body.innerHTML = `<tr><td colspan="3" class="empty-state">No repeat buyers yet — this fills in once the same handle orders more than once, across any week.</td></tr>`;
+      return;
+    }
+    const shown = returningExpanded ? rows : rows.slice(0, TOP_N);
+    body.innerHTML = shown.map((b) => `
+        <tr><td>${escapeHtml(b.name)}<br><span class="handle">@${escapeHtml(b.handle)}</span></td><td class="num">${b.count}</td><td class="num">${fmtMoney(b.total)}</td></tr>
+      `).join("") + renderShowMoreRow(rows.length, returningExpanded, 3, "returning-show-more");
+    body.querySelector(".returning-show-more")?.addEventListener("click", () => {
+      returningExpanded = !returningExpanded;
+      renderReturningBuyers();
+    });
   }
 
   function renderBiggestBuyers() {
     const body = document.getElementById("histBiggestBody");
     if (!body) return;
     const rows = buyerOrderSummary().sort((a, b) => b.total - a.total || b.count - a.count);
-    body.innerHTML = rows.length
-      ? rows.map((b) => `
-          <tr><td>${escapeHtml(b.name)}<br><span class="handle">@${escapeHtml(b.handle)}</span></td><td class="num">${fmtMoney(b.total)}</td><td class="num">${b.count}</td></tr>
-        `).join("")
-      : `<tr><td colspan="3" class="empty-state">No orders logged yet.</td></tr>`;
+    if (!rows.length) {
+      body.innerHTML = `<tr><td colspan="3" class="empty-state">No orders logged yet.</td></tr>`;
+      return;
+    }
+    const shown = biggestExpanded ? rows : rows.slice(0, TOP_N);
+    body.innerHTML = shown.map((b) => `
+        <tr><td>${escapeHtml(b.name)}<br><span class="handle">@${escapeHtml(b.handle)}</span></td><td class="num">${fmtMoney(b.total)}</td><td class="num">${b.count}</td></tr>
+      `).join("") + renderShowMoreRow(rows.length, biggestExpanded, 3, "biggest-show-more");
+    body.querySelector(".biggest-show-more")?.addEventListener("click", () => {
+      biggestExpanded = !biggestExpanded;
+      renderBiggestBuyers();
+    });
   }
 
   function renderHistRangeNote(days, list) {
@@ -2573,6 +2628,8 @@
     return groups;
   }
 
+  let expLogExpanded = false;
+
   function renderExperienceLog() {
     const body = document.getElementById("expLogBody");
     if (!body) return;
@@ -2581,13 +2638,14 @@
       return;
     }
     const groups = groupExperienceByBuyer();
+    const shown = expLogExpanded ? groups : groups.slice(0, TOP_N);
     body.innerHTML = `
       <table class="exp-log-table">
         <thead>
           <tr><th>Buyer</th><th>Issues</th><th>Logged</th></tr>
         </thead>
         <tbody>
-          ${groups.map((g) => `
+          ${shown.map((g) => `
             <tr>
               <td>${escapeHtml(g.name)}<br><span class="handle">@${escapeHtml(g.handle)}</span></td>
               <td><span class="exp-count-pill">${g.count} issue${g.count === 1 ? "" : "s"}</span></td>
@@ -2607,6 +2665,7 @@
               </td>
             </tr>
           `).join("")}
+          ${renderShowMoreRow(groups.length, expLogExpanded, 3, "explog-show-more")}
         </tbody>
       </table>
     `;
@@ -2616,6 +2675,10 @@
         renderExperienceLog();
         renderOrders(); // a history badge on a card may need to update too
       });
+    });
+    body.querySelector(".explog-show-more")?.addEventListener("click", () => {
+      expLogExpanded = !expLogExpanded;
+      renderExperienceLog();
     });
   }
 
