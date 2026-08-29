@@ -95,6 +95,421 @@
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 24px -14px rgba(0, 0, 0, 0.6);
   }
 
+  /* ============================================================
+     CUSTOM COLOR PALETTES (mockup)
+     "Rice & Shine" (the untouched :root block above) stays the
+     default look. Each alternate palette below is scoped to
+     :root[data-palette="..."] so it only kicks in once someone
+     picks it from the Customize popover — the base theme is never
+     edited. Every palette gets its own light AND dark set, mirroring
+     the same light->dark relationship the default theme already
+     uses (dark backgrounds pull way down in lightness, accents pull
+     up so they still pop against a dark card). tg-1..5 (the
+     same-pickup-time tag colors) intentionally stay constant across
+     every palette — they're a functional grouping cue, not branding,
+     and changing them per-theme would make groups harder to learn.
+     ============================================================ */
+
+  /* ---- Sherbet (coral / peach / cream / mint) ---- */
+  :root[data-palette="sherbet"] {
+    --rice: #eef8cd;
+    --rice-2: #dff0b8;
+    --card: #fffbf4;
+    --nori: #3d2422;
+    --nori-2: #55322f;
+    --ink: #3a2422;
+    --ink-soft: #8c6e64;
+    --line: #e9d9c4;
+    --tea: #ff9d9d;
+    --tea-ink: #4a1f1f;
+    --salmon: #e8875f;
+    --salmon-soft: #ffe7d6;
+    --matcha: #3f8f6b;
+    --matcha-soft: #dff6e7;
+    --warn: #d9714f;
+    --warn-soft: #ffe0d3;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root[data-palette="sherbet"]:not([data-theme="light"]) {
+      --rice: #211613; --rice-2: #2b1e1a; --card: #2f211c;
+      --nori: #5c3a35; --nori-2: #7a4f47;
+      --ink: #fbeee3; --ink-soft: #d8b9a9; --line: #4a332c;
+      --tea: #ffb4b4; --tea-ink: #3a1414;
+      --salmon: #f4a472; --salmon-soft: #3e2a1c;
+      --matcha: #8fd1ae; --matcha-soft: #23372c;
+      --warn: #f0937a; --warn-soft: #3e2620;
+    }
+  }
+  :root[data-palette="sherbet"][data-theme="dark"] {
+    --rice: #211613; --rice-2: #2b1e1a; --card: #2f211c;
+    --nori: #5c3a35; --nori-2: #7a4f47;
+    --ink: #fbeee3; --ink-soft: #d8b9a9; --line: #4a332c;
+    --tea: #ffb4b4; --tea-ink: #3a1414;
+    --salmon: #f4a472; --salmon-soft: #3e2a1c;
+    --matcha: #8fd1ae; --matcha-soft: #23372c;
+    --warn: #f0937a; --warn-soft: #3e2620;
+  }
+
+  /* ---- Bubblegum (pink / yellow / sky blue / cream) ---- */
+  :root[data-palette="bubblegum"] {
+    --rice: #ffefe3;
+    --rice-2: #ffe0cc;
+    --card: #fffcf8;
+    --nori: #38284a;
+    --nori-2: #4f3a66;
+    --ink: #3a2a42;
+    --ink-soft: #8b7699;
+    --line: #f0dcee;
+    --tea: #ff84ba;
+    --tea-ink: #4a0f2c;
+    --salmon: #5c8fe0;
+    --salmon-soft: #e4eeff;
+    --matcha: #4c9a6e;
+    --matcha-soft: #e1f3e7;
+    --warn: #e0a83a;
+    --warn-soft: #fff3d6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root[data-palette="bubblegum"]:not([data-theme="light"]) {
+      --rice: #211826; --rice-2: #2b2032; --card: #2f2438;
+      --nori: #5a4570; --nori-2: #7a5f94;
+      --ink: #f7ecfb; --ink-soft: #cbb8da; --line: #453354;
+      --tea: #ffa8cc; --tea-ink: #3a0e22;
+      --salmon: #8fb4f2; --salmon-soft: #23334d;
+      --matcha: #86cba0; --matcha-soft: #21362a;
+      --warn: #f0c368; --warn-soft: #3d3018;
+    }
+  }
+  :root[data-palette="bubblegum"][data-theme="dark"] {
+    --rice: #211826; --rice-2: #2b2032; --card: #2f2438;
+    --nori: #5a4570; --nori-2: #7a5f94;
+    --ink: #f7ecfb; --ink-soft: #cbb8da; --line: #453354;
+    --tea: #ffa8cc; --tea-ink: #3a0e22;
+    --salmon: #8fb4f2; --salmon-soft: #23334d;
+    --matcha: #86cba0; --matcha-soft: #21362a;
+    --warn: #f0c368; --warn-soft: #3d3018;
+  }
+
+  /* ---- Terracotta Bay (salmon / cream / sage / dusty blue) ---- */
+  :root[data-palette="terracotta"] {
+    --rice: #ffebd3;
+    --rice-2: #fbdbb8;
+    --card: #fffaf2;
+    --nori: #2e4a52;
+    --nori-2: #3f636d;
+    --ink: #33403f;
+    --ink-soft: #7d938f;
+    --line: #e4d6c4;
+    --tea: #67a2c5;
+    --tea-ink: #ffffff;
+    --salmon: #e08064;
+    --salmon-soft: #ffe3d8;
+    --matcha: #4c8a72;
+    --matcha-soft: #e1f0e9;
+    --warn: #d9754f;
+    --warn-soft: #fce1d5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root[data-palette="terracotta"]:not([data-theme="light"]) {
+      --rice: #16211f; --rice-2: #1d2b28; --card: #21302d;
+      --nori: #3f636d; --nori-2: #578088;
+      --ink: #e9f3f1; --ink-soft: #a7c4bf; --line: #35504f;
+      --tea: #8fc3e3; --tea-ink: #0e2530;
+      --salmon: #f0a386; --salmon-soft: #3c2a22;
+      --matcha: #82c5a6; --matcha-soft: #223730;
+      --warn: #e89876; --warn-soft: #3e2a20;
+    }
+  }
+  :root[data-palette="terracotta"][data-theme="dark"] {
+    --rice: #16211f; --rice-2: #1d2b28; --card: #21302d;
+    --nori: #3f636d; --nori-2: #578088;
+    --ink: #e9f3f1; --ink-soft: #a7c4bf; --line: #35504f;
+    --tea: #8fc3e3; --tea-ink: #0e2530;
+    --salmon: #f0a386; --salmon-soft: #3c2a22;
+    --matcha: #82c5a6; --matcha-soft: #223730;
+    --warn: #e89876; --warn-soft: #3e2a20;
+  }
+
+  /* ---- Blush (blush white / dusty pink / mauve / charcoal) ---- */
+  :root[data-palette="blush"] {
+    --rice: #fff5f5;
+    --rice-2: #fbe5e1;
+    --card: #fffdfc;
+    --nori: #4a4a4a;
+    --nori-2: #656565;
+    --ink: #3a3536;
+    --ink-soft: #8c8082;
+    --line: #ebd6d3;
+    --tea: #c97f8c;
+    --tea-ink: #ffffff;
+    --salmon: #e2b4bd;
+    --salmon-soft: #fbedf0;
+    --matcha: #6f8f6c;
+    --matcha-soft: #e8efe6;
+    --warn: #b6595f;
+    --warn-soft: #f6e1df;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root[data-palette="blush"]:not([data-theme="light"]) {
+      --rice: #211b1c; --rice-2: #2b2223; --card: #302627;
+      --nori: #4a4a4a; --nori-2: #6e6e6e;
+      --ink: #f5e9e9; --ink-soft: #cbb4b5; --line: #4a3a3b;
+      --tea: #e3a2ac; --tea-ink: #3a1a20;
+      --salmon: #efc7ce; --salmon-soft: #3a2529;
+      --matcha: #9dbb98; --matcha-soft: #263323;
+      --warn: #e0949a; --warn-soft: #3d2426;
+    }
+  }
+  :root[data-palette="blush"][data-theme="dark"] {
+    --rice: #211b1c; --rice-2: #2b2223; --card: #302627;
+    --nori: #4a4a4a; --nori-2: #6e6e6e;
+    --ink: #f5e9e9; --ink-soft: #cbb4b5; --line: #4a3a3b;
+    --tea: #e3a2ac; --tea-ink: #3a1a20;
+    --salmon: #efc7ce; --salmon-soft: #3a2529;
+    --matcha: #9dbb98; --matcha-soft: #263323;
+    --warn: #e0949a; --warn-soft: #3d2426;
+  }
+
+  /* ---- Lagoon (teal / cyan / pale yellow / gold) ---- */
+  :root[data-palette="lagoon"] {
+    --rice: #fdf3d4;
+    --rice-2: #fbe9ae;
+    --card: #fffdf6;
+    --nori: #0f4a5c;
+    --nori-2: #1d6478;
+    --ink: #163a42;
+    --ink-soft: #5c848d;
+    --line: #d8ecef;
+    --tea: #218dae;
+    --tea-ink: #ffffff;
+    --salmon: #2bbbd7;
+    --salmon-soft: #def6fa;
+    --matcha: #4c8f5a;
+    --matcha-soft: #e1f0e3;
+    --warn: #e0a317;
+    --warn-soft: #fff1ce;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root[data-palette="lagoon"]:not([data-theme="light"]) {
+      --rice: #0f2a32; --rice-2: #16363f; --card: #1b3f49;
+      --nori: #2c6272; --nori-2: #3f7d8f;
+      --ink: #e7f6fa; --ink-soft: #9fc7cf; --line: #2a505a;
+      --tea: #6fd3ec; --tea-ink: #0a2a33;
+      --salmon: #7fe0f0; --salmon-soft: #163942;
+      --matcha: #8acb94; --matcha-soft: #1f3323;
+      --warn: #f0c355; --warn-soft: #3a2f14;
+    }
+  }
+  :root[data-palette="lagoon"][data-theme="dark"] {
+    --rice: #0f2a32; --rice-2: #16363f; --card: #1b3f49;
+    --nori: #2c6272; --nori-2: #3f7d8f;
+    --ink: #e7f6fa; --ink-soft: #9fc7cf; --line: #2a505a;
+    --tea: #6fd3ec; --tea-ink: #0a2a33;
+    --salmon: #7fe0f0; --salmon-soft: #163942;
+    --matcha: #8acb94; --matcha-soft: #1f3323;
+    --warn: #f0c355; --warn-soft: #3a2f14;
+  }
+
+  /* ---- Terracotta Grove (dark brown / sage grey / cream / burnt orange) ---- */
+  :root[data-palette="grove"] {
+    --rice: #fcf2e5;
+    --rice-2: #f0e4d2;
+    --card: #fffbf5;
+    --nori: #524646;
+    --nori-2: #6b5c5c;
+    --ink: #3a302e;
+    --ink-soft: #8c7f79;
+    --line: #e3d6c6;
+    --tea: #ec5b38;
+    --tea-ink: #ffffff;
+    --salmon: #b5502a;
+    --salmon-soft: #fbe4d3;
+    --matcha: #6b8f5e;
+    --matcha-soft: #e6eee0;
+    --warn: #d14e30;
+    --warn-soft: #fbe0d6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root[data-palette="grove"]:not([data-theme="light"]) {
+      --rice: #211c19; --rice-2: #2b2420; --card: #302925;
+      --nori: #6b5c5c; --nori-2: #8a7877;
+      --ink: #f5ece5; --ink-soft: #cbb9ae; --line: #4a3d35;
+      --tea: #f28362; --tea-ink: #3a1408;
+      --salmon: #e8916a; --salmon-soft: #3d2a1c;
+      --matcha: #9dc28c; --matcha-soft: #263320;
+      --warn: #f0977a; --warn-soft: #3d281f;
+    }
+  }
+  :root[data-palette="grove"][data-theme="dark"] {
+    --rice: #211c19; --rice-2: #2b2420; --card: #302925;
+    --nori: #6b5c5c; --nori-2: #8a7877;
+    --ink: #f5ece5; --ink-soft: #cbb9ae; --line: #4a3d35;
+    --tea: #f28362; --tea-ink: #3a1408;
+    --salmon: #e8916a; --salmon-soft: #3d2a1c;
+    --matcha: #9dc28c; --matcha-soft: #263320;
+    --warn: #f0977a; --warn-soft: #3d281f;
+  }
+
+  /* ---- Golden Bay (marigold / indigo / sky blue / pale blue) ---- */
+  :root[data-palette="goldenbay"] {
+    --rice: #e7f7fa;
+    --rice-2: #cdeff6;
+    --card: #fffdf7;
+    --nori: #2c3564;
+    --nori-2: #3d4780;
+    --ink: #22284a;
+    --ink-soft: #6e7699;
+    --line: #d9eaf0;
+    --tea: #ffc349;
+    --tea-ink: #4a2e00;
+    --salmon: #5facd3;
+    --salmon-soft: #e1f1f8;
+    --matcha: #4c8f6a;
+    --matcha-soft: #e1f0e7;
+    --warn: #d9714f;
+    --warn-soft: #fce1d5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root[data-palette="goldenbay"]:not([data-theme="light"]) {
+      --rice: #10151f; --rice-2: #171d2b; --card: #1c2330;
+      --nori: #3d4780; --nori-2: #545fa3;
+      --ink: #eaeefc; --ink-soft: #a8b0d6; --line: #2c3554;
+      --tea: #ffd166; --tea-ink: #3a2400;
+      --salmon: #7fc4e6; --salmon-soft: #17323e;
+      --matcha: #8fceaa; --matcha-soft: #1f3327;
+      --warn: #f0937a; --warn-soft: #3e2620;
+    }
+  }
+  :root[data-palette="goldenbay"][data-theme="dark"] {
+    --rice: #10151f; --rice-2: #171d2b; --card: #1c2330;
+    --nori: #3d4780; --nori-2: #545fa3;
+    --ink: #eaeefc; --ink-soft: #a8b0d6; --line: #2c3554;
+    --tea: #ffd166; --tea-ink: #3a2400;
+    --salmon: #7fc4e6; --salmon-soft: #17323e;
+    --matcha: #8fceaa; --matcha-soft: #1f3327;
+    --warn: #f0937a; --warn-soft: #3e2620;
+  }
+
+  /* ---- Regal Autumn (navy / forest green / gold / off-white) ---- */
+  :root[data-palette="regal"] {
+    --rice: #ebede3;
+    --rice-2: #dce0ce;
+    --card: #fffef9;
+    --nori: #0b1849;
+    --nori-2: #1c2c66;
+    --ink: #1a2333;
+    --ink-soft: #6b7280;
+    --line: #dce2d2;
+    --tea: #e4b028;
+    --tea-ink: #3a2600;
+    --salmon: #124d1c;
+    --salmon-soft: #e1ebe0;
+    --matcha: #2e7d40;
+    --matcha-soft: #e2f0e3;
+    --warn: #b23a24;
+    --warn-soft: #f5ded8;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root[data-palette="regal"]:not([data-theme="light"]) {
+      --rice: #10141f; --rice-2: #171c29; --card: #1c222f;
+      --nori: #2c3c78; --nori-2: #3d4f96;
+      --ink: #eef0ea; --ink-soft: #b7bdb0; --line: #303a2c;
+      --tea: #f0c968; --tea-ink: #3a2600;
+      --salmon: #6bbf7c; --salmon-soft: #203324;
+      --matcha: #7fce93; --matcha-soft: #1f3327;
+      --warn: #e08268; --warn-soft: #3e281f;
+    }
+  }
+  :root[data-palette="regal"][data-theme="dark"] {
+    --rice: #10141f; --rice-2: #171c29; --card: #1c222f;
+    --nori: #2c3c78; --nori-2: #3d4f96;
+    --ink: #eef0ea; --ink-soft: #b7bdb0; --line: #303a2c;
+    --tea: #f0c968; --tea-ink: #3a2600;
+    --salmon: #6bbf7c; --salmon-soft: #203324;
+    --matcha: #7fce93; --matcha-soft: #1f3327;
+    --warn: #e08268; --warn-soft: #3e281f;
+  }
+
+  /* ---- Nautical Earth (navy / cream / sage / brown) ---- */
+  :root[data-palette="nautical"] {
+    --rice: #f3e4c9;
+    --rice-2: #e8d5ae;
+    --card: #fffaf0;
+    --nori: #3d2a1a;
+    --nori-2: #56391f;
+    --ink: #2e2418;
+    --ink-soft: #8a7a63;
+    --line: #e2d6bc;
+    --tea: #0a2947;
+    --tea-ink: #ffffff;
+    --salmon: #8b5e3c;
+    --salmon-soft: #f0e4d4;
+    --matcha: #6b8f6a;
+    --matcha-soft: #e6eee2;
+    --warn: #b2492e;
+    --warn-soft: #f5ded2;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root[data-palette="nautical"]:not([data-theme="light"]) {
+      --rice: #1c1712; --rice-2: #241d16; --card: #29221a;
+      --nori: #6b4a2e; --nori-2: #8a6440;
+      --ink: #f5ece0; --ink-soft: #cbb89e; --line: #4a3a28;
+      --tea: #6f9fc7; --tea-ink: #0e2534;
+      --salmon: #d3a06e; --salmon-soft: #3c2c1c;
+      --matcha: #9dc29a; --matcha-soft: #263323;
+      --warn: #e0876a; --warn-soft: #3e281f;
+    }
+  }
+  :root[data-palette="nautical"][data-theme="dark"] {
+    --rice: #1c1712; --rice-2: #241d16; --card: #29221a;
+    --nori: #6b4a2e; --nori-2: #8a6440;
+    --ink: #f5ece0; --ink-soft: #cbb89e; --line: #4a3a28;
+    --tea: #6f9fc7; --tea-ink: #0e2534;
+    --salmon: #d3a06e; --salmon-soft: #3c2c1c;
+    --matcha: #9dc29a; --matcha-soft: #263323;
+    --warn: #e0876a; --warn-soft: #3e281f;
+  }
+
+  /* ---- Slate Ember (light grey / teal / dark slate / orange) ---- */
+  :root[data-palette="ember"] {
+    --rice: #f5f5f5;
+    --rice-2: #e6e9e9;
+    --card: #ffffff;
+    --nori: #303841;
+    --nori-2: #454f5a;
+    --ink: #262b30;
+    --ink-soft: #767f85;
+    --line: #e0e4e5;
+    --tea: #ff5722;
+    --tea-ink: #ffffff;
+    --salmon: #76abae;
+    --salmon-soft: #e4f0f0;
+    --matcha: #4c8f6a;
+    --matcha-soft: #e1f0e7;
+    --warn: #d9714f;
+    --warn-soft: #fce1d5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root[data-palette="ember"]:not([data-theme="light"]) {
+      --rice: #16191c; --rice-2: #1d2124; --card: #22262a;
+      --nori: #454f5a; --nori-2: #5c6874;
+      --ink: #eef0f1; --ink-soft: #a8b0b4; --line: #343b40;
+      --tea: #ff8a65; --tea-ink: #3a1408;
+      --salmon: #9ccbcd; --salmon-soft: #1c3536;
+      --matcha: #8fceaa; --matcha-soft: #1f3327;
+      --warn: #f0937a; --warn-soft: #3d2620;
+    }
+  }
+  :root[data-palette="ember"][data-theme="dark"] {
+    --rice: #16191c; --rice-2: #1d2124; --card: #22262a;
+    --nori: #454f5a; --nori-2: #5c6874;
+    --ink: #eef0f1; --ink-soft: #a8b0b4; --line: #343b40;
+    --tea: #ff8a65; --tea-ink: #3a1408;
+    --salmon: #9ccbcd; --salmon-soft: #1c3536;
+    --matcha: #8fceaa; --matcha-soft: #1f3327;
+    --warn: #f0937a; --warn-soft: #3d2620;
+  }
+
   * { box-sizing: border-box; }
 
   body {
@@ -162,6 +577,92 @@
   .lang-toggle .lang-code { font-family: "Space Mono", ui-monospace, monospace; letter-spacing: 0.03em; }
   .lang-toggle:hover, .lang-toggle:focus-visible { filter: brightness(1.15); outline: none; }
   .lang-toggle:active { transform: scale(0.96); }
+
+  .header-actions { position: relative; display: inline-flex; align-items: center; gap: 8px; flex: none; }
+
+  .palette-toggle {
+    position: relative;
+    z-index: 42;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--card);
+    color: var(--ink);
+    border: 1.5px solid var(--line);
+    border-radius: 999px;
+    padding: 8px 14px 8px 10px;
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+  }
+  .palette-toggle:hover, .palette-toggle:focus-visible { border-color: var(--tea); outline: none; }
+  .palette-toggle:active { transform: scale(0.96); }
+  .palette-toggle .swatch-icon { display: inline-flex; width: 18px; height: 18px; border-radius: 50%; overflow: hidden; box-shadow: 0 0 0 1px var(--line); flex: none; }
+  .palette-toggle .swatch-icon span { flex: 1; }
+
+  .palette-popover-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 14, 10, 0.28);
+    z-index: 40;
+  }
+
+  .palette-popover {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: min(320px, calc(100vw - 32px));
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    padding: 14px;
+    z-index: 41;
+  }
+
+  .palette-popover-title {
+    font-weight: 800;
+    font-size: 0.92rem;
+    color: var(--ink);
+    margin: 0 0 2px;
+  }
+
+  .palette-popover-sub {
+    font-size: 0.76rem;
+    color: var(--ink-soft);
+    margin: 0 0 12px;
+    line-height: 1.4;
+  }
+
+  .palette-list { display: flex; flex-direction: column; gap: 6px; max-height: min(60vh, 420px); overflow-y: auto; padding-right: 2px; }
+
+  .palette-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    background: transparent;
+    border: 1.5px solid transparent;
+    border-radius: 12px;
+    padding: 8px 10px;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+  }
+  .palette-option:hover, .palette-option:focus-visible { background: var(--rice-2); outline: none; }
+  .palette-option[aria-pressed="true"] { border-color: var(--tea); background: var(--rice-2); }
+
+  .palette-swatches { display: flex; flex: none; border-radius: 8px; overflow: hidden; box-shadow: 0 0 0 1px var(--line); }
+  .palette-swatches span { width: 11px; height: 26px; }
+
+  .palette-option-label { flex: 1; min-width: 0; }
+  .palette-option-name { font-weight: 700; font-size: 0.86rem; color: var(--ink); }
+  .palette-option-tag { font-size: 0.72rem; color: var(--ink-soft); }
+
+  .palette-option-check { flex: none; width: 18px; height: 18px; color: var(--tea); visibility: hidden; }
+  .palette-option[aria-pressed="true"] .palette-option-check { visibility: visible; }
 
   .statbar {
     display: grid;
@@ -1191,9 +1692,21 @@
       <span class="mark">rice&shine</span>
       <span class="sub" data-i18n="brand_sub">order board</span>
     </div>
-    <button type="button" id="langToggle" class="lang-toggle">
-      <span class="lang-globe" aria-hidden="true">🌐</span><span class="lang-code" id="langCode">EN</span>
-    </button>
+    <div class="header-actions">
+      <button type="button" id="paletteToggle" class="palette-toggle" aria-haspopup="true" aria-expanded="false">
+        <span class="swatch-icon" id="paletteToggleIcon" aria-hidden="true"></span>
+        <span data-i18n="customize_btn">Customize</span>
+      </button>
+      <div id="palettePopoverBackdrop" class="palette-popover-backdrop" hidden></div>
+      <div id="palettePopover" class="palette-popover" role="dialog" aria-label="Choose a color palette" hidden>
+        <p class="palette-popover-title" data-i18n="customize_title">Dashboard colors</p>
+        <p class="palette-popover-sub" data-i18n="customize_sub">Pick a color palette for this dashboard. Saved on this device.</p>
+        <div class="palette-list" id="paletteList"></div>
+      </div>
+      <button type="button" id="langToggle" class="lang-toggle">
+        <span class="lang-globe" aria-hidden="true">🌐</span><span class="lang-code" id="langCode">EN</span>
+      </button>
+    </div>
   </header>
 
   <div class="statbar" id="statbar"></div>
@@ -1939,6 +2452,100 @@
   // this dashboard (completed-orders, seen/flagged, buyer history, buyer
   // experience log) so toggling language can never collide with or corrupt
   // any of that existing data.
+  // ---------------------------------------------------------------
+  // Color palette customization (mockup). Purely cosmetic: swaps the
+  // CSS custom properties defined on :root by setting
+  // data-palette="<key>" on <html>. "default" (or no key at all)
+  // leaves the original Rice & Shine :root block in charge — nothing
+  // about order data, i18n, or any other feature reads this key.
+  // Persisted the same way language/theme choices are: localStorage,
+  // per-device, wrapped in try/catch so private-browsing just means
+  // the choice doesn't survive a reload instead of breaking the page.
+  // ---------------------------------------------------------------
+  const PALETTE_STORAGE_KEY = "riceShinePalette";
+
+  const PALETTES = [
+    { key: "default", nameKey: "palette_default", tagKey: "palette_default_tag", swatches: ["#f8f2c2", "#efe4a8", "#7a58ad", "#4f7a45"] },
+    { key: "sherbet", nameKey: "palette_sherbet", tagKey: "palette_sherbet_tag", swatches: ["#ff9d9d", "#ffc5aa", "#eef8cd", "#bbf1d2"] },
+    { key: "bubblegum", nameKey: "palette_bubblegum", tagKey: "palette_bubblegum_tag", swatches: ["#ff84ba", "#ffdf82", "#99c2ff", "#ffefe3"] },
+    { key: "terracotta", nameKey: "palette_terracotta", tagKey: "palette_terracotta_tag", swatches: ["#ffb6a6", "#ffebd3", "#9bcec1", "#67a2c5"] },
+    { key: "blush", nameKey: "palette_blush", tagKey: "palette_blush_tag", swatches: ["#fff5f5", "#f7d6d0", "#e2b4bd", "#4a4a4a"] },
+    { key: "lagoon", nameKey: "palette_lagoon", tagKey: "palette_lagoon_tag", swatches: ["#218dae", "#2bbbd7", "#fce59a", "#ffd758"] },
+    { key: "grove", nameKey: "palette_grove", tagKey: "palette_grove_tag", swatches: ["#524646", "#a8a492", "#fcf2e5", "#ec5b38"] },
+    { key: "goldenbay", nameKey: "palette_goldenbay", tagKey: "palette_goldenbay_tag", swatches: ["#ffc349", "#525ea7", "#5facd3", "#97dde9"] },
+    { key: "regal", nameKey: "palette_regal", tagKey: "palette_regal_tag", swatches: ["#0b1849", "#124d1c", "#e4b028", "#ebede3"] },
+    { key: "nautical", nameKey: "palette_nautical", tagKey: "palette_nautical_tag", swatches: ["#0a2947", "#f3e4c9", "#d3d4c0", "#8b5e3c"] },
+    { key: "ember", nameKey: "palette_ember", tagKey: "palette_ember_tag", swatches: ["#f5f5f5", "#76abae", "#303841", "#ff5722"] }
+  ];
+
+  let currentPalette = "default";
+  try {
+    const savedPalette = localStorage.getItem(PALETTE_STORAGE_KEY);
+    if (savedPalette && PALETTES.some((p) => p.key === savedPalette)) currentPalette = savedPalette;
+  } catch (e) {
+    // Private browsing / storage disabled — palette choice just won't persist across reloads.
+  }
+
+  function applyPalette() {
+    if (currentPalette === "default") {
+      document.documentElement.removeAttribute("data-palette");
+    } else {
+      document.documentElement.setAttribute("data-palette", currentPalette);
+    }
+    const icon = document.getElementById("paletteToggleIcon");
+    if (icon) {
+      const active = PALETTES.find((p) => p.key === currentPalette) || PALETTES[0];
+      icon.innerHTML = active.swatches.map((c) => `<span style="background:${c}"></span>`).join("");
+    }
+  }
+
+  function persistPalette() {
+    try { localStorage.setItem(PALETTE_STORAGE_KEY, currentPalette); } catch (e) {}
+  }
+
+  const CHECK_SVG = '<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 10.5L8 14.5L16 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  function renderPaletteList() {
+    const list = document.getElementById("paletteList");
+    if (!list) return;
+    list.innerHTML = PALETTES.map((p) => {
+      const selected = p.key === currentPalette;
+      const swatches = p.swatches.map((c) => `<span style="background:${c}"></span>`).join("");
+      const name = t(p.nameKey);
+      const tag = t(p.tagKey);
+      return `<button type="button" class="palette-option" data-palette-key="${p.key}" aria-pressed="${selected}">
+        <span class="palette-swatches">${swatches}</span>
+        <span class="palette-option-label">
+          <span class="palette-option-name">${name}</span>
+          <span class="palette-option-tag">${tag}</span>
+        </span>
+        <span class="palette-option-check">${CHECK_SVG}</span>
+      </button>`;
+    }).join("");
+    list.querySelectorAll(".palette-option").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        currentPalette = btn.getAttribute("data-palette-key");
+        persistPalette();
+        applyPalette();
+        renderPaletteList();
+        closePalettePopover();
+      });
+    });
+  }
+
+  function openPalettePopover() {
+    document.getElementById("palettePopover").hidden = false;
+    document.getElementById("palettePopoverBackdrop").hidden = false;
+    document.getElementById("paletteToggle").setAttribute("aria-expanded", "true");
+  }
+  function closePalettePopover() {
+    document.getElementById("palettePopover").hidden = true;
+    document.getElementById("palettePopoverBackdrop").hidden = true;
+    document.getElementById("paletteToggle").setAttribute("aria-expanded", "false");
+  }
+
+  applyPalette();
+
   const LANG_STORAGE_KEY = "riceShineLang";
 
   let currentLang = "en";
@@ -1960,6 +2567,31 @@
   const STRINGS = {
     en: {
       brand_sub: "order board",
+      customize_btn: "Customize",
+      customize_title: "Dashboard colors",
+      customize_sub: "Pick a color palette for this dashboard. Saved on this device.",
+      palette_default: "Rice & Shine",
+      palette_default_tag: "Default",
+      palette_sherbet: "Sherbet",
+      palette_sherbet_tag: "Coral, peach & mint",
+      palette_bubblegum: "Bubblegum",
+      palette_bubblegum_tag: "Pink, yellow & sky blue",
+      palette_terracotta: "Terracotta Bay",
+      palette_terracotta_tag: "Salmon, sage & blue",
+      palette_blush: "Blush",
+      palette_blush_tag: "Blush pink & charcoal",
+      palette_lagoon: "Lagoon",
+      palette_lagoon_tag: "Teal, cyan & gold",
+      palette_grove: "Terracotta Grove",
+      palette_grove_tag: "Brown, sage & burnt orange",
+      palette_goldenbay: "Golden Bay",
+      palette_goldenbay_tag: "Marigold, indigo & sky blue",
+      palette_regal: "Regal Autumn",
+      palette_regal_tag: "Navy, forest green & gold",
+      palette_nautical: "Nautical Earth",
+      palette_nautical_tag: "Navy, cream & brown",
+      palette_ember: "Slate Ember",
+      palette_ember_tag: "Grey, slate & orange",
       tab_orders: "Orders",
       tab_prep: "Prep by Day",
       tab_history: "History",
@@ -2058,6 +2690,31 @@
     },
     vi: {
       brand_sub: "bảng theo dõi đơn hàng",
+      customize_btn: "Tùy chỉnh",
+      customize_title: "Màu bảng điều khiển",
+      customize_sub: "Chọn bảng màu cho bảng điều khiển này. Được lưu trên thiết bị này.",
+      palette_default: "Rice & Shine",
+      palette_default_tag: "Mặc định",
+      palette_sherbet: "Sherbet",
+      palette_sherbet_tag: "Cam san hô, đào & bạc hà",
+      palette_bubblegum: "Bubblegum",
+      palette_bubblegum_tag: "Hồng, vàng & xanh da trời",
+      palette_terracotta: "Terracotta Bay",
+      palette_terracotta_tag: "Cam đất, xanh xô thơm & xanh dương",
+      palette_blush: "Blush",
+      palette_blush_tag: "Hồng phấn & than chì",
+      palette_lagoon: "Lagoon",
+      palette_lagoon_tag: "Xanh ngọc, lam & vàng",
+      palette_grove: "Terracotta Grove",
+      palette_grove_tag: "Nâu, xanh xô thơm & cam cháy",
+      palette_goldenbay: "Golden Bay",
+      palette_goldenbay_tag: "Vàng cúc, chàm & xanh da trời",
+      palette_regal: "Regal Autumn",
+      palette_regal_tag: "Xanh navy, xanh lá đậm & vàng",
+      palette_nautical: "Nautical Earth",
+      palette_nautical_tag: "Xanh navy, kem & nâu",
+      palette_ember: "Slate Ember",
+      palette_ember_tag: "Xám, xanh đá & cam",
       tab_orders: "Đơn hàng",
       tab_prep: "Chuẩn bị theo ngày",
       tab_history: "Lịch sử",
@@ -3494,12 +4151,23 @@
     renderPrep();
     renderHistory();
     renderExperienceLog();
+    renderPaletteList();
   }
 
   document.getElementById("langToggle").addEventListener("click", () => {
     currentLang = currentLang === "en" ? "vi" : "en";
     persistLang();
     renderAll();
+  });
+
+  document.getElementById("paletteToggle").addEventListener("click", () => {
+    const isOpen = !document.getElementById("palettePopover").hidden;
+    if (isOpen) closePalettePopover();
+    else openPalettePopover();
+  });
+  document.getElementById("palettePopoverBackdrop").addEventListener("click", closePalettePopover);
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !document.getElementById("palettePopover").hidden) closePalettePopover();
   });
 
   renderAll();
