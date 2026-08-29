@@ -578,6 +578,37 @@
   .lang-toggle:hover, .lang-toggle:focus-visible { filter: brightness(1.15); outline: none; }
   .lang-toggle:active { transform: scale(0.96); }
 
+  /* ---- Cross-device sync (PREVIEW FEATURE) ----
+     Sign-in state and shared/local mode only affect this button's look —
+     everything else about the dashboard renders identically either way. */
+  .sync-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--nori-2);
+    color: var(--rice);
+    border: none;
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    flex: none;
+    max-width: 200px;
+  }
+  .sync-toggle .sync-icon { font-size: 1rem; line-height: 1; flex: none; }
+  .sync-toggle .sync-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .sync-toggle:hover, .sync-toggle:focus-visible { filter: brightness(1.15); outline: none; }
+  .sync-toggle:active { transform: scale(0.96); }
+  .sync-toggle.sync-active { background: var(--matcha); }
+  .sync-toggle.sync-denied { background: var(--salmon); }
+
   .header-actions { position: relative; display: inline-flex; align-items: center; gap: 8px; flex: none; }
 
   .palette-toggle {
@@ -1705,6 +1736,9 @@
       </div>
       <button type="button" id="langToggle" class="lang-toggle">
         <span class="lang-globe" aria-hidden="true">🌐</span><span class="lang-code" id="langCode">EN</span>
+      </button>
+      <button type="button" id="syncToggle" class="sync-toggle" title="Cross-device sync">
+        <span class="sync-icon" id="syncIcon" aria-hidden="true">🔗</span><span class="sync-label" id="syncLabel">Sync</span>
       </button>
     </div>
   </header>
@@ -3087,9 +3121,11 @@
 
   function toggleCompleted(o) {
     const key = orderKey(o);
-    if (completedSet.has(key)) completedSet.delete(key);
-    else completedSet.add(key);
+    let nowDone;
+    if (completedSet.has(key)) { completedSet.delete(key); nowDone = false; }
+    else { completedSet.add(key); nowDone = true; }
     persistCompleted();
+    if (window.RiceShineSync?.isSharedMode?.()) window.RiceShineSync.setCompleted(key, nowDone);
   }
 
   // ---- Deleted-order tracking ----
@@ -3119,26 +3155,37 @@
   }
 
   function deleteOrder(o) {
-    deletedSet.add(orderKey(o));
+    const key = orderKey(o);
+    deletedSet.add(key);
     persistDeleted();
     // Pull it out of buyer history too, so a wrongly-logged order stops
     // counting toward that customer's Returning/Biggest-buyer totals and
     // drops out of the History tab immediately, not just after a reload.
     delete buyerHistory[orderIdentity(o)];
     persistBuyerHistory();
+    if (window.RiceShineSync?.isSharedMode?.()) {
+      window.RiceShineSync.setDeleted(key, true);
+      window.RiceShineSync.deleteBuyerHistoryEntry(orderIdentity(o));
+    }
   }
 
   function restoreOrder(o) {
-    deletedSet.delete(orderKey(o));
+    const key = orderKey(o);
+    deletedSet.delete(key);
     persistDeleted();
-    buyerHistory[orderIdentity(o)] = {
+    const historyEntry = {
       handle: o.handle,
       name: o.name,
       total: o.total,
       orderDate: o.orderDate || "",
       orderTime: o.orderTime || "",
     };
+    buyerHistory[orderIdentity(o)] = historyEntry;
     persistBuyerHistory();
+    if (window.RiceShineSync?.isSharedMode?.()) {
+      window.RiceShineSync.setDeleted(key, false);
+      window.RiceShineSync.setBuyerHistoryBatch([[orderIdentity(o), historyEntry]]);
+    }
   }
 
   // Brief "Order deleted — Undo" toast so a misclick can be reversed in one
@@ -3256,8 +3303,11 @@
   }
 
   function acknowledgeOrder(o) {
-    seenMap[orderIdentity(o)] = orderFingerprint(o);
+    const id = orderIdentity(o);
+    const fp = orderFingerprint(o);
+    seenMap[id] = fp;
     persistSeen();
+    if (window.RiceShineSync?.isSharedMode?.()) window.RiceShineSync.setSeen(id, fp);
   }
 
   // ---- Buyer order history (Returning buyers / Biggest buyers) ----
@@ -3278,29 +3328,48 @@
     buyerHistory = {};
   }
 
-  ORDERS.forEach(o => {
-    // A deleted order shouldn't get (re-)recorded into buyer history on
-    // load — deleteOrder()/restoreOrder() below keep this in sync as the
-    // deleted set changes during the session.
-    if (isDeleted(o)) return;
-    buyerHistory[orderIdentity(o)] = {
-      handle: o.handle,
-      name: o.name,
-      total: o.total,
-      orderDate: o.orderDate || "",
-      orderTime: o.orderTime || "",
-    };
-  });
-
-  try {
-    localStorage.setItem(BUYER_HISTORY_STORAGE_KEY, JSON.stringify(buyerHistory));
-  } catch (e) {}
-
   function persistBuyerHistory() {
     try {
       localStorage.setItem(BUYER_HISTORY_STORAGE_KEY, JSON.stringify(buyerHistory));
     } catch (e) {}
   }
+
+  // Recomputes each active order's buyerHistory entry from the current
+  // ORDERS array and merges any new/changed entries into buyerHistory,
+  // persisting locally and — when shared mode is on — forwarding only the
+  // entries that actually changed to Firestore in a single batched write
+  // (so this costs one write no matter how many orders are on the board).
+  // Called at normal page load (replacing what used to be an unconditional
+  // per-load rewrite here) and again after every remote sync update, since
+  // a remote snapshot's buyerHistory won't yet include orders that are new
+  // on this week's board but haven't been recorded anywhere yet.
+  function rebuildBuyerHistoryFromOrders() {
+    const changed = [];
+    ORDERS.forEach(o => {
+      // A deleted order shouldn't get (re-)recorded into buyer history —
+      // deleteOrder()/restoreOrder() above keep this in sync as the
+      // deleted set changes during the session.
+      if (isDeleted(o)) return;
+      const id = orderIdentity(o);
+      const entry = {
+        handle: o.handle,
+        name: o.name,
+        total: o.total,
+        orderDate: o.orderDate || "",
+        orderTime: o.orderTime || "",
+      };
+      if (JSON.stringify(buyerHistory[id]) !== JSON.stringify(entry)) {
+        buyerHistory[id] = entry;
+        changed.push([id, entry]);
+      }
+    });
+    persistBuyerHistory();
+    if (changed.length && window.RiceShineSync?.isSharedMode?.()) {
+      window.RiceShineSync.setBuyerHistoryBatch(changed);
+    }
+  }
+
+  rebuildBuyerHistoryFromOrders();
 
   // One row per buyer (by handle), summed across every order ever recorded
   // for them in this browser — not just whatever's in this week's ORDERS.
@@ -3367,7 +3436,7 @@
   }
 
   function addExperienceEntry(o, tags, note) {
-    experienceLog.push({
+    const entry = {
       id: `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
       handle: o.handle,
       name: o.name,
@@ -3376,13 +3445,16 @@
       orderRef: orderIdentity(o),
       tags: tags.slice(),
       note: note || "",
-    });
+    };
+    experienceLog.push(entry);
     persistExperienceLog();
+    if (window.RiceShineSync?.isSharedMode?.()) window.RiceShineSync.addExperienceEntry(entry);
   }
 
   function deleteExperienceEntry(id) {
     experienceLog = experienceLog.filter((e) => e.id !== id);
     persistExperienceLog();
+    if (window.RiceShineSync?.isSharedMode?.()) window.RiceShineSync.deleteExperienceEntry(id);
   }
 
   // Which orders currently have their log panel expanded — purely
@@ -4238,5 +4310,338 @@
     if (e.key === "Escape" && !document.getElementById("palettePopover").hidden) closePalettePopover();
   });
 
+  // ---- Cross-device sync (PREVIEW FEATURE) ----
+  // Fired by the Firebase module script below whenever an authorized user's
+  // shared Firestore state is created or changes (including the very first
+  // snapshot right after sign-in). Overwrites the local view of shared
+  // state and re-renders — localStorage is kept updated too, purely as an
+  // offline fallback cache, not as the source of truth once shared mode is
+  // active. Registering this listener doesn't depend on the module script
+  // having loaded yet — it just waits for the event, whenever it comes.
+  document.addEventListener("riceshine-sync-change", (e) => {
+    const remote = e.detail || {};
+    completedSet = new Set(Object.keys(remote.completed || {}));
+    deletedSet = new Set(Object.keys(remote.deleted || {}));
+    seenMap = remote.seen || {};
+    buyerHistory = remote.buyerHistory || {};
+    experienceLog = remote.experienceLog || [];
+    persistCompleted();
+    persistDeleted();
+    persistSeen();
+    persistBuyerHistory();
+    persistExperienceLog();
+    // This week's ORDERS may include orders the remote snapshot doesn't
+    // know about yet (e.g. added locally before this device ever signed
+    // in) — reconcile and push any diffs back up.
+    rebuildBuyerHistoryFromOrders();
+    renderAll();
+  });
+
   renderAll();
+</script>
+
+<script type="module">
+  // ==== Cross-device sync (PREVIEW FEATURE) ====
+  // Everything in this block is additive and self-contained: if this script
+  // fails to load, fails to initialize, or the signed-in Google account
+  // isn't one of the 3 allowed emails below, the dashboard above behaves
+  // exactly as it always has — localStorage-only, per device, per browser.
+  // Only a successful sign-in with an allowed email switches the page into
+  // "shared mode" (real-time Firestore sync). The big non-module script
+  // above is completely untouched in scope/behavior by this block; the two
+  // only talk to each other through window.RiceShineSync and a couple of
+  // CustomEvents, both defined here.
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import {
+    getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect,
+    getRedirectResult, onAuthStateChanged, signOut as fbSignOut,
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  import {
+    getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot,
+    FieldPath, deleteField, arrayUnion,
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDhQa0SwA-UJwcgdwrEu0wX_gPonSwy4hI",
+    authDomain: "rice-shine-order-board.firebaseapp.com",
+    projectId: "rice-shine-order-board",
+    storageBucket: "rice-shine-order-board.firebasestorage.app",
+    messagingSenderId: "825722400081",
+    appId: "1:825722400081:web:0f9f6c7781b7e9e1193770",
+  };
+
+  // Only these 3 accounts can see or write shared/live status. Tony can ask
+  // to add more later — this list is the single place that would change.
+  const ALLOWED_EMAILS = new Set([
+    "htran42595@gmail.com",
+    "vytrinh1308@gmail.com",
+    "253boutique@gmail.com",
+  ]);
+
+  // Same localStorage key names the main script above uses — duplicated
+  // here (rather than shared) so this block can read a brand-new allowed
+  // user's pre-sign-in local state for the one-time migration without
+  // reaching into the other script's internals.
+  const LS = {
+    completed: "riceShineCompletedOrders",
+    deleted: "riceShineDeletedOrders",
+    seen: "riceShineSeenOrders",
+    buyerHistory: "riceShineBuyerOrderHistory",
+    experience: "riceShineBuyerExperience",
+  };
+
+  function readLocalJSON(key, fallback) {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch (e) {
+      return fallback;
+    }
+  }
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const stateDocRef = doc(db, "riceShineBoard", "state");
+
+  let currentUser = null;
+  let authorized = false;
+  let sharedMode = false;
+  let unsubscribeSnapshot = null;
+  let lastRemoteData = null; // most recent doc data — needed for delete-by-id ops on experienceLog
+
+  function dispatchAuthChange() {
+    document.dispatchEvent(new CustomEvent("riceshine-sync-auth-change", {
+      detail: {
+        signedIn: !!currentUser,
+        email: currentUser ? currentUser.email : null,
+        authorized,
+        sharedMode,
+      },
+    }));
+  }
+
+  function dispatchDataChange(data) {
+    lastRemoteData = data;
+    document.dispatchEvent(new CustomEvent("riceshine-sync-change", {
+      detail: {
+        completed: data.completed || {},
+        deleted: data.deleted || {},
+        seen: data.seen || {},
+        buyerHistory: data.buyerHistory || {},
+        experienceLog: data.experienceLog || [],
+      },
+    }));
+  }
+
+  async function migrateLocalStateIfEmpty() {
+    const snap = await getDoc(stateDocRef);
+    if (snap.exists()) return;
+    // First allowed sign-in ever, anywhere — seed the shared doc from
+    // whatever this browser already has locally, so nobody's existing
+    // progress vanishes the moment shared mode turns on.
+    const seed = {
+      completed: {},
+      deleted: {},
+      seen: readLocalJSON(LS.seen, {}),
+      buyerHistory: readLocalJSON(LS.buyerHistory, {}),
+      experienceLog: readLocalJSON(LS.experience, []),
+    };
+    readLocalJSON(LS.completed, []).forEach((k) => { seed.completed[k] = true; });
+    readLocalJSON(LS.deleted, []).forEach((k) => { seed.deleted[k] = true; });
+    try {
+      await setDoc(stateDocRef, seed);
+    } catch (e) {
+      // If two allowed users both happen to be the very first sign-in at
+      // nearly the same moment, one setDoc may lose a race — harmless, the
+      // onSnapshot listener below just picks up whichever write landed.
+      console.warn("Rice & Shine sync: migration write failed", e);
+    }
+  }
+
+  function attachSnapshotListener() {
+    if (unsubscribeSnapshot) return;
+    unsubscribeSnapshot = onSnapshot(stateDocRef, (snap) => {
+      if (snap.exists()) dispatchDataChange(snap.data());
+    }, (err) => {
+      console.warn("Rice & Shine sync: snapshot listener error", err);
+    });
+  }
+
+  function detachSnapshotListener() {
+    if (unsubscribeSnapshot) {
+      unsubscribeSnapshot();
+      unsubscribeSnapshot = null;
+    }
+    lastRemoteData = null;
+  }
+
+  onAuthStateChanged(auth, async (user) => {
+    currentUser = user;
+    authorized = !!(user && user.email && ALLOWED_EMAILS.has(user.email));
+    sharedMode = authorized;
+    if (authorized) {
+      try {
+        await migrateLocalStateIfEmpty();
+      } catch (e) {
+        console.warn("Rice & Shine sync: migration check failed", e);
+      }
+      attachSnapshotListener();
+    } else {
+      detachSnapshotListener();
+    }
+    dispatchAuthChange();
+    updateSyncStatusUI();
+  });
+
+  // iPad Safari (and some in-app browsers) can block popup-based sign-in —
+  // fall back to a full-page redirect specifically when the popup itself
+  // was blocked or unsupported, not on every error, since a user closing
+  // the popup on purpose shouldn't get silently redirected instead.
+  async function signIn() {
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+    } catch (e) {
+      if (e && (e.code === "auth/popup-blocked" || e.code === "auth/operation-not-supported-in-this-environment")) {
+        await signInWithRedirect(auth, provider);
+      } else if (e && e.code !== "auth/popup-closed-by-user" && e.code !== "auth/cancelled-popup-request") {
+        console.warn("Rice & Shine sync: sign-in failed", e);
+        alert("Sign-in didn't go through. Please try again.");
+      }
+    }
+  }
+
+  async function signOutUser() {
+    try {
+      await fbSignOut(auth);
+    } catch (e) {
+      console.warn("Rice & Shine sync: sign-out failed", e);
+    }
+  }
+
+  // ---- Write helpers ----
+  // FieldPath (not dot-notation strings) is required for every nested map
+  // write below: real Instagram handles contain periods (e.g.
+  // "brendi.net2", "xo.jailine"), and Firestore's dot-notation update paths
+  // would otherwise misparse those as nested fields instead of one literal
+  // map key.
+  async function writeField(topField, key, value) {
+    if (!sharedMode) return;
+    try {
+      if (value === undefined || value === null) {
+        await updateDoc(stateDocRef, new FieldPath(topField, key), deleteField());
+      } else {
+        await updateDoc(stateDocRef, new FieldPath(topField, key), value);
+      }
+    } catch (e) {
+      console.warn(`Rice & Shine sync: failed to write ${topField}.${key}`, e);
+    }
+  }
+
+  async function setCompleted(key, isDone) {
+    await writeField("completed", key, isDone ? true : null);
+  }
+
+  async function setDeleted(key, isDel) {
+    await writeField("deleted", key, isDel ? true : null);
+  }
+
+  async function setSeen(identity, fingerprint) {
+    await writeField("seen", identity, fingerprint);
+  }
+
+  // Batched so updating buyerHistory for the whole board on load costs one
+  // Firestore write, not one per order.
+  async function setBuyerHistoryBatch(pairs) {
+    if (!sharedMode || !pairs || !pairs.length) return;
+    try {
+      const args = [];
+      pairs.forEach(([identity, value]) => {
+        args.push(new FieldPath("buyerHistory", identity), value === null ? deleteField() : value);
+      });
+      await updateDoc(stateDocRef, ...args);
+    } catch (e) {
+      console.warn("Rice & Shine sync: failed to write buyerHistory batch", e);
+    }
+  }
+
+  async function deleteBuyerHistoryEntry(identity) {
+    await writeField("buyerHistory", identity, null);
+  }
+
+  async function addExperienceEntryRemote(entry) {
+    if (!sharedMode) return;
+    try {
+      await updateDoc(stateDocRef, "experienceLog", arrayUnion(entry));
+    } catch (e) {
+      console.warn("Rice & Shine sync: failed to append experience entry", e);
+    }
+  }
+
+  async function deleteExperienceEntryRemote(id) {
+    if (!sharedMode) return;
+    try {
+      const current = (lastRemoteData && lastRemoteData.experienceLog) || [];
+      await updateDoc(stateDocRef, "experienceLog", current.filter((e) => e.id !== id));
+    } catch (e) {
+      console.warn("Rice & Shine sync: failed to remove experience entry", e);
+    }
+  }
+
+  // ---- Sync button UI ----
+  // Sign-in state and shared/local mode only ever affect this one button's
+  // look — everything else about the dashboard renders identically either
+  // way, whether or not this script even finishes loading.
+  function updateSyncStatusUI() {
+    const btn = document.getElementById("syncToggle");
+    const icon = document.getElementById("syncIcon");
+    const label = document.getElementById("syncLabel");
+    if (!btn || !icon || !label) return;
+    btn.classList.remove("sync-active", "sync-denied");
+    if (!currentUser) {
+      icon.textContent = "🔗";
+      label.textContent = "Sync";
+      btn.title = "Sign in to sync across devices";
+    } else if (authorized) {
+      btn.classList.add("sync-active");
+      icon.textContent = "✅";
+      label.textContent = currentUser.email;
+      btn.title = "Synced across devices — click to sign out";
+    } else {
+      btn.classList.add("sync-denied");
+      icon.textContent = "⛔";
+      label.textContent = "Not allowed";
+      btn.title = `${currentUser.email} isn't set up for shared access — click to sign out`;
+    }
+  }
+
+  document.getElementById("syncToggle")?.addEventListener("click", () => {
+    if (currentUser) signOutUser();
+    else signIn();
+  });
+
+  // Picks up the result if signIn() above had to fall back to a full-page
+  // redirect (iPad Safari, etc.) — onAuthStateChanged above still fires
+  // normally once this resolves.
+  getRedirectResult(auth).catch((e) => {
+    console.warn("Rice & Shine sync: redirect result error", e);
+  });
+
+  window.RiceShineSync = {
+    isSharedMode: () => sharedMode,
+    getUserEmail: () => (currentUser ? currentUser.email : null),
+    isAuthorized: () => authorized,
+    signIn,
+    signOut: signOutUser,
+    setCompleted,
+    setDeleted,
+    setSeen,
+    setBuyerHistoryBatch,
+    deleteBuyerHistoryEntry,
+    addExperienceEntry: addExperienceEntryRemote,
+    deleteExperienceEntry: deleteExperienceEntryRemote,
+  };
+
+  updateSyncStatusUI();
 </script>
