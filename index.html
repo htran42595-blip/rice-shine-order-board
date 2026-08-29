@@ -329,6 +329,89 @@
     .flag-badge { animation: none; }
   }
 
+  /* ---- Delete / restore ---- */
+  /* Small red X in the top-right corner of every active/completed card —
+     mirrors the flag-badge's position on the top-left. Deleting never
+     touches the ORDERS array; it's a per-viewer localStorage flag (same
+     pattern as completed-order tracking), so it's always reversible. */
+  .delete-btn {
+    position: absolute;
+    top: -10px;
+    right: 14px;
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--card);
+    color: var(--warn);
+    border: 1.5px solid var(--warn);
+    border-radius: 999px;
+    padding: 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(37, 26, 56, 0.25);
+  }
+  .delete-btn:hover, .delete-btn:focus-visible { background: var(--warn); color: var(--card); outline: none; }
+  .delete-btn:active { transform: scale(0.92); }
+
+  .ticket.is-deleted { opacity: 0.6; border-style: dashed; }
+
+  .restore-btn {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--matcha-soft);
+    color: var(--matcha);
+    border: 1.5px solid var(--matcha);
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .restore-btn:hover, .restore-btn:focus-visible { filter: brightness(1.05); outline: none; }
+  .restore-btn:active { transform: scale(0.97); }
+
+  /* ---- Undo toast ---- */
+  .undo-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--ink);
+    color: var(--rice);
+    border-radius: 999px;
+    padding: 12px 12px 12px 20px;
+    box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.45);
+    z-index: 40;
+    font-size: 0.88rem;
+    animation: undoIn 0.18s ease-out;
+  }
+  .undo-toast button {
+    background: var(--tea);
+    color: var(--tea-ink);
+    border: none;
+    border-radius: 999px;
+    padding: 7px 16px;
+    font-weight: 700;
+    font-size: 0.82rem;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .undo-toast button:hover { filter: brightness(1.08); }
+  @keyframes undoIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(8px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+  }
+
   .flag-count {
     display: inline-block;
     margin-left: 6px;
@@ -1125,9 +1208,11 @@
     <nav class="subtabs" role="tablist" aria-label="Order status">
       <button role="tab" id="subtab-active" aria-selected="true" aria-controls="orderGridActive">Active Orders</button>
       <button role="tab" id="subtab-completed" aria-selected="false" aria-controls="orderGridCompleted">Completed Orders</button>
+      <button role="tab" id="subtab-deleted" aria-selected="false" aria-controls="orderGridDeleted">Deleted</button>
     </nav>
     <div class="order-grid" id="orderGridActive" role="tabpanel" aria-labelledby="subtab-active"></div>
     <div class="order-grid" id="orderGridCompleted" role="tabpanel" aria-labelledby="subtab-completed" hidden></div>
+    <div class="order-grid" id="orderGridDeleted" role="tabpanel" aria-labelledby="subtab-deleted" hidden></div>
   </section>
 
   <section id="view-prep" role="tabpanel" aria-labelledby="tab-prep" hidden>
@@ -1845,6 +1930,7 @@
       tab_history: "History",
       subtab_active: "Active Orders",
       subtab_completed: "Completed Orders",
+      subtab_deleted: "Deleted",
       label_unreviewed: "unreviewed",
       stat_open_orders: "Open orders",
       stat_total_value: "Total value",
@@ -1901,6 +1987,12 @@
       toggle_mark_complete: "Mark complete",
       toggle_title_move_back: "Move back to active",
       toggle_title_mark_done: "Mark as picked up / completed",
+      delete_btn_title: "Delete this order",
+      restore_btn: "↩ Restore",
+      restore_btn_title: "Restore this order",
+      empty_no_deleted: "No deleted orders.",
+      undo_toast_text: "Order deleted.",
+      undo_toast_btn: "Undo",
       exp_log_btn: "📝 Log experience",
       exp_log_btn_title: "Optional — log a no-show, late payment, last-minute change, or late pickup",
       exp_save_btn: "Save entry",
@@ -1936,6 +2028,7 @@
       tab_history: "Lịch sử",
       subtab_active: "Đơn đang xử lý",
       subtab_completed: "Đơn đã hoàn tất",
+      subtab_deleted: "Đã xóa",
       label_unreviewed: "chưa xem",
       stat_open_orders: "Đơn đang mở",
       stat_total_value: "Tổng giá trị",
@@ -1992,6 +2085,12 @@
       toggle_mark_complete: "Đánh dấu hoàn tất",
       toggle_title_move_back: "Chuyển lại về đang xử lý",
       toggle_title_mark_done: "Đánh dấu đã lấy hàng / hoàn tất",
+      delete_btn_title: "Xóa đơn này",
+      restore_btn: "↩ Khôi phục",
+      restore_btn_title: "Khôi phục đơn này",
+      empty_no_deleted: "Không có đơn nào đã xóa.",
+      undo_toast_text: "Đã xóa đơn hàng.",
+      undo_toast_btn: "Hoàn tác",
       exp_log_btn: "📝 Ghi trải nghiệm",
       exp_log_btn_title: "Không bắt buộc — ghi lại việc khách không đến, trả tiền trễ, đổi ý phút chót, hoặc lấy hàng trễ",
       exp_save_btn: "Lưu ghi chú",
@@ -2233,6 +2332,79 @@
     persistCompleted();
   }
 
+  // ---- Deleted-order tracking ----
+  // A wrongly-logged order (duplicate, misread thread, etc.) that Tony never
+  // wants to see in Active or Completed. Same pattern as completed-order
+  // tracking: a per-viewer localStorage set keyed off orderKey(), never a
+  // mutation of the ORDERS array itself. That's what makes it reversible —
+  // "deleting" just hides the card behind the Deleted subtab, where a
+  // Restore button puts it right back. Nothing here is ever destroyed.
+  const DELETED_STORAGE_KEY = "riceShineDeletedOrders";
+
+  let deletedSet = new Set();
+  try {
+    deletedSet = new Set(JSON.parse(localStorage.getItem(DELETED_STORAGE_KEY) || "[]"));
+  } catch (e) {
+    // Private browsing / storage disabled — deletion just won't persist across reloads.
+  }
+
+  function persistDeleted() {
+    try {
+      localStorage.setItem(DELETED_STORAGE_KEY, JSON.stringify([...deletedSet]));
+    } catch (e) {}
+  }
+
+  function isDeleted(o) {
+    return deletedSet.has(orderKey(o));
+  }
+
+  function deleteOrder(o) {
+    deletedSet.add(orderKey(o));
+    persistDeleted();
+    // Pull it out of buyer history too, so a wrongly-logged order stops
+    // counting toward that customer's Returning/Biggest-buyer totals and
+    // drops out of the History tab immediately, not just after a reload.
+    delete buyerHistory[orderIdentity(o)];
+    persistBuyerHistory();
+  }
+
+  function restoreOrder(o) {
+    deletedSet.delete(orderKey(o));
+    persistDeleted();
+    buyerHistory[orderIdentity(o)] = {
+      handle: o.handle,
+      name: o.name,
+      total: o.total,
+      orderDate: o.orderDate || "",
+      orderTime: o.orderTime || "",
+    };
+    persistBuyerHistory();
+  }
+
+  // Brief "Order deleted — Undo" toast so a misclick can be reversed in one
+  // tap without hunting for the Deleted subtab. The Deleted subtab itself is
+  // the permanent safety net if the toast is missed.
+  let undoToastTimer = null;
+  function showUndoToast(o) {
+    const existing = document.querySelector(".undo-toast");
+    if (existing) existing.remove();
+    if (undoToastTimer) clearTimeout(undoToastTimer);
+
+    const toast = document.createElement("div");
+    toast.className = "undo-toast";
+    toast.innerHTML = `<span>${t("undo_toast_text")}</span><button type="button">${t("undo_toast_btn")}</button>`;
+    toast.querySelector("button").addEventListener("click", () => {
+      restoreOrder(o);
+      toast.remove();
+      renderOrders();
+      renderStats();
+      renderPrep();
+      renderHistory();
+    });
+    document.body.appendChild(toast);
+    undoToastTimer = setTimeout(() => toast.remove(), 6000);
+  }
+
   // ---- Completion sound ----
   // A "cha-ching" cue when an order gets marked complete — a short coin
   // sound effect Tony picked out (sourced from Freesound, embedded here as
@@ -2347,6 +2519,10 @@
   }
 
   ORDERS.forEach(o => {
+    // A deleted order shouldn't get (re-)recorded into buyer history on
+    // load — deleteOrder()/restoreOrder() below keep this in sync as the
+    // deleted set changes during the session.
+    if (isDeleted(o)) return;
     buyerHistory[orderIdentity(o)] = {
       handle: o.handle,
       name: o.name,
@@ -2359,6 +2535,12 @@
   try {
     localStorage.setItem(BUYER_HISTORY_STORAGE_KEY, JSON.stringify(buyerHistory));
   } catch (e) {}
+
+  function persistBuyerHistory() {
+    try {
+      localStorage.setItem(BUYER_HISTORY_STORAGE_KEY, JSON.stringify(buyerHistory));
+    } catch (e) {}
+  }
 
   // One row per buyer (by handle), summed across every order ever recorded
   // for them in this browser — not just whatever's in this week's ORDERS.
@@ -2568,7 +2750,7 @@
   // Based on active (not-yet-completed) orders only, so the numbers always
   // reflect what's actually still outstanding.
   function renderStats() {
-    const active = ORDERS.filter(o => !isCompleted(o));
+    const active = ORDERS.filter(o => !isCompleted(o) && !isDeleted(o));
     const total = active.length;
     const revenue = active.reduce((s, o) => s + o.total, 0);
     const unpaid = active.filter(o => !o.paid).length;
@@ -2584,7 +2766,7 @@
   }
 
   // ---- Orders view ----
-  function renderTicket(o, idx, groups) {
+  function renderTicket(o, idx, groups, deletedMode) {
     const gk = timeGroupKey(o);
     const gcls = groups.classes[gk];
     const gcount = groups.counts[gk];
@@ -2594,7 +2776,10 @@
     const expOpen = openExpPanels.has(orderIdentity(o));
     const histOpen = openHistoryBadges.has(orderIdentity(o));
     return `
-      <article class="ticket ${gcls || ""} ${completed ? "is-complete" : ""} ${flag ? "is-flagged" : ""}">
+      <article class="ticket ${gcls || ""} ${completed ? "is-complete" : ""} ${flag ? "is-flagged" : ""} ${deletedMode ? "is-deleted" : ""}">
+        ${!deletedMode ? `
+          <button type="button" class="delete-btn" data-idx="${idx}" title="${t("delete_btn_title")}" aria-label="${t("delete_btn_title")}">×</button>
+        ` : ""}
         ${flag ? `
           <button type="button" class="flag-badge" data-idx="${idx}" title="${flag === "new" ? t("flag_new_title") : t("flag_updated_title")}" aria-label="${flag === "new" ? t("flag_new_title") : t("flag_updated_title")}">
             <span class="flag-asterisk">*</span><span>${flag === "new" ? t("flag_new") : t("flag_updated")}</span>
@@ -2637,11 +2822,15 @@
           <button type="button" class="exp-toggle-btn ${expEntries.length ? "has-entries" : ""}" data-idx="${idx}" aria-expanded="${expOpen}" title="${t("exp_log_btn_title")}">
             ${t("exp_log_btn")}${expEntries.length ? ` (${expEntries.length})` : ""}
           </button>
-          <label class="toggle" title="${completed ? t("toggle_title_move_back") : t("toggle_title_mark_done")}">
-            <input type="checkbox" class="complete-toggle" data-idx="${idx}" ${completed ? "checked" : ""}>
-            <span class="track"></span>
-            <span class="tlabel">${completed ? t("toggle_completed") : t("toggle_mark_complete")}</span>
-          </label>
+          ${deletedMode ? `
+            <button type="button" class="restore-btn" data-idx="${idx}" title="${t("restore_btn_title")}">${t("restore_btn")}</button>
+          ` : `
+            <label class="toggle" title="${completed ? t("toggle_title_move_back") : t("toggle_title_mark_done")}">
+              <input type="checkbox" class="complete-toggle" data-idx="${idx}" ${completed ? "checked" : ""}>
+              <span class="track"></span>
+              <span class="tlabel">${completed ? t("toggle_completed") : t("toggle_mark_complete")}</span>
+            </label>
+          `}
         </div>
         ${expOpen ? renderExpPanel(o, idx, expEntries) : ""}
       </article>
@@ -2753,22 +2942,58 @@
     });
   }
 
+  function wireDelete(gridEl, list) {
+    gridEl.querySelectorAll(".delete-btn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const o = list[Number(btn.dataset.idx)];
+        deleteOrder(o);
+        renderOrders();
+        renderStats();
+        renderPrep();
+        renderHistory();
+        showUndoToast(o);
+      });
+    });
+  }
+
+  function wireRestore(gridEl, list) {
+    gridEl.querySelectorAll(".restore-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const o = list[Number(btn.dataset.idx)];
+        restoreOrder(o);
+        renderOrders();
+        renderStats();
+        renderPrep();
+        renderHistory();
+      });
+    });
+  }
+
   function renderOrders() {
     const sorted = ordersByPickup(ORDERS);
     const groups = computeTimeGroups(sorted);
-    const active = sorted.filter(o => !isCompleted(o));
-    const completed = sorted.filter(o => isCompleted(o));
+    const visible = sorted.filter(o => !isDeleted(o));
+    const active = visible.filter(o => !isCompleted(o));
+    const completed = visible.filter(o => isCompleted(o));
+    const deleted = sorted.filter(o => isDeleted(o));
 
     const gridActive = document.getElementById("orderGridActive");
     const gridCompleted = document.getElementById("orderGridCompleted");
+    const gridDeleted = document.getElementById("orderGridDeleted");
 
     gridActive.innerHTML = active.length
-      ? active.map((o, idx) => renderTicket(o, idx, groups)).join("")
+      ? active.map((o, idx) => renderTicket(o, idx, groups, false)).join("")
       : `<div class="empty-state">${t("empty_no_active")}</div>`;
 
     gridCompleted.innerHTML = completed.length
-      ? completed.map((o, idx) => renderTicket(o, idx, groups)).join("")
+      ? completed.map((o, idx) => renderTicket(o, idx, groups, false)).join("")
       : `<div class="empty-state">${t("empty_no_completed")}</div>`;
+
+    gridDeleted.innerHTML = deleted.length
+      ? deleted.map((o, idx) => renderTicket(o, idx, groups, true)).join("")
+      : `<div class="empty-state">${t("empty_no_deleted")}</div>`;
 
     wireToggles(gridActive, active);
     wireToggles(gridCompleted, completed);
@@ -2776,10 +3001,15 @@
     wireFlags(gridCompleted, completed);
     wireExperience(gridActive, active);
     wireExperience(gridCompleted, completed);
+    wireExperience(gridDeleted, deleted);
+    wireDelete(gridActive, active);
+    wireDelete(gridCompleted, completed);
+    wireRestore(gridDeleted, deleted);
 
     const activeFlagged = active.filter(o => orderFlag(o)).length;
     subtabActive.innerHTML = `${t("subtab_active")} (${active.length})${activeFlagged ? `<span class="flag-count">${activeFlagged} ${t("label_unreviewed")}</span>` : ""}`;
     subtabCompleted.textContent = `${t("subtab_completed")} (${completed.length})`;
+    subtabDeleted.textContent = `${t("subtab_deleted")} (${deleted.length})`;
   }
 
   // ---- Prep by day view ----
@@ -2787,7 +3017,7 @@
   // something's picked up, it should drop off the "still need to prep" list.
   function renderPrep() {
     const byDay = {};
-    for (const o of ORDERS.filter(o => !isCompleted(o))) {
+    for (const o of ORDERS.filter(o => !isCompleted(o) && !isDeleted(o))) {
       (byDay[o.pickupDate] ||= []).push(o);
     }
     const days = Object.keys(byDay).sort();
@@ -2874,13 +3104,16 @@
   }
 
   function ordersInWindow(days) {
-    if (days === "all") return ORDERS.slice();
+    // Deleted orders never count toward History — that's the whole point of
+    // deleting a wrongly-logged order rather than just marking it complete.
+    if (days === "all") return ORDERS.filter((o) => !isDeleted(o));
     const cutoff = new Date();
     cutoff.setUTCHours(0, 0, 0, 0);
     cutoff.setUTCDate(cutoff.getUTCDate() - days);
     // Orders with no orderDate can't be placed in a rolling window, so they
     // only ever show up under "All time".
     return ORDERS.filter((o) => {
+      if (isDeleted(o)) return false;
       const d = parseOrderDate(o);
       return d && d >= cutoff;
     });
@@ -3194,21 +3427,25 @@
   tabPrep.addEventListener("click", () => activate("prep"));
   tabHistory.addEventListener("click", () => activate("history"));
 
-  // ---- Orders / Completed subtabs ----
+  // ---- Orders / Completed / Deleted subtabs ----
   const subtabActive = document.getElementById("subtab-active");
   const subtabCompleted = document.getElementById("subtab-completed");
+  const subtabDeleted = document.getElementById("subtab-deleted");
   const gridActiveEl = document.getElementById("orderGridActive");
   const gridCompletedEl = document.getElementById("orderGridCompleted");
+  const gridDeletedEl = document.getElementById("orderGridDeleted");
 
   function activateSub(which) {
-    const isActive = which === "active";
-    subtabActive.setAttribute("aria-selected", String(isActive));
-    subtabCompleted.setAttribute("aria-selected", String(!isActive));
-    gridActiveEl.hidden = !isActive;
-    gridCompletedEl.hidden = isActive;
+    subtabActive.setAttribute("aria-selected", String(which === "active"));
+    subtabCompleted.setAttribute("aria-selected", String(which === "completed"));
+    subtabDeleted.setAttribute("aria-selected", String(which === "deleted"));
+    gridActiveEl.hidden = which !== "active";
+    gridCompletedEl.hidden = which !== "completed";
+    gridDeletedEl.hidden = which !== "deleted";
   }
   subtabActive.addEventListener("click", () => activateSub("active"));
   subtabCompleted.addEventListener("click", () => activateSub("completed"));
+  subtabDeleted.addEventListener("click", () => activateSub("deleted"));
 
   // ---- Language toggle (PREVIEW FEATURE) ----
   // Runs the full set of top-level render calls, same set as the initial
