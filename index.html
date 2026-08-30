@@ -1526,6 +1526,136 @@
   .roster-row .time { font-family: "Space Mono", monospace; color: var(--ink-soft); font-size: 0.8rem; }
   .roster-row .what { color: var(--ink-soft); flex: 1; margin: 0 12px; }
 
+  /* ---- Prep by Time (collapsible widget, top of Orders tab) ---- */
+  .prep-time-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    margin-bottom: 18px;
+    overflow: hidden;
+  }
+
+  .prep-time-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: var(--nori);
+    color: var(--rice);
+    border: none;
+    padding: 14px 20px;
+    font-family: inherit;
+    cursor: pointer;
+    text-align: left;
+  }
+  .prep-time-toggle:focus-visible { outline: 2px solid var(--tea); outline-offset: -2px; }
+  .prep-time-toggle .left { display: flex; align-items: center; gap: 10px; }
+  .prep-time-toggle .icon { font-size: 1.1rem; }
+  .prep-time-toggle .title { font-family: "Bricolage Grotesque", sans-serif; font-weight: 700; font-size: 1.05rem; }
+  .prep-time-toggle .hint { font-size: 0.78rem; opacity: 0.8; font-family: "Space Mono", monospace; }
+  .prep-time-toggle .chevron { transition: transform 0.15s ease; font-size: 0.9rem; }
+  .prep-time-toggle[aria-expanded="true"] .chevron { transform: rotate(180deg); }
+
+  .prep-time-body[hidden] { display: none; }
+
+  .pt-controls {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: flex-end;
+  }
+  .pt-control-group { display: flex; flex-direction: column; gap: 6px; }
+  .pt-control-group label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink-soft);
+    font-weight: 700;
+  }
+  .pt-control-group select {
+    font-family: "Space Mono", ui-monospace, monospace;
+    font-size: 0.92rem;
+    padding: 8px 10px;
+    border: 1.5px solid var(--line);
+    border-radius: 8px;
+    background: var(--card);
+    color: var(--ink);
+    min-width: 150px;
+  }
+  .pt-control-group select:focus-visible { outline: 2px solid var(--tea); outline-offset: 1px; }
+
+  .pt-summary-row {
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .pt-summary-row .count { font-family: "Space Mono", monospace; font-size: 0.84rem; color: var(--ink-soft); }
+
+  .pt-flex-banner {
+    margin: 14px 20px 0;
+    background: var(--matcha-soft);
+    color: var(--ink);
+    border-left: 3px solid var(--matcha);
+    border-radius: 0 8px 8px 0;
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    line-height: 1.4;
+  }
+  .pt-flex-banner b { color: var(--matcha); }
+
+  .pt-tally {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 14px;
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--line);
+  }
+  .pt-tally-item { display: flex; flex-direction: column; gap: 4px; }
+  .pt-tally-item .headline { display: flex; align-items: baseline; gap: 8px; }
+  .pt-tally-item .qty {
+    font-family: "Space Mono", monospace; font-weight: 700; font-size: 1.4rem;
+    color: var(--tea); font-variant-numeric: tabular-nums;
+  }
+  .pt-tally-item .name { font-size: 0.92rem; font-weight: 600; }
+  .pt-tally-notes { display: flex; flex-direction: column; gap: 3px; margin-left: 2px; }
+  .pt-tally-note {
+    font-size: 0.76rem;
+    color: var(--salmon);
+    background: var(--salmon-soft);
+    border-radius: 6px;
+    padding: 2px 8px;
+    width: fit-content;
+    display: flex;
+    gap: 6px;
+  }
+  .pt-tally-note .n { font-family: "Space Mono", monospace; font-weight: 700; }
+
+  .pt-empty { padding: 24px 20px; color: var(--ink-soft); font-size: 0.9rem; text-align: center; }
+
+  .pt-roster { padding: 6px 20px 16px; }
+  .pt-roster-head {
+    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--ink-soft); font-weight: 700; padding: 10px 0 4px;
+  }
+  .pt-roster-row {
+    display: flex; justify-content: space-between; gap: 10px;
+    padding: 9px 0; border-bottom: 1px solid var(--line);
+    font-size: 0.86rem; align-items: baseline;
+  }
+  .pt-roster-row:last-child { border-bottom: none; }
+  .pt-roster-row .who { font-weight: 700; flex: 0 0 140px; }
+  .pt-roster-row .what { flex: 1; color: var(--ink-soft); margin: 0 12px; }
+  .pt-roster-row .what .item-note { color: var(--salmon); }
+  .pt-roster-row .time { font-family: "Space Mono", monospace; color: var(--ink-soft); font-size: 0.8rem; white-space: nowrap; }
+  .pt-roster-row .time.flex-tag { color: var(--matcha); }
+
   footer.foot {
     margin-top: 30px;
     font-size: 0.76rem;
@@ -1752,6 +1882,23 @@
   </nav>
 
   <section id="view-orders" role="tabpanel" aria-labelledby="tab-orders">
+    <div class="prep-time-card">
+      <button type="button" class="prep-time-toggle" id="prepTimeToggle" aria-expanded="false" aria-controls="prepTimeBody">
+        <span class="left">
+          <span class="icon" aria-hidden="true">🧾</span>
+          <span class="title" data-i18n="prep_time_title">Prep by Time</span>
+        </span>
+        <span class="hint" id="prepTimeHint">Tap to open</span>
+        <span class="chevron" aria-hidden="true">▾</span>
+      </button>
+      <div class="prep-time-body" id="prepTimeBody" hidden>
+        <div class="pt-controls" id="prepTimeControls"></div>
+        <div class="pt-summary-row" id="prepTimeSummary"></div>
+        <div id="prepTimeFlexBanner"></div>
+        <div class="pt-tally" id="prepTimeTally"></div>
+        <div class="pt-roster" id="prepTimeRoster"></div>
+      </div>
+    </div>
     <nav class="subtabs" role="tablist" aria-label="Order status">
       <button role="tab" id="subtab-active" aria-selected="true" aria-controls="orderGridActive">Active Orders</button>
       <button role="tab" id="subtab-completed" aria-selected="false" aria-controls="orderGridCompleted">Completed Orders</button>
@@ -2845,6 +2992,15 @@
       flag_new_title: "New order — tap to mark reviewed",
       flag_updated_title: "Order updated — tap to mark reviewed",
       prep_portions_label: "Portions to prep",
+      prep_time_title: "Prep by Time",
+      prep_time_hint_closed: "Tap to open",
+      prep_time_hint_open: "Tap to close",
+      prep_time_cutoff_label: "Show everything due by",
+      prep_time_empty_none_today: "No active orders for pickup today.",
+      prep_time_no_slots_left_today: "No more prep windows left today — check back tomorrow morning.",
+      prep_time_empty_no_due: "Nothing due yet by this time — push the cutoff later, or check back closer to those pickups.",
+      prep_time_roster_head: "Orders included",
+      prep_time_flex_rest: "(\"Flexible\") — always shown here since there's no cutoff to compare against. Prep for these whenever's convenient today.",
       tod_morning: "Morning (12–11am)",
       tod_midday: "Midday (11am–2pm)",
       tod_afternoon: "Afternoon (2–5pm)",
@@ -2968,6 +3124,15 @@
       flag_new_title: "Đơn mới — bấm để đánh dấu đã xem",
       flag_updated_title: "Đơn đã được sửa — bấm để đánh dấu đã xem",
       prep_portions_label: "Phần cần chuẩn bị",
+      prep_time_title: "Chuẩn bị theo giờ",
+      prep_time_hint_closed: "Bấm để mở",
+      prep_time_hint_open: "Bấm để đóng",
+      prep_time_cutoff_label: "Hiện mọi thứ cần xong trước",
+      prep_time_empty_none_today: "Không có đơn nào cần lấy hôm nay.",
+      prep_time_no_slots_left_today: "Hết khung giờ chuẩn bị cho hôm nay — quay lại vào sáng mai.",
+      prep_time_empty_no_due: "Chưa có gì cần xong trước giờ này — chọn giờ trễ hơn, hoặc quay lại gần giờ lấy hàng hơn.",
+      prep_time_roster_head: "Các đơn được tính",
+      prep_time_flex_rest: "(\"Linh hoạt\") — luôn hiện ở đây vì không có mốc giờ để so sánh. Chuẩn bị những đơn này lúc nào thuận tiện trong ngày.",
       tod_morning: "Sáng sớm (12 giờ khuya–11 giờ sáng)",
       tod_midday: "Trưa (11 giờ sáng–2 giờ chiều)",
       tod_afternoon: "Chiều (2–5 giờ chiều)",
@@ -3017,6 +3182,12 @@
   }
   function strShareableTray(n) {
     return currentLang === "vi" ? `${n} khay chia sẻ (×3)` : `${n} shareable tray${n === 1 ? "" : "s"} (×3)`;
+  }
+  function strPrepTimeDueCount(n, timeStr) {
+    return currentLang === "vi" ? `${n} đơn cần lấy trước ${timeStr}` : `${n} order${n === 1 ? "" : "s"} due by ${timeStr}`;
+  }
+  function strPrepTimeFlexHead(n) {
+    return currentLang === "vi" ? `${n} đơn không có giờ lấy cố định` : `${n} order${n === 1 ? " has" : "s have"} no fixed pickup time`;
   }
   function strHistRangeAll(n) {
     return currentLang === "vi" ? `${n} đơn được ghi nhận, tính từ trước đến nay` : `${n} order${n === 1 ? "" : "s"} logged, all time`;
@@ -3278,6 +3449,7 @@
       renderOrders();
       renderStats();
       renderPrep();
+      renderPrepByTime();
       renderHistory();
     });
     document.body.appendChild(toast);
@@ -3788,6 +3960,7 @@
         renderOrders();
         renderStats();
         renderPrep();
+        renderPrepByTime();
       });
     });
   }
@@ -3856,6 +4029,7 @@
         renderOrders();
         renderStats();
         renderPrep();
+        renderPrepByTime();
         renderHistory();
         showUndoToast(o);
       });
@@ -3870,6 +4044,7 @@
         renderOrders();
         renderStats();
         renderPrep();
+        renderPrepByTime();
         renderHistory();
       });
     });
@@ -3977,6 +4152,196 @@
         </div>
       `;
     }).join("");
+  }
+
+  // ---- Prep by Time ----
+  // A collapsible widget (top of the Orders tab) that answers a narrower
+  // question than Prep by Day: "if I only have until a certain time today,
+  // what do I need prepped?" It only ever looks at today's active orders,
+  // and breaks each item's count down by its per-item note (e.g. "2× no
+  // onion" under Personal Tray) so nothing surprises the kitchen. Collapsed
+  // by default on every fresh page load — nothing about its open/closed
+  // state is persisted, same as the other collapsible panels on this board.
+  let prepTimeCutoffMin = null;
+
+  // Local to this widget only. timeToMinutes() above returns 0 (not null)
+  // for an unparseable string like "Flexible" — harmless for its own job of
+  // sorting order cards, where "unknown time" sorting first doesn't matter.
+  // Here 0 would be indistinguishable from a real midnight pickup, so this
+  // returns null instead, letting a Flexible order be recognized and always
+  // included rather than mis-treated as due at 12:00 AM.
+  function prepTimeToMinutes(pt) {
+    const m = /(\d+):(\d+)\s*(AM|PM)/i.exec(pt || "");
+    if (!m) return null;
+    let hours = Number(m[1]) % 12;
+    if (/pm/i.test(m[3])) hours += 12;
+    return hours * 60 + Number(m[2]);
+  }
+
+  // Local calendar day (device time zone), not UTC — "today" for this
+  // widget means Tony's actual today, whatever time zone he's looking from.
+  function localTodayISO() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  }
+
+  function prepTimeFmtMinutes(mins) {
+    let h = Math.floor(mins / 60), m = mins % 60;
+    const ampm = h >= 12 ? "PM" : "AM";
+    h = h % 12; if (h === 0) h = 12;
+    return `${h}:${String(m).padStart(2, "0")} ${ampm}`;
+  }
+
+  const PREP_TIME_DAY_END_MIN = 23 * 60 + 45; // 11:45 PM — last slot on the 15-min grid
+
+  function prepTimeNextQuarterHour(mins) {
+    return Math.min(PREP_TIME_DAY_END_MIN, Math.ceil((mins + 1) / 15) * 15);
+  }
+
+  function updatePrepTimeHint() {
+    const body = document.getElementById("prepTimeBody");
+    const hint = document.getElementById("prepTimeHint");
+    if (!body || !hint) return;
+    hint.textContent = body.hidden ? t("prep_time_hint_closed") : t("prep_time_hint_open");
+  }
+
+  // Renders regardless of whether the widget is currently expanded — cheap
+  // to compute, and it keeps the widget correct the instant it's opened
+  // instead of showing stale data from before a completion/delete/undo.
+  function renderPrepByTime() {
+    const controlsEl = document.getElementById("prepTimeControls");
+    const summaryEl = document.getElementById("prepTimeSummary");
+    const flexEl = document.getElementById("prepTimeFlexBanner");
+    const tallyEl = document.getElementById("prepTimeTally");
+    const rosterEl = document.getElementById("prepTimeRoster");
+    if (!controlsEl) return; // markup missing for some reason — never worth breaking the rest of the page over
+    updatePrepTimeHint();
+
+    const today = localTodayISO();
+    const activeToday = ORDERS.filter(o => !isCompleted(o) && !isDeleted(o) && o.pickupDate === today);
+
+    if (!activeToday.length) {
+      controlsEl.innerHTML = "";
+      summaryEl.innerHTML = "";
+      flexEl.innerHTML = "";
+      tallyEl.innerHTML = `<div class="pt-empty">${t("prep_time_empty_none_today")}</div>`;
+      rosterEl.innerHTML = "";
+      return;
+    }
+
+    const now = new Date();
+    const nowMin = now.getHours() * 60 + now.getMinutes();
+    const fromMin = prepTimeNextQuarterHour(nowMin);
+
+    if (fromMin > PREP_TIME_DAY_END_MIN) {
+      // Past 11:45 PM — no more 15-min slots left today.
+      controlsEl.innerHTML = "";
+      summaryEl.innerHTML = "";
+      flexEl.innerHTML = "";
+      tallyEl.innerHTML = `<div class="pt-empty">${t("prep_time_no_slots_left_today")}</div>`;
+      rosterEl.innerHTML = "";
+      return;
+    }
+
+    // Keep whatever cutoff Tony already picked, as long as it's still a
+    // valid option — only reset to the soonest upcoming slot on first
+    // render, or once real time has passed the previous selection.
+    if (prepTimeCutoffMin === null || prepTimeCutoffMin < fromMin || prepTimeCutoffMin > PREP_TIME_DAY_END_MIN) {
+      prepTimeCutoffMin = fromMin;
+    }
+
+    controlsEl.innerHTML = `
+      <div class="pt-control-group">
+        <label for="prepTimeCutoff">${t("prep_time_cutoff_label")}</label>
+        <select id="prepTimeCutoff"></select>
+      </div>
+    `;
+    const select = document.getElementById("prepTimeCutoff");
+    for (let mins = fromMin; mins <= PREP_TIME_DAY_END_MIN; mins += 15) {
+      const opt = document.createElement("option");
+      opt.value = String(mins);
+      opt.textContent = prepTimeFmtMinutes(mins);
+      if (mins === prepTimeCutoffMin) opt.selected = true;
+      select.appendChild(opt);
+    }
+    select.addEventListener("change", () => {
+      prepTimeCutoffMin = Number(select.value);
+      renderPrepByTimeResults(activeToday);
+    });
+
+    renderPrepByTimeResults(activeToday);
+  }
+
+  function renderPrepByTimeResults(activeToday) {
+    const summaryEl = document.getElementById("prepTimeSummary");
+    const flexEl = document.getElementById("prepTimeFlexBanner");
+    const tallyEl = document.getElementById("prepTimeTally");
+    const rosterEl = document.getElementById("prepTimeRoster");
+    const cutoffMin = prepTimeCutoffMin;
+
+    const included = activeToday.filter(o => {
+      const mins = prepTimeToMinutes(o.pickupTime);
+      return mins === null || mins <= cutoffMin;
+    });
+    const flexIncluded = included.filter(o => prepTimeToMinutes(o.pickupTime) === null);
+
+    const tally = {}; // item name -> { total, notes: { noteText -> qty } }
+    for (const o of included) {
+      for (const i of o.items) {
+        tally[i.name] ||= { total: 0, notes: {} };
+        tally[i.name].total += i.qty;
+        if (i.note) tally[i.name].notes[i.note] = (tally[i.name].notes[i.note] || 0) + i.qty;
+      }
+    }
+    const tallyEntries = Object.entries(tally).sort((a, b) => b[1].total - a[1].total);
+
+    let personal = 0, shareable = 0;
+    for (const o of included) {
+      const portions = trayPortions(o.items);
+      personal += portions.personal;
+      shareable += portions.shareable;
+    }
+    const portions = personal * 1 + shareable * 3;
+
+    summaryEl.innerHTML = `
+      <span class="count">${strPrepTimeDueCount(included.length, prepTimeFmtMinutes(cutoffMin))}</span>
+      <div class="portions-badge"><div class="n">${portions}</div><div class="l">${t("prep_portions_label")}</div></div>
+    `;
+
+    flexEl.innerHTML = flexIncluded.length
+      ? `<div class="pt-flex-banner"><b>${strPrepTimeFlexHead(flexIncluded.length)}</b> ${t("prep_time_flex_rest")}</div>`
+      : "";
+
+    tallyEl.innerHTML = tallyEntries.length
+      ? tallyEntries.map(([name, data]) => `
+        <div class="pt-tally-item">
+          <div class="headline"><span class="qty">${data.total}</span><span class="name">${translateItemName(name)}</span></div>
+          ${Object.keys(data.notes).length ? `
+            <div class="pt-tally-notes">
+              ${Object.entries(data.notes).map(([note, qty]) => `
+                <div class="pt-tally-note"><span class="n">${qty}×</span><span>${translateItemNote(note)}</span></div>
+              `).join("")}
+            </div>
+          ` : ""}
+        </div>
+      `).join("")
+      : `<div class="pt-empty">${t("prep_time_empty_no_due")}</div>`;
+
+    rosterEl.innerHTML = included.length ? `
+      <div class="pt-roster-head">${t("prep_time_roster_head")}</div>
+      ${included.slice().sort((a, b) => {
+        const ma = prepTimeToMinutes(a.pickupTime), mb = prepTimeToMinutes(b.pickupTime);
+        if (ma === null) return 1;
+        if (mb === null) return -1;
+        return ma - mb;
+      }).map(o => `
+        <div class="pt-roster-row">
+          <span class="who">${o.name}</span>
+          <span class="what">${o.items.map(i => `${i.qty}× ${translateItemName(i.name)}${i.note ? ` <span class="item-note">(${translateItemNote(i.note)})</span>` : ""}`).join(", ")}</span>
+          <span class="time${prepTimeToMinutes(o.pickupTime) === null ? " flex-tag" : ""}">${o.pickupTime}</span>
+        </div>
+      `).join("")}
+    ` : "";
   }
 
   // ---- History / Insights ----
@@ -4351,6 +4716,19 @@
   subtabCompleted.addEventListener("click", () => activateSub("completed"));
   subtabDeleted.addEventListener("click", () => activateSub("deleted"));
 
+  // ---- Prep by Time (collapsible toggle) ----
+  // Purely a show/hide flip — the widget's own content is always kept
+  // current by renderPrepByTime(), called alongside renderPrep() at every
+  // point the order data can change, so there's nothing to (re)compute here.
+  const prepTimeToggle = document.getElementById("prepTimeToggle");
+  const prepTimeBody = document.getElementById("prepTimeBody");
+  prepTimeToggle.addEventListener("click", () => {
+    const expanded = prepTimeToggle.getAttribute("aria-expanded") === "true";
+    prepTimeToggle.setAttribute("aria-expanded", String(!expanded));
+    prepTimeBody.hidden = expanded;
+    updatePrepTimeHint();
+  });
+
   // ---- Language toggle (PREVIEW FEATURE) ----
   // Runs the full set of top-level render calls, same set as the initial
   // load below — nothing here is a partial refresh, so every visible
@@ -4361,6 +4739,7 @@
     renderStats();
     renderOrders();
     renderPrep();
+    renderPrepByTime();
     renderHistory();
     renderExperienceLog();
     renderPaletteList();
