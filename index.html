@@ -778,6 +778,32 @@
 
   .order-grid[hidden] { display: none; }
 
+  /* Dashed separator between pickup days within the same grid, so a fast
+     scroll down a long Active/Completed/Deleted list doesn't blur one
+     day's cards into the next. Spans the full grid width regardless of
+     how many card-columns are currently laid out. */
+  .day-divider {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 2px 0;
+  }
+  .day-divider::before,
+  .day-divider::after {
+    content: "";
+    flex: 1;
+    border-top: 2px dashed var(--line);
+  }
+  .day-divider-label {
+    font-family: "Space Mono", monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    white-space: nowrap;
+  }
+
   .ticket {
     background: var(--card);
     border: 1px solid var(--line);
@@ -1647,7 +1673,18 @@
   }
   .pt-tally-note .n { font-family: "Space Mono", monospace; font-weight: 700; }
 
-  .pt-empty { padding: 24px 20px; color: var(--ink-soft); font-size: 0.9rem; text-align: center; }
+  .pt-empty {
+    grid-column: 1 / -1;
+    padding: 28px 20px;
+    text-align: center;
+    color: var(--matcha);
+    background: var(--matcha-soft);
+    border: 1.5px dashed var(--matcha);
+    border-radius: 14px;
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+  }
 
   .pt-roster { padding: 6px 20px 16px; }
   .pt-roster-head {
@@ -4214,7 +4251,7 @@
       prep_time_hint_closed: "Tap to open",
       prep_time_hint_open: "Tap to close",
       prep_time_cutoff_label: "Show everything due by",
-      prep_time_empty_none_today: "No active orders for pickup today.",
+      prep_time_empty_none_today: "🎉 All caught up — nothing left to prep for today!",
       prep_time_no_slots_left_today: "No more prep windows left today — check back tomorrow morning.",
       prep_time_empty_no_due: "Nothing due yet by this time — push the cutoff later, or check back closer to those pickups.",
       prep_time_roster_head: "Orders included",
@@ -4346,7 +4383,7 @@
       prep_time_hint_closed: "Bấm để mở",
       prep_time_hint_open: "Bấm để đóng",
       prep_time_cutoff_label: "Hiện mọi thứ cần xong trước",
-      prep_time_empty_none_today: "Không có đơn nào cần lấy hôm nay.",
+      prep_time_empty_none_today: "🎉 Xong hết rồi — hôm nay không còn gì cần chuẩn bị!",
       prep_time_no_slots_left_today: "Hết khung giờ chuẩn bị cho hôm nay — quay lại vào sáng mai.",
       prep_time_empty_no_due: "Chưa có gì cần xong trước giờ này — chọn giờ trễ hơn, hoặc quay lại gần giờ lấy hàng hơn.",
       prep_time_roster_head: "Các đơn được tính",
@@ -5060,6 +5097,25 @@
   }
 
   // ---- Orders view ----
+  // Groups a pickup-sorted ticket list with a dashed day-divider inserted
+  // between two cards whose pickupDate differs. idx passed into renderTicket
+  // stays the order's position in `list` (unaffected by the dividers), so
+  // the existing wireToggles/wireFlags/etc data-idx wiring keeps working.
+  function renderTicketsWithDayDividers(list, groups, deletedMode) {
+    let html = "";
+    let lastDate = null;
+    list.forEach((o, idx) => {
+      if (o.pickupDate !== lastDate) {
+        if (lastDate !== null) {
+          html += `<div class="day-divider"><span class="day-divider-label">${fmtShortDate(o.pickupDate)}</span></div>`;
+        }
+        lastDate = o.pickupDate;
+      }
+      html += renderTicket(o, idx, groups, deletedMode);
+    });
+    return html;
+  }
+
   function renderTicket(o, idx, groups, deletedMode) {
     const gk = timeGroupKey(o);
     const gcls = groups.classes[gk];
@@ -5287,15 +5343,15 @@
     const gridDeleted = document.getElementById("orderGridDeleted");
 
     gridActive.innerHTML = active.length
-      ? active.map((o, idx) => renderTicket(o, idx, groups, false)).join("")
+      ? renderTicketsWithDayDividers(active, groups, false)
       : `<div class="empty-state">${t("empty_no_active")}</div>`;
 
     gridCompleted.innerHTML = completed.length
-      ? completed.map((o, idx) => renderTicket(o, idx, groups, false)).join("")
+      ? renderTicketsWithDayDividers(completed, groups, false)
       : `<div class="empty-state">${t("empty_no_completed")}</div>`;
 
     gridDeleted.innerHTML = deleted.length
-      ? deleted.map((o, idx) => renderTicket(o, idx, groups, true)).join("")
+      ? renderTicketsWithDayDividers(deleted, groups, true)
       : `<div class="empty-state">${t("empty_no_deleted")}</div>`;
 
     wireToggles(gridActive, active);
