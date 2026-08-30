@@ -30,6 +30,12 @@
     --tg-4-bg: #e2e8f5;
     --tg-5: #6b8e23;
     --tg-5-bg: #eaf0dc;
+    /* Returning-buyer loyalty tiers (10+ orders / 15+ orders). Like tg-1..5
+       above, these are a functional signal Tony reads by color, not
+       branding — so they intentionally stay the same across every palette
+       below rather than getting their own per-palette values. */
+    --tier-blue: #1d4ed8;
+    --tier-gold: #92720a;
     --shadow: 0 1px 2px rgba(37, 26, 56, 0.07), 0 8px 20px -12px rgba(37, 26, 56, 0.3);
   }
 
@@ -61,6 +67,8 @@
       --tg-4-bg: #1f2636;
       --tg-5: #a7cf6e;
       --tg-5-bg: #232c16;
+      --tier-blue: #8fb4ff;
+      --tier-gold: #e8c14d;
       --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 24px -14px rgba(0, 0, 0, 0.6);
     }
   }
@@ -92,6 +100,8 @@
     --tg-4-bg: #1f2636;
     --tg-5: #a7cf6e;
     --tg-5-bg: #232c16;
+    --tier-blue: #8fb4ff;
+    --tier-gold: #e8c14d;
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 24px -14px rgba(0, 0, 0, 0.6);
   }
 
@@ -1806,6 +1816,12 @@
 
   .hist-itemized tr:last-child td { border-bottom: none; }
 
+  /* Loyalty-tier name coloring on the Returning buyers table — see the
+     --tier-blue/--tier-gold vars above. Gold (15+ orders) is checked after
+     blue (10+) in JS, so a buyer past both thresholds gets gold. */
+  .buyer-tier-blue { color: var(--tier-blue); font-weight: 800; }
+  .buyer-tier-gold { color: var(--tier-gold); font-weight: 800; }
+
   .hist-itemized td.num, .hist-itemized th.num {
     text-align: right;
     font-family: "Space Mono", monospace;
@@ -2021,6 +2037,17 @@
 </div>
 
 <script>
+  // Each order supports an optional `historical: true` flag, used for real
+  // orders logged from a pre-dashboard DM sweep (before this board existed
+  // on 2026-08-23). A historical order still counts toward that buyer's
+  // Returning/Biggest-buyer totals (rebuildBuyerHistoryFromOrders counts
+  // every non-deleted order in ORDERS, historical or not) and still shows
+  // in the History tab's all-time stats (ordersInWindow doesn't filter it
+  // out) — it just never appears as a ticket in Active/Completed/Deleted,
+  // never counts toward the stat bar, and never shows up in Prep by Day/Time
+  // (renderOrders/renderStats/renderPrep/renderPrepByTime all exclude it).
+  // Don't add this flag to a normal week's new orders — only to genuine
+  // backfilled pre-dashboard history.
   const ORDERS = [
     {
       name: "Adi Luna", handle: "adiluna",
@@ -2772,6 +2799,1164 @@
       notes: "First order — complimentary drink"
     }
   ];
+
+  // ---- Pre-dashboard historical orders (found via March 14–Aug 23, 2026 DM sweep) ----
+  // See the `historical` field note above the ORDERS declaration for what this flag does.
+  const HISTORICAL_ORDERS = [
+    {
+      name: "Jackie", handle: "unknown-see-notes",
+      historical: true,
+      items: [
+        { qty: 4, name: "Personal Tray", price: 60 },
+        { qty: 2, name: "Thai Tea", price: 0, comp: true },
+      ],
+      total: 60,
+      orderDate: "2026-07-09", orderTime: "20:35",
+      pickupDate: "2026-07-10", pickupTime: "6:00–7:00 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: "IG handle not recoverable from export (account folder is numeric-only, no username slug); business calls her Jackie. Please verify real @handle if you recognize her."
+    },
+    {
+      name: "Abbey", handle: "abbey",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
+      ],
+      total: 15,
+      orderDate: "2026-08-05", orderTime: "17:17",
+      pickupDate: "2026-08-08", pickupTime: "2:00 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "Aidee Aldaco", handle: "aideealdaco",
+      historical: true,
+      items: [
+        { qty: 2, name: "Personal Tray", price: 30 },
+        { qty: 1, name: "Vietnamese Coffee", price: 0, comp: true },
+      ],
+      total: 30,
+      orderDate: "2026-07-29", orderTime: "18:56",
+      pickupDate: "2026-08-01", pickupTime: "12:00 PM",
+      paid: true, payMethod: "Venmo",
+      notes: ""
+    },
+    {
+      name: "aleexx.botello", handle: "aleexxbotello",
+      historical: true,
+      items: [
+        { qty: 1, name: "Shareable Tray", price: 45 },
+        { qty: 1, name: "Vietnamese Coffee", price: 0, comp: true },
+      ],
+      total: 45,
+      orderDate: "2026-08-04", orderTime: "22:41",
+      pickupDate: "2026-08-08", pickupTime: "4:00 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "Alicia Lemos", handle: "alicialemos",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Vietnamese Coffee", price: 0, comp: true },
+      ],
+      total: 15,
+      orderDate: "2026-08-05", orderTime: "19:51",
+      pickupDate: "2026-08-07", pickupTime: "10:30 AM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: "Original pickup rescheduled from 08/08 to 08/07 at customer's request"
+    },
+    {
+      name: "ALMA..V..DIAZ...SANTOS", handle: "almavdiazsantos",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+      ],
+      total: 15,
+      orderDate: "2026-08-04", orderTime: "12:26",
+      pickupDate: "2026-08-08", pickupTime: "2:00 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "Alyssa", handle: "alyssa",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
+      ],
+      total: 15,
+      orderDate: "2026-07-18", orderTime: "17:54",
+      pickupDate: "2026-07-18", pickupTime: "6:40 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: "No pickup date stated in thread — inferred same-day pickup"
+    },
+    {
+      name: "Angelina Gutierrez", handle: "angelinagutierrez",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
+        { qty: 1, name: "Vietnamese Coffee", price: 4 },
+      ],
+      total: 19,
+      orderDate: "2026-08-05", orderTime: "18:19",
+      pickupDate: "2026-08-06", pickupTime: "8:45 PM",
+      paid: true, payMethod: "Apple Pay",
+      notes: ""
+    },
+    {
+      name: "arely mejia", handle: "xoarrelyy",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
+      ],
+      total: 15,
+      orderDate: "2026-07-17", orderTime: "20:21",
+      pickupDate: "2026-07-18", pickupTime: "4:00 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "arely mejia", handle: "xoarrelyy",
+      historical: true,
+      items: [
+        { qty: 2, name: "Personal Tray", price: 30 },
+        { qty: 1, name: "Green Thai Tea", price: 4 },
+      ],
+      total: 34,
+      orderDate: "2026-07-23", orderTime: "20:21",
+      pickupDate: "2026-08-24", pickupTime: "2:00 PM",
+      paid: true, payMethod: "Zelle",
+      notes: "Second pre-dashboard order from this repeat customer"
+    },
+    {
+      name: "Bryanna Gonzalez", handle: "bryannagonzalez",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
+      ],
+      total: 15,
+      orderDate: "2026-08-04", orderTime: "21:41",
+      pickupDate: "2026-08-08", pickupTime: "2:45 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "Carmen Pardo", handle: "carmenpardo",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Vietnamese Coffee", price: 0, comp: true },
+      ],
+      total: 15,
+      orderDate: "2026-08-06", orderTime: "19:52",
+      pickupDate: "2026-08-07", pickupTime: "12:00 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "cashdaddyerika", handle: "cashdaddyerika",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
+      ],
+      total: 15,
+      orderDate: "2026-08-04", orderTime: "19:23",
+      pickupDate: "2026-08-08", pickupTime: "12:00 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "Clara", handle: "clara",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
+      ],
+      total: 15,
+      orderDate: "2026-08-04", orderTime: "22:54",
+      pickupDate: "2026-08-08", pickupTime: "3:00 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: "Pickup rescheduled from 1pm to 3pm at customer's request"
+    },
+    {
+      name: "Corina Baltzelle", handle: "corinabaltzelle",
+      historical: true,
+      items: [
+        { qty: 2, name: "Personal Tray", price: 30 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
+      ],
+      total: 30,
+      orderDate: "2026-07-14", orderTime: "08:13",
+      pickupDate: "2026-07-14", pickupTime: "6:00 PM",
+      paid: true, payMethod: "Apple Pay",
+      notes: ""
+    },
+    {
+      name: "d.0hjena", handle: "d.0hjena",
+      historical: true,
+      items: [
+        { qty: 1, name: "Shareable Tray", price: 45 },
+        { qty: 1, name: "Vietnamese Coffee", price: 0, comp: true },
+      ],
+      total: 45,
+      orderDate: "2026-08-05", orderTime: "14:49",
+      pickupDate: "2026-08-08", pickupTime: "2:45 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "Dashpuppylove", handle: "dashpuppylove",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
+      ],
+      total: 15,
+      orderDate: "2026-08-07", orderTime: "16:01",
+      pickupDate: "2026-08-07", pickupTime: "5:45 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "dawncammie9", handle: "dawncammie9",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
+        { qty: 1, name: "Vietnamese Coffee", price: 4 },
+      ],
+      total: 19,
+      orderDate: "2026-08-05", orderTime: "12:03",
+      pickupDate: "2026-08-07", pickupTime: "3:30 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "delgado_0_0", handle: "delgado_0_0",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
+      ],
+      total: 15,
+      orderDate: "2026-08-06", orderTime: "16:44",
+      pickupDate: "2026-08-08", pickupTime: "5:00 PM",
+      paid: true, payMethod: "Paid — method not specified",
+      notes: ""
+    },
+    {
+      name: "Diamond", handle: "diamond",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Vietnamese Coffee", price: 0, comp: true },
+      ],
+      total: 15,
+      orderDate: "2026-07-16", orderTime: "21:23",
+      pickupDate: "2026-07-17", pickupTime: "5:45 PM",
+      paid: true, payMethod: "Paid — method not specified",
+      notes: ""
+    },
+    {
+      name: "Dina Mahshi- McWashington", handle: "dinamahshimcwashington",
+      historical: true,
+      items: [
+        { qty: 5, name: "Personal Tray", price: 75 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
+      ],
+      total: 75,
+      orderDate: "2026-07-11", orderTime: "17:20",
+      pickupDate: "2026-07-13", pickupTime: "6:00 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "elmoonavarro", handle: "elmoonavarro",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
+      ],
+      total: 15,
+      orderDate: "2026-08-09", orderTime: "13:19",
+      pickupDate: "2026-08-10", pickupTime: "5:45 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "emmalyyya", handle: "emmalyyya",
+      historical: true,
+      items: [
+        { qty: 2, name: "Personal Tray", price: 30 },
+        { qty: 1, name: "Thai Tea", price: 0, comp: true },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
+      ],
+      total: 30,
+      orderDate: "2026-08-08", orderTime: "01:27",
+      pickupDate: "2026-08-08", pickupTime: "12:00 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: "Order for Hudson; two complimentary drinks listed in confirm text"
+    },
+    {
+      name: "Erika Rudolph", handle: "americaerika1999",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Vietnamese Coffee", price: 0, comp: true },
+      ],
+      total: 15,
+      orderDate: "2026-08-04", orderTime: "12:15",
+      pickupDate: "2026-08-04", pickupTime: "6:00 PM",
+      paid: true, payMethod: "Paid — method not specified",
+      notes: ""
+    },
+    {
+      name: "Ever Snow", handle: "eversnow",
+      historical: true,
+      items: [
+        { qty: 2, name: "Personal Tray", price: 30 },
+        { qty: 2, name: "Green Thai Tea", price: 4, note: "1 complimentary" },
+      ],
+      total: 34,
+      orderDate: "2026-07-27", orderTime: "21:21",
+      pickupDate: "2026-07-29", pickupTime: "6:00 PM",
+      paid: true, payMethod: "Cash",
+      notes: ""
+    },
+    {
+      name: "favii", handle: "faviolaguzmann",
+      historical: true,
+      items: [
+        { qty: 2, name: "Personal Tray", price: 30 },
+        { qty: 1, name: "Vietnamese Coffee", price: 0, comp: true },
+      ],
+      total: 30,
+      orderDate: "2026-08-08", orderTime: "13:40",
+      pickupDate: "2026-08-08", pickupTime: "7:00 PM",
+      paid: true, payMethod: "Paid — method not specified",
+      notes: "No pickup date stated in thread — inferred same-day pickup"
+    },
+    {
+      name: "flo.a.16", handle: "floa16",
+      historical: true,
+      items: [
+        { qty: 1, name: "Shareable Tray", price: 45 },
+        { qty: 1, name: "Vietnamese Coffee", price: 0, comp: true },
+      ],
+      total: 45,
+      orderDate: "2026-07-29", orderTime: "22:45",
+      pickupDate: "2026-07-30", pickupTime: "6:00 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "Frank Andrews", handle: "frankandrews",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
+        { qty: 1, name: "Vietnamese Coffee", price: 4 },
+      ],
+      total: 19,
+      orderDate: "2026-07-07", orderTime: "10:28",
+      pickupDate: "2026-07-07", pickupTime: "5:45 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "Frank Andrews", handle: "frankandrews",
+      historical: true,
+      items: [
+        { qty: 1, name: "Shareable Tray", price: 45 },
+        { qty: 3, name: "Green Thai Tea", price: 12 },
+        { qty: 2, name: "Vietnamese Coffee", price: 8 },
+      ],
+      total: 65,
+      orderDate: "2026-07-09", orderTime: "15:25",
+      pickupDate: "2026-07-11", pickupTime: "12:00 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: "Order grew at pickup from 1 Shareable Tray + 2 Thai Tea ($53) to add 1 more Thai Tea + 2 Viet Coffee for family"
+    },
+    {
+      name: "genuinely.genesis", handle: "genuinelygenesis",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
+      ],
+      total: 15,
+      orderDate: "2026-08-01", orderTime: "13:28",
+      pickupDate: "2026-08-01", pickupTime: "2:00 PM",
+      paid: true, payMethod: "Paid — method not specified",
+      notes: ""
+    },
+    {
+      name: "Georgina McArthur", handle: "georginamcarthur",
+      historical: true,
+      items: [
+        { qty: 1, name: "Shareable Tray", price: 45 },
+        { qty: 1, name: "Vietnamese Coffee", price: 0, comp: true },
+        { qty: 2, name: "Green Thai Tea", price: 8 },
+      ],
+      total: 53,
+      orderDate: "2026-07-07", orderTime: "15:28",
+      pickupDate: "2026-07-07", pickupTime: "6:30 PM",
+      paid: true, payMethod: "Venmo",
+      notes: "Order grew from 2 Personal Trays to a Shareable Tray as more family wanted some"
+    },
+    {
+      name: "Giselle Alvarez", handle: "gisellealvarez",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
+      ],
+      total: 15,
+      orderDate: "2026-07-28", orderTime: "18:34",
+      pickupDate: "2026-07-30", pickupTime: "6:00 PM",
+      paid: true, payMethod: "Paid — method not specified",
+      notes: ""
+    },
+    {
+      name: "Hong Doan", handle: "hongdoan",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
+      ],
+      total: 15,
+      orderDate: "2026-08-08", orderTime: "11:48",
+      pickupDate: "2026-08-08", pickupTime: "4:00 PM",
+      paid: true, payMethod: "Paid — method not specified",
+      notes: ""
+    },
+    {
+      name: "Isabelle Goodwin", handle: "isabellegoodwin",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Vietnamese Coffee", price: 0, comp: true },
+      ],
+      total: 15,
+      orderDate: "2026-07-18", orderTime: "10:56",
+      pickupDate: "2026-07-18", pickupTime: "12:30 PM",
+      paid: true, payMethod: "Paid — method not specified",
+      notes: ""
+    },
+    {
+      name: "Jade Aubrey", handle: "jadeaubrey",
+      historical: true,
+      items: [
+        { qty: 2, name: "Personal Tray", price: 30 },
+        { qty: 1, name: "Vietnamese Coffee", price: 0, comp: true },
+      ],
+      total: 30,
+      orderDate: "2026-07-16", orderTime: "16:15",
+      pickupDate: "2026-07-16", pickupTime: "3:30 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "Jailine Jimenez", handle: "jailinejimenez",
+      historical: true,
+      items: [
+        { qty: 2, name: "Personal Tray", price: 30 },
+        { qty: 1, name: "Vietnamese Coffee", price: 0, comp: true },
+      ],
+      total: 30,
+      orderDate: "2026-08-09", orderTime: "17:18",
+      pickupDate: "2026-08-10", pickupTime: "5:45 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: "Possibly the same person as existing customer \"xo.jailine\" (manually-logged, unverified) — worth checking; kept separate since I couldn't confirm the match"
+    },
+    {
+      name: "Janel Rose", handle: "janelrose",
+      historical: true,
+      items: [
+        { qty: 1, name: "Shareable Tray", price: 45 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
+      ],
+      total: 45,
+      orderDate: "2026-08-02", orderTime: "09:25",
+      pickupDate: "2026-08-03", pickupTime: "5:45 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: "Sriracha requested on half the tray only"
+    },
+    {
+      name: "Janessa Darke", handle: "janessadarke",
+      historical: true,
+      items: [
+        { qty: 1, name: "Shareable Tray", price: 45 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
+      ],
+      total: 45,
+      orderDate: "2026-07-22", orderTime: "20:07",
+      pickupDate: "2026-07-23", pickupTime: "5:45 PM",
+      paid: true, payMethod: "Paid — method not specified",
+      notes: ""
+    },
+    {
+      name: "Jaqueline Loya", handle: "jaquelineloya",
+      historical: true,
+      items: [
+        { qty: 1, name: "Shareable Tray", price: 45, note: "1/2 spicy only" },
+        { qty: 1, name: "Vietnamese Coffee", price: 0, comp: true },
+      ],
+      total: 45,
+      orderDate: "2026-08-04", orderTime: "19:57",
+      pickupDate: "2026-08-08", pickupTime: "12:00 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "Jasmine", handle: "jasmine",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 2, name: "Green Thai Tea", price: 4, note: "1 complimentary" },
+      ],
+      total: 19,
+      orderDate: "2026-08-08", orderTime: "08:10",
+      pickupDate: "2026-08-08", pickupTime: "3:00 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "Jessica Fernandez", handle: "jessicafernandez",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Thai Tea", price: 4 },
+        { qty: 1, name: "Vietnamese Coffee", price: 0, comp: true },
+      ],
+      total: 19,
+      orderDate: "2026-07-08", orderTime: "11:31",
+      pickupDate: "2026-07-10", pickupTime: "6:00 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "Jessica Fernandez", handle: "jessicafernandez",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Thai Tea", price: 4 },
+      ],
+      total: 19,
+      orderDate: "2026-07-08", orderTime: "11:32",
+      pickupDate: "2026-07-11", pickupTime: "2:00 PM",
+      paid: true, payMethod: "Paid — method not specified",
+      notes: "Second order placed same message as the Friday order above; actual pickup ran later than planned (~5:35pm)"
+    },
+    {
+      name: "Jocelyne Mejia", handle: "firsthomewith.jocelyne",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
+      ],
+      total: 15,
+      orderDate: "2026-08-01", orderTime: "20:54",
+      pickupDate: "2026-08-03", pickupTime: "6:00 PM",
+      paid: true, payMethod: "Paid — method not specified",
+      notes: ""
+    },
+    {
+      name: "julia", handle: "julia",
+      historical: true,
+      items: [
+        { qty: 2, name: "Personal Tray", price: 30 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
+      ],
+      total: 30,
+      orderDate: "2026-08-06", orderTime: "21:50",
+      pickupDate: "2026-08-08", pickupTime: "11:00 AM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: "Ordered alongside a friend's order, same pickup slot"
+    },
+    {
+      name: "Kristin McChesney", handle: "kristinmcchesney",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
+      ],
+      total: 15,
+      orderDate: "2026-08-05", orderTime: "07:04",
+      pickupDate: "2026-08-08", pickupTime: "10:00 AM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "Lalitooo", handle: "lalitooo",
+      historical: true,
+      items: [
+        { qty: 1, name: "Shareable Tray", price: 45 },
+        { qty: 2, name: "Green Thai Tea", price: 4, note: "1 complimentary" },
+      ],
+      total: 49,
+      orderDate: "2026-08-09", orderTime: "17:11",
+      pickupDate: "2026-08-10", pickupTime: "5:45 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "LASH ARTIST | SUPPLIER | KOREAN LASH LIFTS | 707", handle: "lashartistsupplierkoreanlashlifts707",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
+      ],
+      total: 15,
+      orderDate: "2026-07-09", orderTime: "20:25",
+      pickupDate: "2026-07-10", pickupTime: "12:30 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "Laura Pardo", handle: "laurapardo",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Vietnamese Coffee", price: 0, comp: true },
+      ],
+      total: 15,
+      orderDate: "2026-08-06", orderTime: "20:18",
+      pickupDate: "2026-08-07", pickupTime: "5:30 PM",
+      paid: true, payMethod: "Paid — method not specified",
+      notes: ""
+    },
+    {
+      name: "Lucero Vega", handle: "lucerovega",
+      historical: true,
+      items: [
+        { qty: 2, name: "Personal Tray", price: 30 },
+        { qty: 2, name: "Green Thai Tea", price: 8 },
+        { qty: 1, name: "Vietnamese Coffee", price: 0, comp: true },
+      ],
+      total: 38,
+      orderDate: "2026-08-06", orderTime: "12:59",
+      pickupDate: "2026-08-07", pickupTime: "11:30 AM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "lupe.died", handle: "lupedied",
+      historical: true,
+      items: [
+        { qty: 3, name: "Personal Tray", price: 45 },
+        { qty: 1, name: "Vietnamese Coffee", price: 0, comp: true },
+      ],
+      total: 45,
+      orderDate: "2026-07-21", orderTime: "20:01",
+      pickupDate: "2026-07-24", pickupTime: "5:45 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: "Pickup possibly pushed later to ~7:30pm per a follow-up message"
+    },
+    {
+      name: "Makeup Enthusiast", handle: "makeupenthusiast",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
+      ],
+      total: 15,
+      orderDate: "2026-08-07", orderTime: "11:35",
+      pickupDate: "2026-08-08", pickupTime: "1:00 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "Mali", handle: "mali",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Vietnamese Coffee", price: 0, comp: true },
+      ],
+      total: 15,
+      orderDate: "2026-07-09", orderTime: "20:21",
+      pickupDate: "2026-07-10", pickupTime: "12:00 PM",
+      paid: true, payMethod: "Venmo",
+      notes: ""
+    },
+    {
+      name: "mamaphy_", handle: "mamaphy_",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
+      ],
+      total: 15,
+      orderDate: "2026-07-09", orderTime: "18:26",
+      pickupDate: "2026-07-11", pickupTime: "1:00 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "maria carranza", handle: "mariacarranza",
+      historical: true,
+      items: [
+        { qty: 1, name: "Shareable Tray", price: 45 },
+        { qty: 2, name: "Green Thai Tea", price: 8 },
+        { qty: 1, name: "Vietnamese Coffee", price: 0, comp: true },
+      ],
+      total: 53,
+      orderDate: "2026-07-18", orderTime: "10:04",
+      pickupDate: "2026-07-18", pickupTime: "1:00 PM",
+      paid: true, payMethod: "Paid — method not specified",
+      notes: ""
+    },
+    {
+      name: "Mariah McCulloch", handle: "mariahmcculloch",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Vietnamese Coffee", price: 0, comp: true },
+      ],
+      total: 15,
+      orderDate: "2026-07-10", orderTime: "19:57",
+      pickupDate: "2026-07-11", pickupTime: "2:30 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "Marisabel12", handle: "marisabel12",
+      historical: true,
+      items: [
+        { qty: 1, name: "Shareable Tray", price: 45 },
+      ],
+      total: 45,
+      orderDate: "2026-07-09", orderTime: "20:20",
+      pickupDate: "2026-07-10", pickupTime: "4:30 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: "Pickup possibly moved later to ~5:45pm per a follow-up message"
+    },
+    {
+      name: "Marta Kelly-Villalvazo", handle: "martakellyvillalvazo",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
+      ],
+      total: 15,
+      orderDate: "2026-08-08", orderTime: "09:35",
+      pickupDate: "2026-08-08", pickupTime: "12:00 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "Melanny Bermudez", handle: "melannybermudez",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 2, name: "Vietnamese Coffee", price: 8 },
+      ],
+      total: 23,
+      orderDate: "2026-08-05", orderTime: "18:14",
+      pickupDate: "2026-08-06", pickupTime: "5:45 PM",
+      paid: true, payMethod: "Paid — method not specified",
+      notes: ""
+    },
+    {
+      name: "Meldee", handle: "_mel.dee",
+      historical: true,
+      items: [
+        { qty: 2, name: "Personal Tray", price: 30 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
+        { qty: 1, name: "Vietnamese Coffee", price: 4, note: "ice on the side" },
+      ],
+      total: 34,
+      orderDate: "2026-08-06", orderTime: "20:20",
+      pickupDate: "2026-08-07", pickupTime: "5:45 PM",
+      paid: true, payMethod: "Paid — method not specified",
+      notes: ""
+    },
+    {
+      name: "Mercedes", handle: "mercedes",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 2, name: "Vietnamese Coffee", price: 4, note: "1 complimentary" },
+      ],
+      total: 19,
+      orderDate: "2026-08-04", orderTime: "22:51",
+      pickupDate: "2026-08-08", pickupTime: "4:00 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "Mich Hojilla", handle: "michhojilla",
+      historical: true,
+      items: [
+        { qty: 2, name: "Personal Tray", price: 30 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
+        { qty: 1, name: "Vietnamese Coffee", price: 4 },
+      ],
+      total: 34,
+      orderDate: "2026-07-11", orderTime: "16:17",
+      pickupDate: "2026-07-11", pickupTime: "5:00 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "mockingbird_trinket_dollhouse", handle: "mockingbird_trinket_dollhouse",
+      historical: true,
+      items: [
+        { qty: 1, name: "Green Thai Tea", price: 4 },
+        { qty: 2, name: "Vietnamese Coffee", price: 8 },
+      ],
+      total: 12,
+      orderDate: "2026-08-09", orderTime: "08:36",
+      pickupDate: "2026-08-09", pickupTime: "10:00–10:30 AM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "nathalie", handle: "nathalie",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
+      ],
+      total: 15,
+      orderDate: "2026-08-04", orderTime: "22:39",
+      pickupDate: "2026-08-08", pickupTime: "4:30 PM",
+      paid: true, payMethod: "Paid — method not specified",
+      notes: ""
+    },
+    {
+      name: "NELLY", handle: "nelly",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Vietnamese Coffee", price: 0, comp: true },
+      ],
+      total: 15,
+      orderDate: "2026-08-06", orderTime: "12:38",
+      pickupDate: "2026-08-08", pickupTime: "11:00 AM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "o7.briannaa", handle: "o7briannaa",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
+      ],
+      total: 15,
+      orderDate: "2026-07-17", orderTime: "19:50",
+      pickupDate: "2026-07-18", pickupTime: "11:00 AM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "Paulie P", handle: "pauliep",
+      historical: true,
+      items: [
+        { qty: 2, name: "Personal Tray", price: 30 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true, note: "half portion, complimentary" },
+      ],
+      total: 30,
+      orderDate: "2026-07-09", orderTime: "20:23",
+      pickupDate: "2026-07-10", pickupTime: "12:00 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: "Grew from 1 to 2 Personal Trays at pickup (added one for his sister)"
+    },
+    {
+      name: "pauline derr", handle: "paulinederr",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Vietnamese Coffee", price: 0, comp: true },
+      ],
+      total: 15,
+      orderDate: "2026-08-05", orderTime: "14:40",
+      pickupDate: "2026-08-08", pickupTime: "4:00 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "Roberto Irucuta", handle: "robertoirucuta",
+      historical: true,
+      items: [
+        { qty: 2, name: "Vietnamese Coffee", price: 8 },
+      ],
+      total: 8,
+      orderDate: "2026-08-06", orderTime: "18:52",
+      pickupDate: "2026-08-07", pickupTime: "1:30 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "Roberto Irucuta", handle: "robertoirucuta",
+      historical: true,
+      items: [
+        { qty: 2, name: "Vietnamese Coffee", price: 8 },
+      ],
+      total: 8,
+      orderDate: "2026-08-08", orderTime: "09:55",
+      pickupDate: "2026-08-08", pickupTime: "2:00 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "Roberto Irucuta", handle: "robertoirucuta",
+      historical: true,
+      items: [
+        { qty: 1, name: "Vietnamese Coffee", price: 4 },
+      ],
+      total: 4,
+      orderDate: "2026-08-11", orderTime: "12:40",
+      pickupDate: "2026-08-11", pickupTime: "4:30 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "Rossy Gonzalez Reyes", handle: "rossygonzalezreyes",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
+      ],
+      total: 15,
+      orderDate: "2026-08-04", orderTime: "21:27",
+      pickupDate: "2026-08-08", pickupTime: "11:00 AM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "r.yyannn__", handle: "ryyannn__",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Vietnamese Coffee", price: 0, comp: true },
+      ],
+      total: 15,
+      orderDate: "2026-08-06", orderTime: "16:46",
+      pickupDate: "2026-08-08", pickupTime: "12:30 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "Sasha", handle: "sasha",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Vietnamese Coffee", price: 0, comp: true },
+      ],
+      total: 15,
+      orderDate: "2026-07-17", orderTime: "18:14",
+      pickupDate: "2026-07-18", pickupTime: "12:30 PM",
+      paid: true, payMethod: "Paid — method not specified",
+      notes: ""
+    },
+    {
+      name: "Scent Luxury & Co", handle: "scentluxuryco",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Thai Tea", price: 4 },
+        { qty: 1, name: "Vietnamese Coffee", price: 4 },
+      ],
+      total: 23,
+      orderDate: "2026-08-05", orderTime: "14:48",
+      pickupDate: "2026-08-07", pickupTime: "12:00 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "shashaseui", handle: "shashaseui",
+      historical: true,
+      items: [
+        { qty: 1, name: "Shareable Tray", price: 45 },
+        { qty: 2, name: "Green Thai Tea", price: 4, note: "1 complimentary" },
+      ],
+      total: 49,
+      orderDate: "2026-08-04", orderTime: "18:30",
+      pickupDate: "2026-08-08", pickupTime: "9:30 AM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "Sky", handle: "sky",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
+      ],
+      total: 15,
+      orderDate: "2026-08-06", orderTime: "16:50",
+      pickupDate: "2026-08-06", pickupTime: "5:45 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "Sophia Coss", handle: "sophiacoss",
+      historical: true,
+      items: [
+        { qty: 1, name: "Shareable Tray", price: 45 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
+      ],
+      total: 45,
+      orderDate: "2026-08-06", orderTime: "18:12",
+      pickupDate: "2026-08-07", pickupTime: "4:30 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "sydnee.", handle: "n3_6lokkaa",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 2, name: "Green Thai Tea", price: 4, note: "1 complimentary" },
+      ],
+      total: 19,
+      orderDate: "2026-07-19", orderTime: "20:42",
+      pickupDate: "2026-07-20", pickupTime: "5:45 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "Tere Martinez", handle: "teremartinez",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Vietnamese Coffee", price: 0, comp: true },
+      ],
+      total: 15,
+      orderDate: "2026-07-10", orderTime: "14:08",
+      pickupDate: "2026-07-11", pickupTime: "6:00 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "Tina Belletti", handle: "tinabelletti",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+      ],
+      total: 15,
+      orderDate: "2026-08-10", orderTime: "10:41",
+      pickupDate: "2026-08-10", pickupTime: "6:00 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: "Confirmation template was sent blank (no items/price/pickup filled in) but a real pickup clearly happened — items/total here are a best guess (most common single order). Please verify against memory if possible."
+    },
+    {
+      name: "TMG Cards", handle: "tmgcards",
+      historical: true,
+      items: [
+        { qty: 2, name: "Personal Tray", price: 30 },
+        { qty: 1, name: "Thai Tea", price: 4 },
+        { qty: 1, name: "Vietnamese Coffee", price: 0, comp: true },
+      ],
+      total: 34,
+      orderDate: "2026-08-08", orderTime: "10:01",
+      pickupDate: "2026-08-08", pickupTime: "12:30 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "validez", handle: "validez",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 2, name: "Green Thai Tea", price: 4, note: "1 complimentary" },
+      ],
+      total: 19,
+      orderDate: "2026-07-09", orderTime: "20:32",
+      pickupDate: "2026-07-10", pickupTime: "5:45 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "vanessa", handle: "vanessa",
+      historical: true,
+      items: [
+        { qty: 2, name: "Personal Tray", price: 30 },
+        { qty: 2, name: "Green Thai Tea", price: 4, note: "1 complimentary" },
+      ],
+      total: 34,
+      orderDate: "2026-08-04", orderTime: "13:32",
+      pickupDate: "2026-08-04", pickupTime: "6:30 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "Vanessa Ceja", handle: "vanessaceja",
+      historical: true,
+      items: [
+        { qty: 1, name: "Shareable Tray", price: 45 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
+      ],
+      total: 45,
+      orderDate: "2026-08-06", orderTime: "18:52",
+      pickupDate: "2026-08-07", pickupTime: "1:15 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "Vero", handle: "vero",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
+      ],
+      total: 15,
+      orderDate: "2026-08-05", orderTime: "21:29",
+      pickupDate: "2026-08-08", pickupTime: "3:30 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: ""
+    },
+    {
+      name: "Victoria R.", handle: "t00rii_",
+      historical: true,
+      items: [
+        { qty: 1, name: "Shareable Tray", price: 45 },
+        { qty: 2, name: "Green Thai Tea", price: 4, note: "1 complimentary" },
+      ],
+      total: 49,
+      orderDate: "2026-08-07", orderTime: "17:11",
+      pickupDate: "2026-08-08", pickupTime: "4:00 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: "Added a 2nd Thai Tea mid-pickup after the initial confirm"
+    },
+    {
+      name: "Victoria Tyana", handle: "victoria_tyana",
+      historical: true,
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
+      ],
+      total: 15,
+      orderDate: "2026-08-05", orderTime: "11:57",
+      pickupDate: "2026-08-08", pickupTime: "1:00 PM",
+      paid: true, payMethod: "Paid — method not specified",
+      notes: ""
+    },
+    {
+      name: "Zeli Adawag", handle: "zeliadawag",
+      historical: true,
+      items: [
+        { qty: 2, name: "Personal Tray", price: 30 },
+        { qty: 1, name: "Vietnamese Coffee", price: 4 },
+      ],
+      total: 34,
+      orderDate: "2026-08-05", orderTime: "09:23",
+      pickupDate: "2026-08-08", pickupTime: "11:00 AM",
+      paid: true, payMethod: "Paid — method not specified",
+      notes: ""
+    },
+  ];
+
+  ORDERS.push(...HISTORICAL_ORDERS);
 
   // ---- Language / i18n (PREVIEW FEATURE) ----
   // Everything below in this block is UI-chrome translation only — labels,
@@ -3836,7 +5021,7 @@
   // Based on active (not-yet-completed) orders only, so the numbers always
   // reflect what's actually still outstanding.
   function renderStats() {
-    const active = ORDERS.filter(o => !isCompleted(o) && !isDeleted(o));
+    const active = ORDERS.filter(o => !isCompleted(o) && !isDeleted(o) && !o.historical);
     const total = active.length;
     const revenue = active.reduce((s, o) => s + o.total, 0);
     const unpaid = active.filter(o => !o.paid).length;
@@ -4061,7 +5246,13 @@
   }
 
   function renderOrders() {
-    const sorted = ordersByPickup(ORDERS);
+    // Orders logged from a pre-dashboard DM sweep (o.historical === true)
+    // never belonged to Active/Completed/Deleted — they're real orders for
+    // buyer-history purposes (see rebuildBuyerHistoryFromOrders below, which
+    // still counts them), but they predate this board and Tony never needs
+    // to see/prep/toggle them here. They only ever surface on the History
+    // tab, via ordersInWindow(), which doesn't filter them out.
+    const sorted = ordersByPickup(ORDERS.filter(o => !o.historical));
     const groups = computeTimeGroups(sorted);
     const visible = sorted.filter(o => !isDeleted(o));
     const active = visible.filter(o => !isCompleted(o));
@@ -4106,7 +5297,7 @@
   // something's picked up, it should drop off the "still need to prep" list.
   function renderPrep() {
     const byDay = {};
-    for (const o of ORDERS.filter(o => !isCompleted(o) && !isDeleted(o))) {
+    for (const o of ORDERS.filter(o => !isCompleted(o) && !isDeleted(o) && !o.historical)) {
       (byDay[o.pickupDate] ||= []).push(o);
     }
     const days = Object.keys(byDay).sort();
@@ -4228,7 +5419,7 @@
     updatePrepTimeHint();
 
     const today = localTodayISO();
-    const activeToday = ORDERS.filter(o => !isCompleted(o) && !isDeleted(o) && o.pickupDate === today);
+    const activeToday = ORDERS.filter(o => !isCompleted(o) && !isDeleted(o) && !o.historical && o.pickupDate === today);
 
     if (!activeToday.length) {
       controlsEl.innerHTML = "";
@@ -4548,9 +5739,14 @@
       return;
     }
     const shown = returningExpanded ? rows : rows.slice(0, TOP_N);
-    body.innerHTML = shown.map((b) => `
-        <tr><td>${escapeHtml(b.name)}<br><span class="handle">@${escapeHtml(b.handle)}</span></td><td class="num">${b.count}</td><td class="num">${fmtMoney(b.total)}</td></tr>
-      `).join("") + renderShowMoreRow(rows.length, returningExpanded, 3, "returning-show-more");
+    body.innerHTML = shown.map((b) => {
+      // Loyalty tier by all-time order count: 15+ is gold, 10+ is blue,
+      // checked gold-first so a buyer past both lands on gold, not blue.
+      const tierClass = b.count >= 15 ? " buyer-tier-gold" : b.count >= 10 ? " buyer-tier-blue" : "";
+      return `
+        <tr><td><span class="${tierClass.trim()}">${escapeHtml(b.name)}</span><br><span class="handle">@${escapeHtml(b.handle)}</span></td><td class="num">${b.count}</td><td class="num">${fmtMoney(b.total)}</td></tr>
+      `;
+    }).join("") + renderShowMoreRow(rows.length, returningExpanded, 3, "returning-show-more");
     body.querySelector(".returning-show-more")?.addEventListener("click", () => {
       returningExpanded = !returningExpanded;
       renderReturningBuyers();
