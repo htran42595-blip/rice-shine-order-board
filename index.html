@@ -2032,7 +2032,7 @@
       total: 19,
       orderDate: "2026-08-25", orderTime: "03:04",
       pickupDate: "2026-08-29", pickupTime: "1:00 PM",
-      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      paid: true, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
       notes: ""
     },
     {
@@ -2185,14 +2185,13 @@
       name: "Christine", handle: "dinski21",
       items: [
         { qty: 1, name: "Personal Tray", price: 15 },
-        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
-        { qty: 1, name: "Orange Thai Tea", price: 4 }
+        { qty: 2, name: "Green Thai Tea", price: 4, note: "1 complimentary" }
       ],
       total: 19,
       orderDate: "2026-08-25", orderTime: "06:48",
       pickupDate: "2026-08-30", pickupTime: "11:30 AM",
       paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
-      notes: ""
+      notes: "Orange Thai Tea swapped for Green Thai Tea (quality issue with that batch) — customer notified and agreed, no price change"
     },
     {
       name: "Elmo", handle: "elmo",
@@ -2488,15 +2487,14 @@
       name: "brendi.net2", handle: "brendi.net2",
       items: [
         { qty: 1, name: "Personal Tray", price: 15 },
-        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
-        { qty: 1, name: "Orange Thai Tea", price: 4 },
+        { qty: 2, name: "Green Thai Tea", price: 4, note: "1 complimentary" },
         { qty: 1, name: "Vietnamese Coffee", price: 4 }
       ],
       total: 23,
       orderDate: "2026-08-27", orderTime: "20:21",
       pickupDate: "2026-08-29", pickupTime: "4:30 PM",
       paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
-      notes: ""
+      notes: "Orange Thai Tea swapped for Green Thai Tea (quality issue with that batch) — customer notified and agreed, no price change"
     },
     {
       name: "emenoacid", handle: "emenoacid.tcg",
@@ -2615,8 +2613,8 @@
       total: 45,
       orderDate: "2026-08-28", orderTime: "16:56",
       pickupDate: "2026-08-29", pickupTime: "4:30 PM",
-      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
-      notes: "First order — complimentary drink"
+      paid: true, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: "First order — complimentary drink. Paid via Venmo, included a $5 tip"
     },
     {
       name: "Summer Wylie", handle: "summmerwylie",
@@ -2760,6 +2758,18 @@
       pickupDate: "2026-08-30", pickupTime: "1:00 PM",
       paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
       notes: "Wanted orange Thai tea but we're out of stock; declined the green tea substitute so no drink included"
+    },
+    {
+      name: "Terese Boughtin", handle: "tereseboughtin",
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Vietnamese Coffee", price: 0, comp: true }
+      ],
+      total: 15,
+      orderDate: "2026-08-30", orderTime: "09:51",
+      pickupDate: "2026-08-30", pickupTime: "11:00 AM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: "First order — complimentary drink"
     }
   ];
 
