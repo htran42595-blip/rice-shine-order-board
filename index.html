@@ -705,6 +705,68 @@
   .palette-option-check { flex: none; width: 18px; height: 18px; color: var(--tea); visibility: hidden; }
   .palette-option[aria-pressed="true"] .palette-option-check { visibility: visible; }
 
+  /* ---- History PIN gate ---- */
+  .pin-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 14, 10, 0.45);
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  .pin-modal-backdrop[hidden] { display: none; }
+  .pin-modal {
+    background: var(--card);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    padding: 22px;
+    width: min(320px, 100%);
+    text-align: center;
+  }
+  .pin-modal-title { font-weight: 800; font-size: 1rem; margin: 0 0 6px; }
+  .pin-modal-sub { font-size: 0.8rem; color: var(--ink-soft); margin: 0 0 14px; line-height: 1.4; }
+  .pin-modal-input {
+    width: 100%;
+    font-size: 1.5rem;
+    letter-spacing: 8px;
+    text-align: center;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1.5px solid var(--line);
+    background: var(--rice-2);
+    color: var(--ink);
+    font-family: inherit;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+  }
+  .pin-modal-input:focus { outline: none; border-color: var(--tea); }
+  .pin-modal-error {
+    font-size: 0.78rem;
+    color: var(--salmon);
+    min-height: 1.1em;
+    margin: 0 0 10px;
+    font-weight: 700;
+  }
+  .pin-modal-actions { display: flex; gap: 8px; }
+  .pin-modal-btn {
+    flex: 1;
+    border-radius: 999px;
+    padding: 10px 14px;
+    font-weight: 700;
+    font-size: 0.86rem;
+    cursor: pointer;
+    font-family: inherit;
+    border: 1.5px solid var(--line);
+    background: var(--card);
+    color: var(--ink);
+  }
+  .pin-modal-btn.primary { background: var(--tea); color: var(--rice); border-color: var(--tea); }
+  .pin-modal-btn:active { transform: scale(0.96); }
+
   .statbar {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1933,6 +1995,19 @@
     <button role="tab" id="tab-prep" aria-selected="false" aria-controls="view-prep" data-i18n="tab_prep">Prep by Day</button>
     <button role="tab" id="tab-history" aria-selected="false" aria-controls="view-history" data-i18n="tab_history">History</button>
   </nav>
+
+  <div id="historyPinBackdrop" class="pin-modal-backdrop" role="dialog" aria-modal="true" aria-label="Enter PIN for History" hidden>
+    <div class="pin-modal">
+      <p class="pin-modal-title">History is PIN-protected</p>
+      <p class="pin-modal-sub">Enter the PIN to view order history.</p>
+      <input type="password" inputmode="numeric" autocomplete="off" class="pin-modal-input" id="historyPinInput" maxlength="12" />
+      <p class="pin-modal-error" id="historyPinError"></p>
+      <div class="pin-modal-actions">
+        <button type="button" class="pin-modal-btn" id="historyPinCancel">Cancel</button>
+        <button type="button" class="pin-modal-btn primary" id="historyPinSubmit">Unlock</button>
+      </div>
+    </div>
+  </div>
 
   <section id="view-orders" role="tabpanel" aria-labelledby="tab-orders">
     <div class="prep-time-card">
@@ -5979,7 +6054,64 @@
   }
   tabOrders.addEventListener("click", () => activate("orders"));
   tabPrep.addEventListener("click", () => activate("prep"));
-  tabHistory.addEventListener("click", () => activate("history"));
+
+  // ---- History PIN gate ----
+  // Orders and Prep by Day stay open to anyone with the link. History is a
+  // bit more sensitive (full order history, returning/biggest-buyer stats),
+  // so it's gated by a PIN — except for the 3 people already set up in the
+  // Sync feature above: signing in there with an allowed Google account
+  // (window.RiceShineSync.isAuthorized()) proves who they are and skips the
+  // PIN entirely, remembered on that device the same way that sign-in
+  // already is. Anyone not signed in that way is asked for the PIN every
+  // time they click History — a correct entry only unlocks that one view,
+  // it's never remembered, so the prompt reappears next time too.
+  const HISTORY_PIN = "1317";
+  const historyPinBackdrop = document.getElementById("historyPinBackdrop");
+  const historyPinInput = document.getElementById("historyPinInput");
+  const historyPinError = document.getElementById("historyPinError");
+  const historyPinSubmit = document.getElementById("historyPinSubmit");
+  const historyPinCancel = document.getElementById("historyPinCancel");
+
+  function isTrustedForHistory() {
+    return !!(window.RiceShineSync && window.RiceShineSync.isAuthorized && window.RiceShineSync.isAuthorized());
+  }
+
+  function openHistoryPinModal() {
+    historyPinError.textContent = "";
+    historyPinInput.value = "";
+    historyPinBackdrop.hidden = false;
+    historyPinInput.focus();
+  }
+
+  function closeHistoryPinModal() {
+    historyPinBackdrop.hidden = true;
+  }
+
+  function submitHistoryPin() {
+    if (historyPinInput.value.trim() === HISTORY_PIN) {
+      closeHistoryPinModal();
+      activate("history");
+    } else {
+      historyPinError.textContent = "Wrong PIN, try again.";
+      historyPinInput.value = "";
+      historyPinInput.focus();
+    }
+  }
+
+  historyPinSubmit.addEventListener("click", submitHistoryPin);
+  historyPinCancel.addEventListener("click", closeHistoryPinModal);
+  historyPinInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") submitHistoryPin();
+    else if (e.key === "Escape") closeHistoryPinModal();
+  });
+  historyPinBackdrop.addEventListener("click", (e) => {
+    if (e.target === historyPinBackdrop) closeHistoryPinModal();
+  });
+
+  tabHistory.addEventListener("click", () => {
+    if (isTrustedForHistory()) activate("history");
+    else openHistoryPinModal();
+  });
 
   // ---- Orders / Completed / Deleted subtabs ----
   const subtabActive = document.getElementById("subtab-active");
