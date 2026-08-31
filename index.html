@@ -766,6 +766,18 @@
   }
   .pin-modal-btn.primary { background: var(--tea); color: var(--rice); border-color: var(--tea); }
   .pin-modal-btn:active { transform: scale(0.96); }
+  .pin-modal-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .pin-modal-input:disabled { opacity: 0.6; }
+  .pin-modal-lock-msg {
+    font-size: 0.82rem;
+    color: var(--ink);
+    background: var(--rice-2);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 10px;
+    line-height: 1.4;
+  }
+  .pin-modal-lock-msg strong { font-variant-numeric: tabular-nums; }
 
   .statbar {
     display: grid;
@@ -2000,6 +2012,7 @@
     <div class="pin-modal">
       <p class="pin-modal-title">History is PIN-protected</p>
       <p class="pin-modal-sub">Enter the PIN to view order history.</p>
+      <p class="pin-modal-lock-msg" id="historyPinLockMsg" hidden></p>
       <input type="password" inputmode="numeric" autocomplete="off" class="pin-modal-input" id="historyPinInput" maxlength="12" />
       <p class="pin-modal-error" id="historyPinError"></p>
       <div class="pin-modal-actions">
@@ -6065,35 +6078,139 @@
   // already is. Anyone not signed in that way is asked for the PIN every
   // time they click History — a correct entry only unlocks that one view,
   // it's never remembered, so the prompt reappears next time too.
+  //
+  // Wrong guesses escalate into a lockout (tracked in this browser's
+  // localStorage, so it's a deterrent against casual guessing rather than a
+  // hard wall — clearing site data or an incognito window resets it, same
+  // caveat as the PIN itself). The first HISTORY_PIN_FREE_ATTEMPTS wrong
+  // guesses just show an error; from there each further wrong guess locks
+  // the input for the next duration in HISTORY_PIN_LOCKOUT_MINUTES, holding
+  // at the last value once the ladder runs out. A correct PIN clears the
+  // slate back to zero.
   const HISTORY_PIN = "1317";
+  const HISTORY_PIN_LOCK_KEY = "riceShineHistoryPinLock";
+  const HISTORY_PIN_FREE_ATTEMPTS = 3;
+  const HISTORY_PIN_LOCKOUT_MINUTES = [1, 5, 15, 30, 60];
   const historyPinBackdrop = document.getElementById("historyPinBackdrop");
   const historyPinInput = document.getElementById("historyPinInput");
   const historyPinError = document.getElementById("historyPinError");
+  const historyPinLockMsg = document.getElementById("historyPinLockMsg");
   const historyPinSubmit = document.getElementById("historyPinSubmit");
   const historyPinCancel = document.getElementById("historyPinCancel");
+  let historyPinCountdownTimer = null;
 
   function isTrustedForHistory() {
     return !!(window.RiceShineSync && window.RiceShineSync.isAuthorized && window.RiceShineSync.isAuthorized());
+  }
+
+  function readHistoryPinLock() {
+    try {
+      return JSON.parse(localStorage.getItem(HISTORY_PIN_LOCK_KEY)) || { fails: 0, lockedUntil: 0 };
+    } catch (e) {
+      return { fails: 0, lockedUntil: 0 };
+    }
+  }
+
+  function writeHistoryPinLock(state) {
+    try {
+      localStorage.setItem(HISTORY_PIN_LOCK_KEY, JSON.stringify(state));
+    } catch (e) {
+      // Private browsing / storage disabled — lockout just won't persist
+      // for this visitor; PIN entry itself still works fine.
+    }
+  }
+
+  function formatCountdown(ms) {
+    const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
+    const m = Math.floor(totalSeconds / 60);
+    const s = totalSeconds % 60;
+    return `${m}:${String(s).padStart(2, "0")}`;
+  }
+
+  function stopHistoryPinCountdown() {
+    if (historyPinCountdownTimer) {
+      clearInterval(historyPinCountdownTimer);
+      historyPinCountdownTimer = null;
+    }
+  }
+
+  // Shows/hides the lockout message and disables input+submit while locked.
+  // Returns whether it's currently locked.
+  function renderHistoryPinLockState() {
+    const remaining = readHistoryPinLock().lockedUntil - Date.now();
+    const locked = remaining > 0;
+    historyPinLockMsg.hidden = !locked;
+    if (locked) {
+      historyPinLockMsg.innerHTML = `Too many wrong tries. Try again in <strong>${formatCountdown(remaining)}</strong>.`;
+      historyPinError.textContent = "";
+    }
+    historyPinInput.disabled = locked;
+    historyPinSubmit.disabled = locked;
+    return locked;
+  }
+
+  // Re-renders the lock state and, while locked, ticks a live countdown so
+  // the prompt unlocks itself the instant time is up — no reload or extra
+  // click needed.
+  function refreshHistoryPinLockUI() {
+    const locked = renderHistoryPinLockState();
+    stopHistoryPinCountdown();
+    if (locked) {
+      historyPinCountdownTimer = setInterval(() => {
+        if (!renderHistoryPinLockState()) {
+          stopHistoryPinCountdown();
+          historyPinInput.focus();
+        }
+      }, 1000);
+    }
+    return locked;
+  }
+
+  function registerWrongHistoryPinAttempt() {
+    const state = readHistoryPinLock();
+    const fails = (state.fails || 0) + 1;
+    let lockedUntil = 0;
+    if (fails >= HISTORY_PIN_FREE_ATTEMPTS) {
+      const ladderIndex = Math.min(fails - HISTORY_PIN_FREE_ATTEMPTS, HISTORY_PIN_LOCKOUT_MINUTES.length - 1);
+      lockedUntil = Date.now() + HISTORY_PIN_LOCKOUT_MINUTES[ladderIndex] * 60 * 1000;
+    }
+    const next = { fails, lockedUntil };
+    writeHistoryPinLock(next);
+    return next;
   }
 
   function openHistoryPinModal() {
     historyPinError.textContent = "";
     historyPinInput.value = "";
     historyPinBackdrop.hidden = false;
-    historyPinInput.focus();
+    if (!refreshHistoryPinLockUI()) historyPinInput.focus();
   }
 
   function closeHistoryPinModal() {
     historyPinBackdrop.hidden = true;
+    stopHistoryPinCountdown();
   }
 
   function submitHistoryPin() {
+    if (readHistoryPinLock().lockedUntil > Date.now()) {
+      refreshHistoryPinLockUI();
+      return;
+    }
     if (historyPinInput.value.trim() === HISTORY_PIN) {
+      writeHistoryPinLock({ fails: 0, lockedUntil: 0 });
       closeHistoryPinModal();
       activate("history");
+      return;
+    }
+    const result = registerWrongHistoryPinAttempt();
+    historyPinInput.value = "";
+    if (result.lockedUntil > Date.now()) {
+      refreshHistoryPinLockUI();
     } else {
-      historyPinError.textContent = "Wrong PIN, try again.";
-      historyPinInput.value = "";
+      const attemptsLeft = HISTORY_PIN_FREE_ATTEMPTS - result.fails;
+      historyPinError.textContent = attemptsLeft > 0
+        ? `Wrong PIN, try again. (${attemptsLeft} attempt${attemptsLeft === 1 ? "" : "s"} left before a short lockout)`
+        : "Wrong PIN, try again.";
       historyPinInput.focus();
     }
   }
