@@ -2087,6 +2087,7 @@
   <section id="view-history" role="tabpanel" aria-labelledby="tab-history" hidden>
     <div class="hist-filterbar">
       <div class="window-pills" role="group" aria-label="Time window">
+        <button type="button" data-window="thisweek" aria-pressed="false" data-i18n="window_thisweek">This week</button>
         <button type="button" data-window="week" aria-pressed="false" data-i18n="window_week">Last week</button>
         <button type="button" data-window="month" aria-pressed="false" data-i18n="window_month">Last month</button>
         <button type="button" data-window="quarter" aria-pressed="false" data-i18n="window_quarter">Last quarter</button>
@@ -4419,6 +4420,7 @@
       stat_total_value: "Total value",
       stat_awaiting_payment: "Awaiting payment",
       stat_next_pickup: "Next pickup day",
+      window_thisweek: "This week",
       window_week: "Last week",
       window_month: "Last month",
       window_quarter: "Last quarter",
@@ -4553,6 +4555,7 @@
       stat_total_value: "Tổng giá trị",
       stat_awaiting_payment: "Chờ thanh toán",
       stat_next_pickup: "Ngày lấy hàng kế tiếp",
+      window_thisweek: "Tuần này",
       window_week: "Tuần trước",
       window_month: "Tháng trước",
       window_quarter: "Quý trước",
@@ -4692,11 +4695,13 @@
   function strIssueCount(n) {
     return currentLang === "vi" ? `${n} sự cố` : `${n} issue${n === 1 ? "" : "s"}`;
   }
-  // windowKey is "week" | "month" | "quarter" — the pill's fixed Mon–Sun
-  // period (see WINDOW_WEEKS/windowRange), not a rolling day count.
+  // windowKey is "thisweek" | "week" | "month" | "quarter" — the pill's
+  // fixed Mon-anchored period (see WINDOW_WEEKS/windowRange), not a rolling
+  // day count. "thisweek" is the current week through right now; the rest
+  // are fully-closed past periods.
   function strHistRangeWindow(n, windowKey) {
-    const periodEn = windowKey === "week" ? "last week" : windowKey === "month" ? "the last 4 weeks" : "the last 12 weeks";
-    const periodVi = windowKey === "week" ? "tuần trước" : windowKey === "month" ? "4 tuần qua" : "12 tuần qua";
+    const periodEn = windowKey === "thisweek" ? "this week so far" : windowKey === "week" ? "last week" : windowKey === "month" ? "the last 4 weeks" : "the last 12 weeks";
+    const periodVi = windowKey === "thisweek" ? "tuần này (tính đến hiện tại)" : windowKey === "week" ? "tuần trước" : windowKey === "month" ? "4 tuần qua" : "12 tuần qua";
     return currentLang === "vi" ? `${n} đơn trong ${periodVi}` : `${n} order${n === 1 ? "" : "s"} in ${periodEn}`;
   }
   function strTimeOfDaySub(unknownCount) {
@@ -5920,12 +5925,17 @@
     return today;
   }
 
-  // Returns the inclusive [start, end] range for a "week"/"month"/"quarter"
-  // pill: start is 12:00am UTC on the Monday `weeks` weeks before this
-  // week's Monday; end is 11:59:59.999pm UTC on last Sunday (the day right
-  // before this week's Monday) — the same last-Sunday end for all three.
+  // Returns the inclusive [start, end] range for a window pill.
+  // "thisweek" is the odd one out: it's the current, still-in-progress week
+  // — 12:00am UTC this Monday through right now — so people can see what's
+  // been ordered for the week so far, not just fully-closed weeks.
+  // "week"/"month"/"quarter" all look backward instead: start is 12:00am
+  // UTC on the Monday `weeks` weeks before this week's Monday, and end is
+  // 11:59:59.999pm UTC on last Sunday (the day right before this week's
+  // Monday) — the same last-Sunday end for all three.
   function windowRange(windowKey) {
     const thisMonday = currentWeekMondayUTC();
+    if (windowKey === "thisweek") return { start: thisMonday, end: new Date() };
     const weeks = WINDOW_WEEKS[windowKey];
     const start = new Date(thisMonday);
     start.setUTCDate(start.getUTCDate() - weeks * 7);
@@ -6240,7 +6250,7 @@
   const windowPillButtons = Array.from(document.querySelectorAll(".window-pills button"));
   windowPillButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
-      currentWindow = btn.dataset.window; // "week" | "month" | "quarter" | "all"
+      currentWindow = btn.dataset.window; // "thisweek" | "week" | "month" | "quarter" | "all"
       windowPillButtons.forEach((b) => b.setAttribute("aria-pressed", String(b === btn)));
       renderHistory();
     });
