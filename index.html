@@ -619,6 +619,33 @@
   .sync-toggle.sync-active { background: var(--matcha); }
   .sync-toggle.sync-denied { background: var(--salmon); }
 
+  .refresh-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--tea);
+    color: var(--rice);
+    border: none;
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    flex: none;
+  }
+  .refresh-toggle .refresh-icon {
+    font-size: 1.05rem;
+    line-height: 1;
+    display: inline-block;
+    transition: transform 0.5s ease;
+  }
+  .refresh-toggle.refresh-spinning .refresh-icon { animation: refresh-spin 0.6s linear; }
+  @keyframes refresh-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  .refresh-toggle:hover, .refresh-toggle:focus-visible { filter: brightness(1.15); outline: none; }
+  .refresh-toggle:active { transform: scale(0.96); }
+
   .header-actions { position: relative; display: inline-flex; align-items: center; gap: 8px; flex: none; }
 
   .palette-toggle {
@@ -1981,6 +2008,9 @@
       <span class="sub" data-i18n="brand_sub">order board</span>
     </div>
     <div class="header-actions">
+      <button type="button" id="refreshToggle" class="refresh-toggle" data-i18n-title="refresh_btn_title" title="Reload the latest orders">
+        <span class="refresh-icon" id="refreshIcon" aria-hidden="true">⟳</span><span data-i18n="refresh_btn">Refresh</span>
+      </button>
       <button type="button" id="paletteToggle" class="palette-toggle" aria-haspopup="true" aria-expanded="false">
         <span class="swatch-icon" id="paletteToggleIcon" aria-hidden="true"></span>
         <span data-i18n="customize_btn">Customize</span>
@@ -4352,6 +4382,8 @@
     en: {
       brand_sub: "order board",
       customize_btn: "Customize",
+      refresh_btn: "Refresh",
+      refresh_btn_title: "Reload the latest orders",
       customize_title: "Dashboard colors",
       customize_sub: "Pick a color palette for this dashboard. Saved on this device.",
       palette_default: "Rice & Shine",
@@ -4484,6 +4516,8 @@
     vi: {
       brand_sub: "bảng theo dõi đơn hàng",
       customize_btn: "Tùy chỉnh",
+      refresh_btn: "Làm mới",
+      refresh_btn_title: "Tải lại đơn hàng mới nhất",
       customize_title: "Màu bảng điều khiển",
       customize_sub: "Chọn bảng màu cho bảng điều khiển này. Được lưu trên thiết bị này.",
       palette_default: "Rice & Shine",
@@ -4744,6 +4778,9 @@
   function applyStaticI18n() {
     document.querySelectorAll("[data-i18n]").forEach((el) => {
       el.textContent = t(el.dataset.i18n);
+    });
+    document.querySelectorAll("[data-i18n-title]").forEach((el) => {
+      el.title = t(el.dataset.i18nTitle);
     });
     document.documentElement.lang = currentLang === "vi" ? "vi" : "en";
     const codeEl = document.getElementById("langCode");
@@ -6438,6 +6475,17 @@
     renderExperienceLog();
     renderPaletteList();
   }
+
+  // Reloads the page from the network with a cache-busting query param —
+  // the same trick used to verify a fresh deploy — instead of Tony having
+  // to force-close and reopen the app to see newly-added orders. Uses
+  // location.replace so repeated taps don't pile up history entries.
+  document.getElementById("refreshToggle").addEventListener("click", () => {
+    document.getElementById("refreshToggle").classList.add("refresh-spinning");
+    const url = new URL(window.location.href);
+    url.searchParams.set("v", Date.now().toString());
+    window.location.replace(url.toString());
+  });
 
   document.getElementById("langToggle").addEventListener("click", () => {
     currentLang = currentLang === "en" ? "vi" : "en";
