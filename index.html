@@ -2057,9 +2057,9 @@
   <section id="view-history" role="tabpanel" aria-labelledby="tab-history" hidden>
     <div class="hist-filterbar">
       <div class="window-pills" role="group" aria-label="Time window">
-        <button type="button" data-window="7" aria-pressed="false" data-i18n="window_week">Last week</button>
-        <button type="button" data-window="30" aria-pressed="false" data-i18n="window_month">Last month</button>
-        <button type="button" data-window="90" aria-pressed="false" data-i18n="window_quarter">Last quarter</button>
+        <button type="button" data-window="week" aria-pressed="false" data-i18n="window_week">Last week</button>
+        <button type="button" data-window="month" aria-pressed="false" data-i18n="window_month">Last month</button>
+        <button type="button" data-window="quarter" aria-pressed="false" data-i18n="window_quarter">Last quarter</button>
         <button type="button" data-window="all" aria-pressed="true" data-i18n="window_all">All time</button>
       </div>
       <div class="hist-note" id="histRangeNote"></div>
@@ -3058,7 +3058,7 @@
       name: "Dr A", handle: "dra (phone order)",
       items: [
         { qty: 3, name: "Shareable Tray", price: 45 },
-        { qty: 1, name: "Personal Tray", price: 0, comp: true, note: "included in the $135 total" }
+        { qty: 1, name: "Personal Tray", price: 0, comp: true, note: "no spicy; included in the $135 total" }
       ],
       total: 135,
       orderDate: "2026-09-03", orderTime: null,
@@ -4658,8 +4658,12 @@
   function strIssueCount(n) {
     return currentLang === "vi" ? `${n} sự cố` : `${n} issue${n === 1 ? "" : "s"}`;
   }
-  function strHistRangeWindow(n, days) {
-    return currentLang === "vi" ? `${n} đơn trong ${days} ngày qua` : `${n} order${n === 1 ? "" : "s"} in the last ${days} days`;
+  // windowKey is "week" | "month" | "quarter" — the pill's fixed Mon–Sun
+  // period (see WINDOW_WEEKS/windowRange), not a rolling day count.
+  function strHistRangeWindow(n, windowKey) {
+    const periodEn = windowKey === "week" ? "last week" : windowKey === "month" ? "the last 4 weeks" : "the last 12 weeks";
+    const periodVi = windowKey === "week" ? "tuần trước" : windowKey === "month" ? "4 tuần qua" : "12 tuần qua";
+    return currentLang === "vi" ? `${n} đơn trong ${periodVi}` : `${n} order${n === 1 ? "" : "s"} in ${periodEn}`;
   }
   function strTimeOfDaySub(unknownCount) {
     const base = t("hist_tod_sub");
@@ -5860,19 +5864,53 @@
     return new Date(Date.UTC(y, m - 1, d));
   }
 
-  function ordersInWindow(days) {
+  // How many complete Mon–Sun weeks each window pill covers, counting back
+  // from the most recent full week (i.e. NOT the current, still-in-progress
+  // week). Per Tony: "last week" = all of the previous Monday through
+  // Sunday; "last month" = the previous 4 such weeks; "last quarter" = the
+  // previous 12 such weeks. All three share the same end boundary (last
+  // Sunday 11:59:59.999pm) and only differ in how far back the start goes.
+  const WINDOW_WEEKS = { week: 1, month: 4, quarter: 12 };
+
+  // 00:00 UTC on the Monday of the current (in-progress) week. Used as the
+  // anchor for every window pill's start/end math below.
+  function currentWeekMondayUTC() {
+    const now = new Date();
+    const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+    const dow = today.getUTCDay(); // 0=Sun..6=Sat
+    const daysSinceMonday = dow === 0 ? 6 : dow - 1;
+    today.setUTCDate(today.getUTCDate() - daysSinceMonday);
+    return today;
+  }
+
+  // Returns the inclusive [start, end] range for a "week"/"month"/"quarter"
+  // pill: start is 12:00am UTC on the Monday `weeks` weeks before this
+  // week's Monday; end is 11:59:59.999pm UTC on last Sunday (the day right
+  // before this week's Monday) — the same last-Sunday end for all three.
+  function windowRange(windowKey) {
+    const thisMonday = currentWeekMondayUTC();
+    const weeks = WINDOW_WEEKS[windowKey];
+    const start = new Date(thisMonday);
+    start.setUTCDate(start.getUTCDate() - weeks * 7);
+    const end = new Date(thisMonday);
+    end.setUTCDate(end.getUTCDate() - 1);
+    end.setUTCHours(23, 59, 59, 999);
+    return { start, end };
+  }
+
+  function ordersInWindow(windowKey) {
     // Deleted orders never count toward History — that's the whole point of
     // deleting a wrongly-logged order rather than just marking it complete.
-    if (days === "all") return ORDERS.filter((o) => !isDeleted(o));
-    const cutoff = new Date();
-    cutoff.setUTCHours(0, 0, 0, 0);
-    cutoff.setUTCDate(cutoff.getUTCDate() - days);
-    // Orders with no orderDate can't be placed in a rolling window, so they
-    // only ever show up under "All time".
+    if (windowKey === "all") return ORDERS.filter((o) => !isDeleted(o));
+    // Windowed by pickupDate (not orderDate) — the pills answer "what did
+    // we prep/sell that week", which is a pickup-time question. pickupDate
+    // is required on every order, so nothing silently falls out of every
+    // window the way a null orderDate would.
+    const { start, end } = windowRange(windowKey);
     return ORDERS.filter((o) => {
       if (isDeleted(o)) return false;
-      const d = parseOrderDate(o);
-      return d && d >= cutoff;
+      const d = parsePickupDate(o);
+      return d && d >= start && d <= end;
     });
   }
 
@@ -6058,11 +6096,13 @@
     });
   }
 
-  function renderHistRangeNote(days, list) {
+  function renderHistRangeNote(windowKey, list) {
     const el = document.getElementById("histRangeNote");
     if (!list.length) { el.textContent = t("empty_no_orders_logged_window"); return; }
-    const dates = list.map((o) => o.orderDate).sort();
-    const label = days === "all" ? strHistRangeAll(list.length) : strHistRangeWindow(list.length, days);
+    // pickupDate, not orderDate — the window pills now bucket by pickup
+    // week, so the displayed range should describe the same field.
+    const dates = list.map((o) => o.pickupDate).sort();
+    const label = windowKey === "all" ? strHistRangeAll(list.length) : strHistRangeWindow(list.length, windowKey);
     el.textContent = dates[0] === dates[dates.length - 1]
       ? `${label} · ${fmtShortDate(dates[0])}`
       : `${label} · ${fmtShortDate(dates[0])}–${fmtShortDate(dates[dates.length - 1])}`;
@@ -6163,7 +6203,7 @@
   const windowPillButtons = Array.from(document.querySelectorAll(".window-pills button"));
   windowPillButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
-      currentWindow = btn.dataset.window === "all" ? "all" : Number(btn.dataset.window);
+      currentWindow = btn.dataset.window; // "week" | "month" | "quarter" | "all"
       windowPillButtons.forEach((b) => b.setAttribute("aria-pressed", String(b === btn)));
       renderHistory();
     });
