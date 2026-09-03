@@ -861,6 +861,21 @@
 
   .stat.accent { background: var(--tea); color: var(--tea-ink); }
 
+  .stat-progress-target { font-size: 0.9rem; font-weight: 700; opacity: 0.7; margin-left: 1px; }
+  .stat-progress-track {
+    margin-top: 9px;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.25);
+    overflow: hidden;
+  }
+  .stat-progress-fill {
+    height: 100%;
+    border-radius: inherit;
+    background: var(--rice);
+    transition: width 0.3s ease;
+  }
+
   nav.tabs {
     display: inline-flex;
     background: var(--rice-2);
@@ -2130,7 +2145,6 @@
         <button type="button" data-window="thisweek" aria-pressed="false" data-i18n="window_thisweek">This week</button>
         <button type="button" data-window="week" aria-pressed="false" data-i18n="window_week">Last week</button>
         <button type="button" data-window="month" aria-pressed="false" data-i18n="window_month">Last month</button>
-        <button type="button" data-window="quarter" aria-pressed="false" data-i18n="window_quarter">Last quarter</button>
         <button type="button" data-window="all" aria-pressed="true" data-i18n="window_all">All time</button>
         <button type="button" data-window="custom" aria-pressed="false" data-i18n="window_custom">Custom range</button>
       </div>
@@ -4459,12 +4473,11 @@
       label_unreviewed: "unreviewed",
       stat_open_orders: "Open orders",
       stat_total_value: "Total value",
-      stat_awaiting_payment: "Awaiting payment",
+      stat_weekly_portions: "Weekly portions",
       stat_next_pickup: "Next pickup day",
       window_thisweek: "This week",
       window_week: "Last week",
       window_month: "Last month",
-      window_quarter: "Last quarter",
       window_all: "All time",
       window_custom: "Custom range",
       custom_range_title: "Custom date range",
@@ -4601,12 +4614,11 @@
       label_unreviewed: "chưa xem",
       stat_open_orders: "Đơn đang mở",
       stat_total_value: "Tổng giá trị",
-      stat_awaiting_payment: "Chờ thanh toán",
+      stat_weekly_portions: "Phần ăn trong tuần",
       stat_next_pickup: "Ngày lấy hàng kế tiếp",
       window_thisweek: "Tuần này",
       window_week: "Tuần trước",
       window_month: "Tháng trước",
-      window_quarter: "Quý trước",
       window_all: "Từ trước đến nay",
       window_custom: "Khoảng tùy chỉnh",
       custom_range_title: "Khoảng ngày tùy chỉnh",
@@ -4750,21 +4762,21 @@
   function strIssueCount(n) {
     return currentLang === "vi" ? `${n} sự cố` : `${n} issue${n === 1 ? "" : "s"}`;
   }
-  // windowKey is "thisweek" | "week" | "month" | "quarter" | "custom" — the
-  // pill's fixed Mon-anchored period (see WINDOW_WEEKS/windowRange), not a
-  // rolling day count. "thisweek" is the current week through right now;
-  // "custom" is whatever start/end Tony picked in the date-range modal;
-  // the rest are fully-closed past periods.
+  // windowKey is "thisweek" | "week" | "month" | "custom" — the pill's
+  // fixed Mon-anchored period (see WINDOW_WEEKS/windowRange), not a rolling
+  // day count. "thisweek" is the current week through right now; "custom"
+  // is whatever start/end Tony picked in the date-range modal (this is
+  // also where a picked quarter-ish range lands now that the "Last
+  // quarter" pill is gone — Custom range covers that case fine); "week"
+  // and "month" are fully-closed past periods.
   function strHistRangeWindow(n, windowKey) {
     const periodEn = windowKey === "thisweek" ? "this week so far"
       : windowKey === "week" ? "last week"
       : windowKey === "month" ? "the last 4 weeks"
-      : windowKey === "quarter" ? "the last 12 weeks"
       : "the selected range";
     const periodVi = windowKey === "thisweek" ? "tuần này (tính đến hiện tại)"
       : windowKey === "week" ? "tuần trước"
       : windowKey === "month" ? "4 tuần qua"
-      : windowKey === "quarter" ? "12 tuần qua"
       : "khoảng đã chọn";
     return currentLang === "vi" ? `${n} đơn trong ${periodVi}` : `${n} order${n === 1 ? "" : "s"} in ${periodEn}`;
   }
@@ -5398,18 +5410,54 @@
   // ---- Stat bar ----
   // Based on active (not-yet-completed) orders only, so the numbers always
   // reflect what's actually still outstanding.
+
+  // How many portions Tony wants to sell/prep in a Mon–Sun week — shown as
+  // a small progress bar on the stat bar in place of "Awaiting payment"
+  // (he doesn't check payment status from the top bar much; this is the
+  // number he actually wants to see at a glance).
+  const WEEKLY_PORTIONS_TARGET = 40;
+
+  // Portions already on the books for the current week, counting every
+  // non-deleted order with a pickup date anywhere in this Mon–Sun week —
+  // including already-completed/picked-up ones, since they still count
+  // toward what actually got made this week, and including pickups later
+  // this week (e.g. a Friday order logged on Monday already counts now,
+  // it doesn't wait until Friday to "arrive"). Only deleted orders are
+  // excluded, same as everywhere else portions/History math lives.
+  function weeklyPortionsProgress() {
+    const monday = currentWeekMondayUTC();
+    const sunday = new Date(monday);
+    sunday.setUTCDate(sunday.getUTCDate() + 6);
+    sunday.setUTCHours(23, 59, 59, 999);
+    let portions = 0;
+    ORDERS.forEach((o) => {
+      if (isDeleted(o)) return;
+      const d = parsePickupDate(o);
+      if (!d || d < monday || d > sunday) return;
+      portions += trayPortions(o.items).portions;
+    });
+    return portions;
+  }
+
   function renderStats() {
     const active = ORDERS.filter(o => !isCompleted(o) && !isDeleted(o) && !o.historical);
     const total = active.length;
     const revenue = active.reduce((s, o) => s + o.total, 0);
-    const unpaid = active.filter(o => !o.paid).length;
     const days = [...new Set(active.map(o => o.pickupDate))].sort();
     const nextDay = days[0];
+    const weeklyPortions = weeklyPortionsProgress();
+    // Bar visually caps at 100% once the target's hit, but the number
+    // itself keeps counting up past it so exceeding the goal is visible.
+    const weeklyPct = Math.min(100, Math.round((weeklyPortions / WEEKLY_PORTIONS_TARGET) * 100));
     const el = document.getElementById("statbar");
     el.innerHTML = `
       <div class="stat accent"><div class="n">${total}</div><div class="l">${t("stat_open_orders")}</div></div>
       <div class="stat"><div class="n">${fmtMoney(revenue)}</div><div class="l">${t("stat_total_value")}</div></div>
-      <div class="stat"><div class="n">${unpaid}</div><div class="l">${t("stat_awaiting_payment")}</div></div>
+      <div class="stat stat-progress">
+        <div class="n">${weeklyPortions}<span class="stat-progress-target">/${WEEKLY_PORTIONS_TARGET}</span></div>
+        <div class="l">${t("stat_weekly_portions")}</div>
+        <div class="stat-progress-track"><div class="stat-progress-fill" style="width:${weeklyPct}%"></div></div>
+      </div>
       <div class="stat"><div class="n">${nextDay ? fmtShortDate(nextDay) : "—"}</div><div class="l">${t("stat_next_pickup")}</div></div>
     `;
   }
@@ -5973,10 +6021,12 @@
   // How many complete Mon–Sun weeks each window pill covers, counting back
   // from the most recent full week (i.e. NOT the current, still-in-progress
   // week). Per Tony: "last week" = all of the previous Monday through
-  // Sunday; "last month" = the previous 4 such weeks; "last quarter" = the
-  // previous 12 such weeks. All three share the same end boundary (last
-  // Sunday 11:59:59.999pm) and only differ in how far back the start goes.
-  const WINDOW_WEEKS = { week: 1, month: 4, quarter: 12 };
+  // Sunday; "last month" = the previous 4 such weeks. Both share the same
+  // end boundary (last Sunday 11:59:59.999pm) and only differ in how far
+  // back the start goes. There used to be a "last quarter" here too, but
+  // Tony removed it once Custom range could cover the same ground on
+  // demand — reach for that pill for anything quarter-sized now.
+  const WINDOW_WEEKS = { week: 1, month: 4 };
 
   // Holds whatever start/end Tony last applied in the "Custom range" date
   // picker (both UTC-midnight-anchored Dates, same convention as
@@ -6000,10 +6050,10 @@
   // "thisweek" is the odd one out: it's the current, still-in-progress week
   // — 12:00am UTC this Monday through right now — so people can see what's
   // been ordered for the week so far, not just fully-closed weeks.
-  // "week"/"month"/"quarter" all look backward instead: start is 12:00am
-  // UTC on the Monday `weeks` weeks before this week's Monday, and end is
+  // "week"/"month" both look backward instead: start is 12:00am UTC on the
+  // Monday `weeks` weeks before this week's Monday, and end is
   // 11:59:59.999pm UTC on last Sunday (the day right before this week's
-  // Monday) — the same last-Sunday end for all three.
+  // Monday) — the same last-Sunday end for both.
   // "custom" is the odd one out too: its range comes from customRangeStart/
   // customRangeEnd (set by applyCustomRange when Tony confirms the date
   // picker), not from anything computed off today's date.
@@ -6231,8 +6281,9 @@
   }
 
   let currentWindow = "all";
-  // Deliberately NOT filtered by the "Last week / month / quarter / All
-  // time" window pills above — it's a paper trail, not a stat, so an entry
+  // Deliberately NOT filtered by the "This week / Last week / month / All
+  // time / Custom range" window pills above — it's a paper trail, not a
+  // stat, so an entry
   // should never look like it "disappeared" just because the window
   // changed. Always the full log, newest first.
   // One row per buyer, not per incident — the point of this view is
@@ -6333,7 +6384,7 @@
         openCustomRangeModal();
         return;
       }
-      currentWindow = btn.dataset.window; // "thisweek" | "week" | "month" | "quarter" | "all" | "custom"
+      currentWindow = btn.dataset.window; // "thisweek" | "week" | "month" | "all" | "custom"
       windowPillButtons.forEach((b) => b.setAttribute("aria-pressed", String(b === btn)));
       renderHistory();
     });
