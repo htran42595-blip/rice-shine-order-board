@@ -806,6 +806,28 @@
   }
   .pin-modal-lock-msg strong { font-variant-numeric: tabular-nums; }
 
+  .custom-range-fields { text-align: left; margin-bottom: 4px; }
+  .custom-range-label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--ink-soft);
+    margin: 10px 0 4px;
+  }
+  .custom-range-label:first-child { margin-top: 0; }
+  .custom-range-input {
+    width: 100%;
+    font-size: 0.95rem;
+    padding: 9px 10px;
+    border-radius: 10px;
+    border: 1.5px solid var(--line);
+    background: var(--rice-2);
+    color: var(--ink);
+    font-family: inherit;
+    box-sizing: border-box;
+  }
+  .custom-range-input:focus { outline: none; border-color: var(--tea); }
+
   .statbar {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -2052,6 +2074,24 @@
     </div>
   </div>
 
+  <div id="customRangeBackdrop" class="pin-modal-backdrop" role="dialog" aria-modal="true" aria-label="Choose a custom date range" hidden>
+    <div class="pin-modal">
+      <p class="pin-modal-title" data-i18n="custom_range_title">Custom date range</p>
+      <p class="pin-modal-sub" data-i18n="custom_range_sub">Show orders with a pickup date in this range.</p>
+      <div class="custom-range-fields">
+        <label class="custom-range-label" for="customRangeStart" data-i18n="custom_range_start_label">Start date</label>
+        <input type="date" class="custom-range-input" id="customRangeStart" />
+        <label class="custom-range-label" for="customRangeEnd" data-i18n="custom_range_end_label">End date</label>
+        <input type="date" class="custom-range-input" id="customRangeEnd" />
+      </div>
+      <p class="pin-modal-error" id="customRangeError"></p>
+      <div class="pin-modal-actions">
+        <button type="button" class="pin-modal-btn" id="customRangeCancel" data-i18n="custom_range_cancel">Cancel</button>
+        <button type="button" class="pin-modal-btn primary" id="customRangeApply" data-i18n="custom_range_apply">Show orders</button>
+      </div>
+    </div>
+  </div>
+
   <section id="view-orders" role="tabpanel" aria-labelledby="tab-orders">
     <div class="prep-time-card">
       <button type="button" class="prep-time-toggle" id="prepTimeToggle" aria-expanded="false" aria-controls="prepTimeBody">
@@ -2092,6 +2132,7 @@
         <button type="button" data-window="month" aria-pressed="false" data-i18n="window_month">Last month</button>
         <button type="button" data-window="quarter" aria-pressed="false" data-i18n="window_quarter">Last quarter</button>
         <button type="button" data-window="all" aria-pressed="true" data-i18n="window_all">All time</button>
+        <button type="button" data-window="custom" aria-pressed="false" data-i18n="window_custom">Custom range</button>
       </div>
       <div class="hist-note" id="histRangeNote"></div>
     </div>
@@ -4425,6 +4466,13 @@
       window_month: "Last month",
       window_quarter: "Last quarter",
       window_all: "All time",
+      window_custom: "Custom range",
+      custom_range_title: "Custom date range",
+      custom_range_sub: "Show orders with a pickup date in this range.",
+      custom_range_start_label: "Start date",
+      custom_range_end_label: "End date",
+      custom_range_cancel: "Cancel",
+      custom_range_apply: "Show orders",
       hist_stat_total_orders: "Total orders",
       hist_stat_total_income: "Total income",
       hist_stat_avg_order: "Avg order value",
@@ -4560,6 +4608,13 @@
       window_month: "Tháng trước",
       window_quarter: "Quý trước",
       window_all: "Từ trước đến nay",
+      window_custom: "Khoảng tùy chỉnh",
+      custom_range_title: "Khoảng ngày tùy chỉnh",
+      custom_range_sub: "Hiển thị đơn hàng có ngày lấy trong khoảng này.",
+      custom_range_start_label: "Ngày bắt đầu",
+      custom_range_end_label: "Ngày kết thúc",
+      custom_range_cancel: "Hủy",
+      custom_range_apply: "Xem đơn hàng",
       hist_stat_total_orders: "Tổng số đơn",
       hist_stat_total_income: "Tổng doanh thu",
       hist_stat_avg_order: "Giá trị đơn trung bình",
@@ -4695,13 +4750,22 @@
   function strIssueCount(n) {
     return currentLang === "vi" ? `${n} sự cố` : `${n} issue${n === 1 ? "" : "s"}`;
   }
-  // windowKey is "thisweek" | "week" | "month" | "quarter" — the pill's
-  // fixed Mon-anchored period (see WINDOW_WEEKS/windowRange), not a rolling
-  // day count. "thisweek" is the current week through right now; the rest
-  // are fully-closed past periods.
+  // windowKey is "thisweek" | "week" | "month" | "quarter" | "custom" — the
+  // pill's fixed Mon-anchored period (see WINDOW_WEEKS/windowRange), not a
+  // rolling day count. "thisweek" is the current week through right now;
+  // "custom" is whatever start/end Tony picked in the date-range modal;
+  // the rest are fully-closed past periods.
   function strHistRangeWindow(n, windowKey) {
-    const periodEn = windowKey === "thisweek" ? "this week so far" : windowKey === "week" ? "last week" : windowKey === "month" ? "the last 4 weeks" : "the last 12 weeks";
-    const periodVi = windowKey === "thisweek" ? "tuần này (tính đến hiện tại)" : windowKey === "week" ? "tuần trước" : windowKey === "month" ? "4 tuần qua" : "12 tuần qua";
+    const periodEn = windowKey === "thisweek" ? "this week so far"
+      : windowKey === "week" ? "last week"
+      : windowKey === "month" ? "the last 4 weeks"
+      : windowKey === "quarter" ? "the last 12 weeks"
+      : "the selected range";
+    const periodVi = windowKey === "thisweek" ? "tuần này (tính đến hiện tại)"
+      : windowKey === "week" ? "tuần trước"
+      : windowKey === "month" ? "4 tuần qua"
+      : windowKey === "quarter" ? "12 tuần qua"
+      : "khoảng đã chọn";
     return currentLang === "vi" ? `${n} đơn trong ${periodVi}` : `${n} order${n === 1 ? "" : "s"} in ${periodEn}`;
   }
   function strTimeOfDaySub(unknownCount) {
@@ -5914,6 +5978,13 @@
   // Sunday 11:59:59.999pm) and only differ in how far back the start goes.
   const WINDOW_WEEKS = { week: 1, month: 4, quarter: 12 };
 
+  // Holds whatever start/end Tony last applied in the "Custom range" date
+  // picker (both UTC-midnight-anchored Dates, same convention as
+  // parsePickupDate — end is bumped to 23:59:59.999 on apply so the whole
+  // end day is included). null until he's picked a range at least once.
+  let customRangeStart = null;
+  let customRangeEnd = null;
+
   // 00:00 UTC on the Monday of the current (in-progress) week. Used as the
   // anchor for every window pill's start/end math below.
   function currentWeekMondayUTC() {
@@ -5933,9 +6004,13 @@
   // UTC on the Monday `weeks` weeks before this week's Monday, and end is
   // 11:59:59.999pm UTC on last Sunday (the day right before this week's
   // Monday) — the same last-Sunday end for all three.
+  // "custom" is the odd one out too: its range comes from customRangeStart/
+  // customRangeEnd (set by applyCustomRange when Tony confirms the date
+  // picker), not from anything computed off today's date.
   function windowRange(windowKey) {
     const thisMonday = currentWeekMondayUTC();
     if (windowKey === "thisweek") return { start: thisMonday, end: new Date() };
+    if (windowKey === "custom") return { start: customRangeStart, end: customRangeEnd };
     const weeks = WINDOW_WEEKS[windowKey];
     const start = new Date(thisMonday);
     start.setUTCDate(start.getUTCDate() - weeks * 7);
@@ -6250,10 +6325,101 @@
   const windowPillButtons = Array.from(document.querySelectorAll(".window-pills button"));
   windowPillButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
-      currentWindow = btn.dataset.window; // "thisweek" | "week" | "month" | "quarter" | "all"
+      // "Custom range" doesn't have a ready-made window to switch to — it
+      // needs Tony to pick dates first, so clicking it opens the picker
+      // instead of applying anything immediately. The pill only becomes
+      // active once he confirms a range (see applyCustomRange below).
+      if (btn.dataset.window === "custom") {
+        openCustomRangeModal();
+        return;
+      }
+      currentWindow = btn.dataset.window; // "thisweek" | "week" | "month" | "quarter" | "all" | "custom"
       windowPillButtons.forEach((b) => b.setAttribute("aria-pressed", String(b === btn)));
       renderHistory();
     });
+  });
+
+  // ---- Custom date-range picker (History tab) ----
+  // Reuses the same .pin-modal-backdrop/.pin-modal styling as the History
+  // PIN prompt below, so it looks like part of the same dashboard rather
+  // than a bolted-on widget.
+  const customRangeBackdrop = document.getElementById("customRangeBackdrop");
+  const customRangeStartInput = document.getElementById("customRangeStart");
+  const customRangeEndInput = document.getElementById("customRangeEnd");
+  const customRangeError = document.getElementById("customRangeError");
+  const customRangeApplyBtn = document.getElementById("customRangeApply");
+  const customRangeCancelBtn = document.getElementById("customRangeCancel");
+
+  // <input type="date"> reads/writes "YYYY-MM-DD" strings — parse/format
+  // through the same UTC-midnight convention as parsePickupDate so a date
+  // typed here lines up exactly with how pickupDate is compared elsewhere.
+  function parseDateInputUTC(value) {
+    if (!value) return null;
+    const [y, m, d] = value.split("-").map(Number);
+    return new Date(Date.UTC(y, m - 1, d));
+  }
+  function fmtDateInputUTC(date) {
+    const y = date.getUTCFullYear();
+    const m = String(date.getUTCMonth() + 1).padStart(2, "0");
+    const d = String(date.getUTCDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
+
+  function openCustomRangeModal() {
+    customRangeError.textContent = "";
+    // Prefill with the last applied range so reopening to tweak it doesn't
+    // lose the previous picks; otherwise default to this week (Monday
+    // through today) as a sensible starting point.
+    const prefillStart = customRangeStart || currentWeekMondayUTC();
+    const prefillEnd = customRangeEnd || currentWeekMondayUTC();
+    if (!customRangeEnd) {
+      const now = new Date();
+      prefillEnd.setTime(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+    }
+    customRangeStartInput.value = fmtDateInputUTC(prefillStart);
+    customRangeEndInput.value = fmtDateInputUTC(prefillEnd);
+    customRangeBackdrop.hidden = false;
+    customRangeStartInput.focus();
+  }
+
+  function closeCustomRangeModal() {
+    customRangeBackdrop.hidden = true;
+    // Cancelling without ever applying a range shouldn't leave the "Custom
+    // range" pill looking pressed with nothing behind it — re-sync the
+    // pressed state to whatever window is actually active.
+    windowPillButtons.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.window === currentWindow)));
+  }
+
+  function applyCustomRange() {
+    const start = parseDateInputUTC(customRangeStartInput.value);
+    const end = parseDateInputUTC(customRangeEndInput.value);
+    if (!start || !end) {
+      customRangeError.textContent = "Pick both a start and end date.";
+      return;
+    }
+    if (end < start) {
+      customRangeError.textContent = "End date must be on or after the start date.";
+      return;
+    }
+    end.setUTCHours(23, 59, 59, 999);
+    customRangeStart = start;
+    customRangeEnd = end;
+    currentWindow = "custom";
+    windowPillButtons.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.window === "custom")));
+    customRangeBackdrop.hidden = true;
+    renderHistory();
+  }
+
+  customRangeApplyBtn.addEventListener("click", applyCustomRange);
+  customRangeCancelBtn.addEventListener("click", closeCustomRangeModal);
+  [customRangeStartInput, customRangeEndInput].forEach((input) => {
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") applyCustomRange();
+      else if (e.key === "Escape") closeCustomRangeModal();
+    });
+  });
+  customRangeBackdrop.addEventListener("click", (e) => {
+    if (e.target === customRangeBackdrop) closeCustomRangeModal();
   });
 
   // ---- Tabs ----
@@ -6510,7 +6676,9 @@
   });
   document.getElementById("palettePopoverBackdrop").addEventListener("click", closePalettePopover);
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && !document.getElementById("palettePopover").hidden) closePalettePopover();
+    if (e.key !== "Escape") return;
+    if (!document.getElementById("palettePopover").hidden) closePalettePopover();
+    if (!customRangeBackdrop.hidden) closeCustomRangeModal();
   });
 
   // ---- Cross-device sync (PREVIEW FEATURE) ----
