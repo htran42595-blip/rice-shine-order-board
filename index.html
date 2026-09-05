@@ -5359,13 +5359,20 @@
   // ---- Completed-order tracking ----
   // Whether an order's been picked up / fulfilled lives in the viewer's own
   // browser (localStorage), not in the ORDERS array — the dashboard is
-  // redeployed fresh each week, so there's no server to store this on. Each
-  // order gets a content-based key (not just its position in the array) so a
-  // page reload keeps the right orders marked complete, and so last week's
-  // completions don't accidentally carry over onto this week's new orders.
+  // redeployed fresh each week, so there's no server to store this on. Keyed
+  // off orderIdentity() (defined below) — the same stable, DM-placement-time
+  // anchored identity the new/updated flag already uses — rather than a
+  // fingerprint of price/items/pickup time. Those fields get corrected
+  // fairly often during a DM sweep, and a content-based key used to mean a
+  // routine price fix or added item silently un-completed (or un-deleted) an
+  // order Tony had already handled. orderIdentity doesn't move when those
+  // fields change, so a mark stays put across edits and page reloads alike.
   const COMPLETED_STORAGE_KEY = "riceShineCompletedOrders";
 
-  function orderKey(o) {
+  // Kept only so a status recorded under the old content-based key (before
+  // this fix) can still be found and carried forward — see
+  // migrateLegacyStatusKeys() below. Never used for new reads/writes.
+  function legacyOrderKey(o) {
     return [o.handle, o.pickupDate, o.pickupTime, o.total, o.items.map(i => `${i.qty}x${i.name}`).join(",")].join("|");
   }
 
@@ -5383,11 +5390,11 @@
   }
 
   function isCompleted(o) {
-    return completedSet.has(orderKey(o));
+    return completedSet.has(orderIdentity(o));
   }
 
   function toggleCompleted(o) {
-    const key = orderKey(o);
+    const key = orderIdentity(o);
     let nowDone;
     if (completedSet.has(key)) { completedSet.delete(key); nowDone = false; }
     else { completedSet.add(key); nowDone = true; }
@@ -5398,8 +5405,8 @@
   // ---- Deleted-order tracking ----
   // A wrongly-logged order (duplicate, misread thread, etc.) that Tony never
   // wants to see in Active or Completed. Same pattern as completed-order
-  // tracking: a per-viewer localStorage set keyed off orderKey(), never a
-  // mutation of the ORDERS array itself. That's what makes it reversible —
+  // tracking: a per-viewer localStorage set keyed off orderIdentity(), never
+  // a mutation of the ORDERS array itself. That's what makes it reversible —
   // "deleting" just hides the card behind the Deleted subtab, where a
   // Restore button puts it right back. Nothing here is ever destroyed.
   const DELETED_STORAGE_KEY = "riceShineDeletedOrders";
@@ -5418,26 +5425,26 @@
   }
 
   function isDeleted(o) {
-    return deletedSet.has(orderKey(o));
+    return deletedSet.has(orderIdentity(o));
   }
 
   function deleteOrder(o) {
-    const key = orderKey(o);
+    const key = orderIdentity(o);
     deletedSet.add(key);
     persistDeleted();
     // Pull it out of buyer history too, so a wrongly-logged order stops
     // counting toward that customer's Returning/Biggest-buyer totals and
     // drops out of the History tab immediately, not just after a reload.
-    delete buyerHistory[orderIdentity(o)];
+    delete buyerHistory[key];
     persistBuyerHistory();
     if (window.RiceShineSync?.isSharedMode?.()) {
       window.RiceShineSync.setDeleted(key, true);
-      window.RiceShineSync.deleteBuyerHistoryEntry(orderIdentity(o));
+      window.RiceShineSync.deleteBuyerHistoryEntry(key);
     }
   }
 
   function restoreOrder(o) {
-    const key = orderKey(o);
+    const key = orderIdentity(o);
     deletedSet.delete(key);
     persistDeleted();
     const historyEntry = {
@@ -5447,13 +5454,68 @@
       orderDate: o.orderDate || "",
       orderTime: o.orderTime || "",
     };
-    buyerHistory[orderIdentity(o)] = historyEntry;
+    buyerHistory[key] = historyEntry;
     persistBuyerHistory();
     if (window.RiceShineSync?.isSharedMode?.()) {
       window.RiceShineSync.setDeleted(key, false);
-      window.RiceShineSync.setBuyerHistoryBatch([[orderIdentity(o), historyEntry]]);
+      window.RiceShineSync.setBuyerHistoryBatch([[key, historyEntry]]);
     }
   }
+
+  // ---- One-time migration off the old content-based key ----
+  // Before this fix, completed/deleted status was keyed by legacyOrderKey()
+  // (handle + pickup date/time + total + items) instead of the stable
+  // orderIdentity() every other per-order feature already used. Run this
+  // once per load so a status recorded under the old key isn't silently
+  // lost the moment this file ships: try an exact legacy-key match first
+  // (an order whose price/items never changed since it was marked), then
+  // fall back to matching on just handle + pickup date + pickup time —
+  // enough to recover a status even for an order whose price or items were
+  // corrected sometime before this fix went out, since a mark-complete/
+  // delete tap essentially never lands in the same edit as a menu
+  // correction. Entries that still can't be matched to any current order
+  // (it was removed from the board entirely) are simply left alone rather
+  // than guessed at.
+  function legacyPrefix(key) {
+    return key.split("|").slice(0, 3).join("|");
+  }
+
+  function migrateLegacyStatusKeys(pushToRemote) {
+    const byExactLegacy = new Map();
+    const byPrefix = new Map();
+    ORDERS.forEach((o) => {
+      const identity = orderIdentity(o);
+      const legacy = legacyOrderKey(o);
+      byExactLegacy.set(legacy, identity);
+      const prefix = legacyPrefix(legacy);
+      if (!byPrefix.has(prefix)) byPrefix.set(prefix, identity);
+    });
+    const currentIdentities = new Set(ORDERS.map((o) => orderIdentity(o)));
+
+    function migrateSet(set, pushFn) {
+      let changed = false;
+      [...set].forEach((key) => {
+        if (currentIdentities.has(key)) return; // already a current-style key
+        const identity = byExactLegacy.get(key) || byPrefix.get(legacyPrefix(key));
+        if (!identity) return; // no matching order on the board — leave it
+        set.delete(key);
+        if (!set.has(identity)) set.add(identity);
+        changed = true;
+        if (pushToRemote && window.RiceShineSync?.isSharedMode?.()) {
+          pushFn(identity, true);
+          pushFn(key, false);
+        }
+      });
+      return changed;
+    }
+
+    const changedCompleted = migrateSet(completedSet, (k, v) => window.RiceShineSync.setCompleted(k, v));
+    const changedDeleted = migrateSet(deletedSet, (k, v) => window.RiceShineSync.setDeleted(k, v));
+    if (changedCompleted) persistCompleted();
+    if (changedDeleted) persistDeleted();
+  }
+
+  migrateLegacyStatusKeys(false);
 
   // Brief "Order deleted — Undo" toast so a misclick can be reversed in one
   // tap without hunting for the Deleted subtab. The Deleted subtab itself is
@@ -7193,6 +7255,11 @@
     seenMap = remote.seen || {};
     buyerHistory = remote.buyerHistory || {};
     experienceLog = remote.experienceLog || [];
+    // The shared doc may still carry entries under the old content-based
+    // key from before the completed/deleted key fix — convert those to the
+    // stable identity key here too, and push the fix back up so every
+    // synced device converges on it instead of re-discovering it separately.
+    migrateLegacyStatusKeys(true);
     persistCompleted();
     persistDeleted();
     persistSeen();
