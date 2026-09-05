@@ -5443,6 +5443,37 @@
     return completedSet.has(orderIdentity(o));
   }
 
+  // ---- Last-known-synced baselines (completed/deleted) ----
+  // A snapshot of what the shared doc's completed/deleted maps looked like
+  // as of the most recently processed remote update — separate from
+  // completedSet/deletedSet themselves. This is what lets an intentional
+  // un-complete (or restore-from-deleted) on one device actually stick on
+  // every other device instead of being silently resurrected.
+  //
+  // Without this, the sync-change listener's merge step can't tell apart
+  // "my local set has key X, remote doesn't (yet) — I just haven't synced
+  // it out" from "my local set has key X, remote doesn't — because someone
+  // else already removed it after I'd cached it." Both look identical (a
+  // key present locally, absent remotely) unless something records what
+  // remote used to say. Comparing against this baseline is that record —
+  // see the riceshine-sync-change listener below for the actual 3-way diff.
+  const LAST_SYNCED_COMPLETED_KEY = "riceShineLastSyncedCompleted";
+  const LAST_SYNCED_DELETED_KEY = "riceShineLastSyncedDeleted";
+
+  function readLastSynced(storageKey) {
+    try {
+      return new Set(JSON.parse(localStorage.getItem(storageKey) || "[]"));
+    } catch (e) {
+      return new Set();
+    }
+  }
+
+  function persistLastSynced(storageKey, keySet) {
+    try {
+      localStorage.setItem(storageKey, JSON.stringify([...keySet]));
+    } catch (e) {}
+  }
+
   function toggleCompleted(o) {
     const key = orderIdentity(o);
     let nowDone;
@@ -7349,10 +7380,29 @@
     // quietly re-pushed below so it stays self-healing across devices.
     const remoteCompleted = new Set(Object.keys(remote.completed || {}));
     const remoteDeleted = new Set(Object.keys(remote.deleted || {}));
-    const localOnlyCompleted = [...completedSet].filter((k) => !remoteCompleted.has(k));
-    const localOnlyDeleted = [...deletedSet].filter((k) => !remoteDeleted.has(k));
+    // A key only counts as "local-only, not yet synced" (keep it, re-push
+    // it) if this browser has never seen a PAST remote snapshot confirm it
+    // either. A key that WAS in a prior snapshot's completed/deleted map but
+    // is missing from this one was removed on purpose somewhere else — an
+    // un-complete tap, a restore-from-deleted — so it gets dropped here too
+    // instead of being resurrected and fought back onto the shared doc. This
+    // is the piece the original merge-not-replace fix was missing: it could
+    // stop a not-yet-synced mark from being lost, but couldn't tell that
+    // case apart from a mark that was already synced and then intentionally
+    // undone elsewhere, so an undo could never actually stick once a second
+    // device had cached the old value.
+    const priorSyncedCompleted = readLastSynced(LAST_SYNCED_COMPLETED_KEY);
+    const priorSyncedDeleted = readLastSynced(LAST_SYNCED_DELETED_KEY);
+    const localOnlyCompleted = [...completedSet].filter(
+      (k) => !remoteCompleted.has(k) && !priorSyncedCompleted.has(k)
+    );
+    const localOnlyDeleted = [...deletedSet].filter(
+      (k) => !remoteDeleted.has(k) && !priorSyncedDeleted.has(k)
+    );
     completedSet = new Set([...remoteCompleted, ...localOnlyCompleted]);
     deletedSet = new Set([...remoteDeleted, ...localOnlyDeleted]);
+    persistLastSynced(LAST_SYNCED_COMPLETED_KEY, remoteCompleted);
+    persistLastSynced(LAST_SYNCED_DELETED_KEY, remoteDeleted);
 
     const remoteSeen = remote.seen || {};
     const mergedSeen = { ...remoteSeen };
