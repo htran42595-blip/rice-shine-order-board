@@ -7234,8 +7234,23 @@
   // the same trick used to verify a fresh deploy — instead of Tony having
   // to force-close and reopen the app to see newly-added orders. Uses
   // location.replace so repeated taps don't pile up history entries.
-  document.getElementById("refreshToggle").addEventListener("click", () => {
+  document.getElementById("refreshToggle").addEventListener("click", async () => {
     document.getElementById("refreshToggle").classList.add("refresh-spinning");
+    // Give any queued mark-complete/acknowledge write a brief chance to
+    // reach the shared doc before we navigate away — the debounced write
+    // queue (see the sync module script) can otherwise still be sitting on
+    // a just-clicked change when Refresh is tapped right after it. This is
+    // a best-effort grace period, not a guarantee; the merge-on-receive fix
+    // in the riceshine-sync-change listener is what actually makes it safe
+    // even if this races and loses.
+    try {
+      if (window.RiceShineSync?.flushPending) {
+        await Promise.race([
+          window.RiceShineSync.flushPending(),
+          new Promise((resolve) => setTimeout(resolve, 600)),
+        ]);
+      }
+    } catch (e) {}
     const url = new URL(window.location.href);
     url.searchParams.set("v", Date.now().toString());
     window.location.replace(url.toString());
@@ -7269,9 +7284,37 @@
   // having loaded yet — it just waits for the event, whenever it comes.
   document.addEventListener("riceshine-sync-change", (e) => {
     const remote = e.detail || {};
-    completedSet = new Set(Object.keys(remote.completed || {}));
-    deletedSet = new Set(Object.keys(remote.deleted || {}));
-    seenMap = remote.seen || {};
+    // MERGE, never replace, for completed/deleted/seen: a mark-complete or
+    // acknowledge click always updates this browser's own localStorage
+    // synchronously, then fires an async write to the shared doc. That
+    // write can silently fail — a Firestore quota limit, a rate limit from
+    // several quick clicks in a row hitting the same shared document, a
+    // dropped connection — and the ONLY signal is a console.warn. Before
+    // this fix, the next remote snapshot (including the one on the very
+    // next page load) would blindly REPLACE completedSet/deletedSet/seenMap
+    // with whatever the server had, silently discarding any mark whose
+    // write hadn't actually landed — exactly the "refresh undoes my mark
+    // complete" bug. Now: anything this browser already has locally that
+    // the remote doc doesn't (yet) know about is kept, not dropped, and
+    // quietly re-pushed below so it stays self-healing across devices.
+    const remoteCompleted = new Set(Object.keys(remote.completed || {}));
+    const remoteDeleted = new Set(Object.keys(remote.deleted || {}));
+    const localOnlyCompleted = [...completedSet].filter((k) => !remoteCompleted.has(k));
+    const localOnlyDeleted = [...deletedSet].filter((k) => !remoteDeleted.has(k));
+    completedSet = new Set([...remoteCompleted, ...localOnlyCompleted]);
+    deletedSet = new Set([...remoteDeleted, ...localOnlyDeleted]);
+
+    const remoteSeen = remote.seen || {};
+    const mergedSeen = { ...remoteSeen };
+    const localOnlySeenPairs = [];
+    Object.keys(seenMap || {}).forEach((k) => {
+      if (seenMap[k] !== remoteSeen[k]) {
+        mergedSeen[k] = seenMap[k];
+        localOnlySeenPairs.push([k, seenMap[k]]);
+      }
+    });
+    seenMap = mergedSeen;
+
     buyerHistory = remote.buyerHistory || {};
     experienceLog = remote.experienceLog || [];
     // The shared doc may still carry entries under the old content-based
@@ -7288,6 +7331,11 @@
     // know about yet (e.g. added locally before this device ever signed
     // in) — reconcile and push any diffs back up.
     rebuildBuyerHistoryFromOrders();
+    if (window.RiceShineSync?.isSharedMode?.()) {
+      if (localOnlyCompleted.length) window.RiceShineSync.setCompletedBatch(localOnlyCompleted.map((k) => [k, true]));
+      if (localOnlyDeleted.length) window.RiceShineSync.setDeletedBatch(localOnlyDeleted.map((k) => [k, true]));
+      if (localOnlySeenPairs.length && window.RiceShineSync.setSeenBatch) window.RiceShineSync.setSeenBatch(localOnlySeenPairs);
+    }
     renderAll();
   });
 
@@ -7493,16 +7541,90 @@
     }
   }
 
-  async function setCompleted(key, isDone) {
-    await writeField("completed", key, isDone ? true : null);
+  // ---- Debounced write queue ----
+  // Ticking off several orders in a row (a very normal way to use this
+  // board — clearing a batch of pickups at once) used to fire one
+  // Firestore updateDoc PER CLICK, all against the same shared document.
+  // That's exactly the pattern that trips Firestore's per-document write
+  // rate limit / free-tier quota ("resource-exhausted") — confirmed live
+  // on this board. When a write fails that way it only console.warns; nothing
+  // else in the UI shows it. Queuing rapid clicks and flushing them as one
+  // batched write cuts the write rate dramatically. This is a second,
+  // independent layer of defense — the merge-on-receive logic in the main
+  // script (riceshine-sync-change listener) is what actually stops a failed
+  // write from undoing the user's own mark on the next refresh; this queue
+  // just makes hitting that failure in the first place a lot less likely.
+  const pendingCompleted = new Map();
+  const pendingDeleted = new Map();
+  const pendingSeen = new Map();
+  let flushTimer = null;
+
+  function scheduleFlush() {
+    if (flushTimer) return;
+    flushTimer = setTimeout(flushPendingWrites, 1200);
   }
 
-  async function setDeleted(key, isDel) {
-    await writeField("deleted", key, isDel ? true : null);
+  async function flushPendingWrites() {
+    flushTimer = null;
+    const completedPairs = [...pendingCompleted.entries()];
+    const deletedPairs = [...pendingDeleted.entries()];
+    const seenPairs = [...pendingSeen.entries()];
+    if (!completedPairs.length && !deletedPairs.length && !seenPairs.length) return;
+    if (!sharedMode) { pendingCompleted.clear(); pendingDeleted.clear(); pendingSeen.clear(); return; }
+    try {
+      const args = [];
+      completedPairs.forEach(([k, v]) => args.push(new FieldPath("completed", k), v ? true : deleteField()));
+      deletedPairs.forEach(([k, v]) => args.push(new FieldPath("deleted", k), v ? true : deleteField()));
+      seenPairs.forEach(([k, v]) => args.push(new FieldPath("seen", k), v));
+      await updateDoc(stateDocRef, ...args);
+      completedPairs.forEach(([k]) => pendingCompleted.delete(k));
+      deletedPairs.forEach(([k]) => pendingDeleted.delete(k));
+      seenPairs.forEach(([k]) => pendingSeen.delete(k));
+    } catch (e) {
+      console.warn("Rice & Shine sync: batched write failed, will retry on next flush", e);
+      scheduleFlush();
+    }
   }
 
-  async function setSeen(identity, fingerprint) {
-    await writeField("seen", identity, fingerprint);
+  // Best-effort: try to get any queued writes out before the tab actually
+  // goes away (e.g. the in-page Refresh button navigates immediately, with
+  // no debounce delay to wait out). This can still lose the race — it's not
+  // a substitute for the merge-on-receive fix above, just one more chance.
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden" && flushTimer) {
+      clearTimeout(flushTimer);
+      flushTimer = null;
+      flushPendingWrites();
+    }
+  });
+  window.addEventListener("pagehide", () => {
+    if (flushTimer) {
+      clearTimeout(flushTimer);
+      flushTimer = null;
+      flushPendingWrites();
+    }
+  });
+
+  function setCompleted(key, isDone) {
+    if (!sharedMode) return;
+    pendingCompleted.set(key, !!isDone);
+    scheduleFlush();
+  }
+
+  function setDeleted(key, isDel) {
+    if (!sharedMode) return;
+    pendingDeleted.set(key, !!isDel);
+    scheduleFlush();
+  }
+
+  function setSeen(identity, fingerprint) {
+    if (!sharedMode) return;
+    pendingSeen.set(identity, fingerprint);
+    scheduleFlush();
+  }
+
+  async function setSeenBatch(pairs) {
+    await writeFieldBatch("seen", pairs);
   }
 
   // Batched so updating buyerHistory for the whole board on load costs one
@@ -7620,6 +7742,8 @@
     setSeen,
     setCompletedBatch,
     setDeletedBatch,
+    setSeenBatch,
+    flushPending: flushPendingWrites,
     setBuyerHistoryBatch,
     deleteBuyerHistoryEntry,
     addExperienceEntry: addExperienceEntryRemote,
