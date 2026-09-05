@@ -3149,13 +3149,13 @@
       name: "Stephanie Ibarra", handle: "steph_ibar",
       items: [
         { qty: 1, name: "Personal Tray", price: 15 },
-        { qty: 1, name: "Vietnamese Coffee", price: 0, comp: true }
+        { qty: 1, name: "Thai Tea", price: 0, comp: true, note: "swapped from comp Vietnamese Coffee day-of" }
       ],
       total: 15,
       orderDate: "2026-09-01", orderTime: "16:12",
       pickupDate: "2026-09-04", pickupTime: "12:30 PM",
       paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
-      notes: "First order — complimentary drink. Cash promised at pickup. Pickup moved from 12:00 PM to 12:30 PM per customer request (picking up her child from school)."
+      notes: "First order — complimentary drink. Cash promised at pickup. Pickup moved from 12:00 PM to 12:30 PM per customer request (picking up her child from school). Swapped complimentary Vietnamese Coffee for Thai tea right before pickup (already had coffee that morning)."
     },
     {
       name: "Kiana", handle: "vibes.with.isaaa",
@@ -3431,6 +3431,56 @@
       pickupDate: "2026-09-05", pickupTime: "4:00 PM",
       paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup (cash preferred)",
       notes: "First order — complimentary drink"
+    },
+    {
+      name: "Dave Karmokar", handle: "davekarmokar",
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Vietnamese Coffee", price: 0, comp: true }
+      ],
+      total: 15,
+      orderDate: "2026-09-05", orderTime: null,
+      pickupDate: "2026-09-05", pickupTime: "6:45 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: "First order — complimentary drink. DM confirmation message said pickup 09/04, but the whole thread happened same-day today (Sat 09/05) for a same-evening pickup — logged as 09/05, flag to Tony to double check the auto-reply template isn't defaulting to the wrong date"
+    },
+    {
+      name: "iiam._.dajaecfs", handle: "iiam._.dajaecfs",
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Orange Thai Tea", price: 0, comp: true, note: "swapped from comp green Thai Tea day-of" }
+      ],
+      total: 15,
+      orderDate: "2026-09-05", orderTime: null,
+      pickupDate: "2026-09-05", pickupTime: "6:00 PM",
+      paid: false, payMethod: "Apple Pay",
+      notes: "First order — complimentary drink. Picked up already (from Vallejo). Same 09/04-vs-09/05 date mismatch as Dave Karmokar/Cristian/matcha.diaryx3 below — DM said 09/04, logged as 09/05 since it was today's live pickup"
+    },
+    {
+      name: "Cristian", handle: "cristian_hernandez78",
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Vietnamese Coffee", price: 0, comp: true }
+      ],
+      total: 15,
+      orderDate: "2026-09-05", orderTime: null,
+      pickupDate: "2026-09-05", pickupTime: "5:45 PM",
+      paid: true, payMethod: "Apple Pay",
+      notes: "First order — complimentary drink. Paid and picked up already. DM confirmation said pickup 09/04 — logged as 09/05, same date mismatch flagged on the others from today"
+    },
+    {
+      name: "matcha.diaryx3", handle: "matcha.diaryx3",
+      items: [
+        { qty: 1, name: "Shareable Tray", price: 45 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
+        { qty: 1, name: "Vietnamese Coffee", price: 4, note: "added last-minute, iced" },
+        { qty: 1, name: "Extra Seaweed", price: 0, note: "requested last-minute; no set price for this add-on yet — flag to Tony to confirm whether it should be charged" }
+      ],
+      total: 49,
+      orderDate: "2026-09-05", orderTime: null,
+      pickupDate: "2026-09-05", pickupTime: "5:45 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: "First order — complimentary drink. Added an extra iced Vietnamese Coffee and asked for extra seaweed while already on the way to pick up. DM confirmation said pickup 09/04 — logged as 09/05, same date mismatch as the others from today"
     }
   ];
 
@@ -5055,6 +5105,9 @@
   // quarter" pill is gone — Custom range covers that case fine); "week"
   // and "month" are fully-closed past periods.
   function strHistRangeWindow(n, windowKey) {
+    // "This week" counts completed orders only (it's still in progress, so
+    // "completed" is the meaningful number) — the label says so explicitly
+    // to avoid reading as a lower-than-expected total order count.
     const periodEn = windowKey === "thisweek" ? "this week so far"
       : windowKey === "week" ? "last week"
       : windowKey === "month" ? "the last 4 weeks"
@@ -5063,6 +5116,11 @@
       : windowKey === "week" ? "tuần trước"
       : windowKey === "month" ? "4 tuần qua"
       : "khoảng đã chọn";
+    if (windowKey === "thisweek") {
+      return currentLang === "vi"
+        ? `${n} đơn đã hoàn thành trong ${periodVi}`
+        : `${n} completed order${n === 1 ? "" : "s"} in ${periodEn}`;
+    }
     return currentLang === "vi" ? `${n} đơn trong ${periodVi}` : `${n} order${n === 1 ? "" : "s"} in ${periodEn}`;
   }
   function strTimeOfDaySub(unknownCount) {
@@ -6363,9 +6421,16 @@
     // we prep/sell that week", which is a pickup-time question. pickupDate
     // is required on every order, so nothing silently falls out of every
     // window the way a null orderDate would.
+    // "This week" is the one exception to "all non-deleted orders count":
+    // since it's still in progress, it only counts orders Tony has actually
+    // marked complete (picked up) — Last week/Last month/Custom range all
+    // look backward at closed periods, so they include every non-deleted
+    // order (active or completed) same as before.
+    const onlyCompleted = windowKey === "thisweek";
     const { start, end } = windowRange(windowKey);
     return ORDERS.filter((o) => {
       if (isDeleted(o)) return false;
+      if (onlyCompleted && !isCompleted(o)) return false;
       const d = parsePickupDate(o);
       return d && d >= start && d <= end;
     });
