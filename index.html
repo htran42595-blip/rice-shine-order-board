@@ -520,6 +520,46 @@
     --warn: #f0937a; --warn-soft: #3d2620;
   }
 
+  /* ---- Graphite (white / off-white / black / grays) ---- */
+  :root[data-palette="graphite"] {
+    --rice: #f7f7f6;
+    --rice-2: #ececea;
+    --card: #ffffff;
+    --nori: #19191c;
+    --nori-2: #3a3a3f;
+    --ink: #1c1c1e;
+    --ink-soft: #6e6e75;
+    --line: #e2e2e2;
+    --tea: #3f3f46;
+    --tea-ink: #ffffff;
+    --salmon: #6b6b72;
+    --salmon-soft: #efeff0;
+    --matcha: #396d4d;
+    --matcha-soft: #e7efe9;
+    --warn: #9c3f3f;
+    --warn-soft: #f3e6e6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root[data-palette="graphite"]:not([data-theme="light"]) {
+      --rice: #333338; --rice-2: #2c2c30; --card: #3d3d43;
+      --nori: #0e0e10; --nori-2: #1c1c20;
+      --ink: #f1f1ee; --ink-soft: #adadb3; --line: #4d4d54;
+      --tea: #dcdce0; --tea-ink: #1c1c1f;
+      --salmon: #b8b8be; --salmon-soft: #38383e;
+      --matcha: #86c49f; --matcha-soft: #223229;
+      --warn: #dd9a9a; --warn-soft: #3a2626;
+    }
+  }
+  :root[data-palette="graphite"][data-theme="dark"] {
+    --rice: #333338; --rice-2: #2c2c30; --card: #3d3d43;
+    --nori: #0e0e10; --nori-2: #1c1c20;
+    --ink: #f1f1ee; --ink-soft: #adadb3; --line: #4d4d54;
+    --tea: #dcdce0; --tea-ink: #1c1c1f;
+    --salmon: #b8b8be; --salmon-soft: #38383e;
+    --matcha: #86c49f; --matcha-soft: #223229;
+    --warn: #dd9a9a; --warn-soft: #3a2626;
+  }
+
   * { box-sizing: border-box; }
 
   body {
@@ -4585,7 +4625,8 @@
     { key: "goldenbay", nameKey: "palette_goldenbay", tagKey: "palette_goldenbay_tag", swatches: ["#ffc349", "#525ea7", "#5facd3", "#97dde9"] },
     { key: "regal", nameKey: "palette_regal", tagKey: "palette_regal_tag", swatches: ["#0b1849", "#124d1c", "#e4b028", "#ebede3"] },
     { key: "nautical", nameKey: "palette_nautical", tagKey: "palette_nautical_tag", swatches: ["#0a2947", "#f3e4c9", "#d3d4c0", "#8b5e3c"] },
-    { key: "ember", nameKey: "palette_ember", tagKey: "palette_ember_tag", swatches: ["#f5f5f5", "#76abae", "#303841", "#ff5722"] }
+    { key: "ember", nameKey: "palette_ember", tagKey: "palette_ember_tag", swatches: ["#f5f5f5", "#76abae", "#303841", "#ff5722"] },
+    { key: "graphite", nameKey: "palette_graphite", tagKey: "palette_graphite_tag", swatches: ["#ffffff", "#ececea", "#6e6e75", "#19191c"] }
   ];
 
   let currentPalette = "default";
@@ -4704,6 +4745,8 @@
       palette_nautical_tag: "Navy, cream & brown",
       palette_ember: "Slate Ember",
       palette_ember_tag: "Grey, slate & orange",
+      palette_graphite: "Graphite",
+      palette_graphite_tag: "Black, white & shades of grey",
       tab_orders: "Orders",
       tab_prep: "Prep by Day",
       tab_history: "History",
@@ -4845,6 +4888,8 @@
       palette_nautical_tag: "Xanh navy, kem & nâu",
       palette_ember: "Slate Ember",
       palette_ember_tag: "Xám, xanh đá & cam",
+      palette_graphite: "Than Chì",
+      palette_graphite_tag: "Đen, trắng & các sắc xám",
       tab_orders: "Đơn hàng",
       tab_prep: "Chuẩn bị theo ngày",
       tab_history: "Lịch sử",
