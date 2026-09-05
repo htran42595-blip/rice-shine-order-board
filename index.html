@@ -5481,38 +5481,57 @@
   }
 
   function migrateLegacyStatusKeys(pushToRemote) {
-    const byExactLegacy = new Map();
-    const byPrefix = new Map();
-    ORDERS.forEach((o) => {
-      const identity = orderIdentity(o);
-      const legacy = legacyOrderKey(o);
-      byExactLegacy.set(legacy, identity);
-      const prefix = legacyPrefix(legacy);
-      if (!byPrefix.has(prefix)) byPrefix.set(prefix, identity);
-    });
-    const currentIdentities = new Set(ORDERS.map((o) => orderIdentity(o)));
-
-    function migrateSet(set, pushFn) {
-      let changed = false;
-      [...set].forEach((key) => {
-        if (currentIdentities.has(key)) return; // already a current-style key
-        const identity = byExactLegacy.get(key) || byPrefix.get(legacyPrefix(key));
-        if (!identity) return; // no matching order on the board — leave it
-        set.delete(key);
-        if (!set.has(identity)) set.add(identity);
-        changed = true;
-        if (pushToRemote && window.RiceShineSync?.isSharedMode?.()) {
-          pushFn(identity, true);
-          pushFn(key, false);
-        }
+    // Defensive: this runs unconditionally on every single page load (and
+    // again on every remote sync), so a bad order shape or an unexpected
+    // key format must never be able to throw and take the rest of page
+    // setup down with it.
+    try {
+      const byExactLegacy = new Map();
+      const byPrefix = new Map();
+      ORDERS.forEach((o) => {
+        const identity = orderIdentity(o);
+        const legacy = legacyOrderKey(o);
+        byExactLegacy.set(legacy, identity);
+        const prefix = legacyPrefix(legacy);
+        if (!byPrefix.has(prefix)) byPrefix.set(prefix, identity);
       });
-      return changed;
-    }
+      const currentIdentities = new Set(ORDERS.map((o) => orderIdentity(o)));
 
-    const changedCompleted = migrateSet(completedSet, (k, v) => window.RiceShineSync.setCompleted(k, v));
-    const changedDeleted = migrateSet(deletedSet, (k, v) => window.RiceShineSync.setDeleted(k, v));
-    if (changedCompleted) persistCompleted();
-    if (changedDeleted) persistDeleted();
+      // Collect corrections instead of writing remotely per key — a board
+      // with weeks of history can have dozens of old-format keys, and firing
+      // one Firestore write per key would mean dozens of concurrent writes
+      // the moment this fix first reaches a synced device. Each set gets at
+      // most one batched write below instead.
+      function migrateSet(set, remotePairs) {
+        let changed = false;
+        [...set].forEach((key) => {
+          if (currentIdentities.has(key)) return; // already a current-style key
+          const identity = byExactLegacy.get(key) || byPrefix.get(legacyPrefix(key));
+          if (!identity) return; // no matching order on the board — leave it
+          set.delete(key);
+          if (!set.has(identity)) {
+            set.add(identity);
+            remotePairs.push([identity, true]);
+          }
+          remotePairs.push([key, null]);
+          changed = true;
+        });
+        return changed;
+      }
+
+      const completedPairs = [];
+      const deletedPairs = [];
+      const changedCompleted = migrateSet(completedSet, completedPairs);
+      const changedDeleted = migrateSet(deletedSet, deletedPairs);
+      if (changedCompleted) persistCompleted();
+      if (changedDeleted) persistDeleted();
+      if (pushToRemote && window.RiceShineSync?.isSharedMode?.()) {
+        if (completedPairs.length) window.RiceShineSync.setCompletedBatch(completedPairs);
+        if (deletedPairs.length) window.RiceShineSync.setDeletedBatch(deletedPairs);
+      }
+    } catch (e) {
+      console.warn("Rice & Shine: legacy status key migration failed, continuing without it", e);
+    }
   }
 
   migrateLegacyStatusKeys(false);
@@ -7501,6 +7520,33 @@
     }
   }
 
+  // Generic version of the same batching trick, used by the completed/
+  // deleted legacy-key migration below — a board that's been in use for
+  // weeks can have dozens of old-format keys to convert in one pass, and
+  // firing one Firestore write per key would mean dozens of concurrent
+  // writes the moment this fix first reaches a synced device. One call per
+  // field (completed, deleted) instead.
+  async function writeFieldBatch(topField, pairs) {
+    if (!sharedMode || !pairs || !pairs.length) return;
+    try {
+      const args = [];
+      pairs.forEach(([key, value]) => {
+        args.push(new FieldPath(topField, key), value === null || value === undefined ? deleteField() : value);
+      });
+      await updateDoc(stateDocRef, ...args);
+    } catch (e) {
+      console.warn(`Rice & Shine sync: failed to write ${topField} batch`, e);
+    }
+  }
+
+  async function setCompletedBatch(pairs) {
+    await writeFieldBatch("completed", pairs);
+  }
+
+  async function setDeletedBatch(pairs) {
+    await writeFieldBatch("deleted", pairs);
+  }
+
   async function deleteBuyerHistoryEntry(identity) {
     await writeField("buyerHistory", identity, null);
   }
@@ -7572,6 +7618,8 @@
     setCompleted,
     setDeleted,
     setSeen,
+    setCompletedBatch,
+    setDeletedBatch,
     setBuyerHistoryBatch,
     deleteBuyerHistoryEntry,
     addExperienceEntry: addExperienceEntryRemote,
