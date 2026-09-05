@@ -5460,11 +5460,24 @@
   const LAST_SYNCED_COMPLETED_KEY = "riceShineLastSyncedCompleted";
   const LAST_SYNCED_DELETED_KEY = "riceShineLastSyncedDeleted";
 
-  function readLastSynced(storageKey) {
+  function readLastSynced(storageKey, currentLocalSet) {
     try {
-      return new Set(JSON.parse(localStorage.getItem(storageKey) || "[]"));
+      const raw = localStorage.getItem(storageKey);
+      // No baseline recorded yet on this browser — either it's the very
+      // first sync ever, or (more commonly the day this was added) this
+      // browser has old completed/deleted marks from before this baseline
+      // existed at all. Treat whatever it already has locally as if it were
+      // already reconciled, instead of defaulting to "unsynced" (which would
+      // just resurrect and re-fight over any stale marks one more time,
+      // right when this fix is supposed to stop that). That means the very
+      // next remote snapshot is trusted as-is for anything this browser
+      // can't already prove is new — a one-time reset that's what actually
+      // lets an already-diverged device converge, rather than requiring one
+      // more round of resurrection before it settles down.
+      if (raw === null) return new Set(currentLocalSet);
+      return new Set(JSON.parse(raw));
     } catch (e) {
-      return new Set();
+      return new Set(currentLocalSet);
     }
   }
 
@@ -7391,8 +7404,8 @@
     // case apart from a mark that was already synced and then intentionally
     // undone elsewhere, so an undo could never actually stick once a second
     // device had cached the old value.
-    const priorSyncedCompleted = readLastSynced(LAST_SYNCED_COMPLETED_KEY);
-    const priorSyncedDeleted = readLastSynced(LAST_SYNCED_DELETED_KEY);
+    const priorSyncedCompleted = readLastSynced(LAST_SYNCED_COMPLETED_KEY, completedSet);
+    const priorSyncedDeleted = readLastSynced(LAST_SYNCED_DELETED_KEY, deletedSet);
     const localOnlyCompleted = [...completedSet].filter(
       (k) => !remoteCompleted.has(k) && !priorSyncedCompleted.has(k)
     );
