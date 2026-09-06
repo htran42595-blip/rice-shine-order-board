@@ -7513,7 +7513,48 @@
     incoming.forEach((d) => ORDERS.push(websiteDocToOrder(d)));
     rebuildBuyerHistoryFromOrders();
     renderAll();
+    reconcileDayCapacity(incoming);
   });
+
+  // ---- Keeping the website's daily capacity tally honest ----
+  //
+  // The order form decides whether a day is full by reading a small
+  // per-day tally document, because customers aren't allowed to browse
+  // orders and count them. That tally is a separate document from the
+  // orders, so it can drift out of step: deleting an order here doesn't
+  // decrement it, and neither does anything that happens outside the site.
+  // Left alone, drift only ever goes one way — the tally creeps up, days
+  // look full that aren't, and orders are quietly turned away.
+  //
+  // The board is the one place that can see both halves, so whenever it's
+  // open it recomputes the truth from live website orders and corrects the
+  // tally. Only future dates are touched, and only when the number actually
+  // differs, so this is normally a no-op that costs nothing.
+  const PORTIONS_PER_ITEM = { "Personal Tray": 1, "Shareable Tray": 3 };
+
+  function portionsOfItems(items) {
+    return (items || []).reduce(
+      (sum, it) => sum + (PORTIONS_PER_ITEM[it.name] || 0) * (Number(it.qty) || 0), 0);
+  }
+
+  function reconcileDayCapacity(incoming) {
+    if (typeof window.riceShineWriteDayLoad !== "function") return;
+    const today = new Date();
+    const todayIso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+
+    // Deleted orders free their capacity; completed ones do not, because the
+    // food was still made and the day's kitchen time was still spent.
+    const truth = {};
+    incoming.forEach((d) => {
+      const iso = d.pickupDate;
+      if (!iso || iso < todayIso) return;
+      const asOrder = ORDERS.find((o) => o.webId === d.id);
+      if (asOrder && isDeleted(asOrder)) return;
+      truth[iso] = (truth[iso] || 0) + portionsOfItems(d.items);
+    });
+
+    window.riceShineWriteDayLoad(truth, todayIso);
+  }
 
   // Reloads the page from the network with a cache-busting query param —
   // the same trick used to verify a fresh deploy — instead of Tony having
@@ -7663,7 +7704,7 @@
     getRedirectResult, onAuthStateChanged, signOut as fbSignOut,
   } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
   import {
-    getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot,
+    getFirestore, doc, getDoc, getDocs, setDoc, updateDoc, onSnapshot,
     FieldPath, deleteField, arrayUnion, collection, query, orderBy,
   } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
   import {
@@ -7824,6 +7865,38 @@
       console.warn("Rice & Shine sync: website-order listener error", err);
     });
   }
+
+  // Writes corrected day tallies, but only where the stored number actually
+  // disagrees with the live orders. Exposed on window because the reconcile
+  // logic lives in the main script, which has the deleted/completed state,
+  // while Firestore access lives only in this module.
+  window.riceShineWriteDayLoad = async function (truth, todayIso) {
+    if (!authorized) return;
+    const dates = Object.keys(truth);
+    // Also correct days whose orders have all gone away, which is exactly
+    // the case a "only write what we computed" pass would miss.
+    try {
+      const existing = await getDocs(collection(db, "dayLoad"));
+      existing.forEach((d) => {
+        if (d.id >= todayIso && !(d.id in truth)) truth[d.id] = 0;
+      });
+    } catch (e) {
+      // Not fatal: fall back to correcting only the days we know about.
+    }
+    for (const iso of Object.keys(truth)) {
+      try {
+        const ref = doc(db, "dayLoad", iso);
+        const snap = await getDoc(ref);
+        const stored = snap.exists() ? Number(snap.data().portions) || 0 : 0;
+        if (stored === truth[iso]) continue;
+        await setDoc(ref, { portions: truth[iso] }, { merge: true });
+        console.info(`Rice & Shine: corrected ${iso} capacity ${stored} -> ${truth[iso]}`);
+      } catch (e) {
+        console.warn("Rice & Shine: could not correct day capacity for", iso, e);
+      }
+    }
+    void dates;
+  };
 
   function detachOnlineOrdersListener() {
     if (unsubscribeOrders) {
