@@ -5588,6 +5588,8 @@
       window.RiceShineSync.setDeleted(key, true);
       window.RiceShineSync.deleteBuyerHistoryEntry(key);
     }
+    // A deleted order gives its portions back to that day.
+    if (o && o.webId) scheduleCapacityReconcile();
   }
 
   function restoreOrder(o) {
@@ -5607,6 +5609,8 @@
       window.RiceShineSync.setDeleted(key, false);
       window.RiceShineSync.setBuyerHistoryBatch([[key, historyEntry]]);
     }
+    // Restoring takes those portions back off the day again.
+    if (o && o.webId) scheduleCapacityReconcile();
   }
 
   // ---- One-time migration off the old content-based key ----
@@ -7513,7 +7517,8 @@
     incoming.forEach((d) => ORDERS.push(websiteDocToOrder(d)));
     rebuildBuyerHistoryFromOrders();
     renderAll();
-    reconcileDayCapacity(incoming);
+    lastWebsiteOrders = incoming;
+    scheduleCapacityReconcile();
   });
 
   // ---- Keeping the website's daily capacity tally honest ----
@@ -7531,6 +7536,20 @@
   // tally. Only future dates are touched, and only when the number actually
   // differs, so this is normally a no-op that costs nothing.
   const PORTIONS_PER_ITEM = { "Personal Tray": 1, "Shareable Tray": 3 };
+
+  // The last set of website orders the database sent us. Kept because
+  // deleting an order here is a mark stored in the board's own state, not a
+  // change to the order itself — so no new snapshot arrives to recompute
+  // from, and without this the tally would keep counting an order Tony has
+  // already removed, quietly making the day look fuller than it is.
+  let lastWebsiteOrders = [];
+  let capacityReconcileTimer = null;
+
+  function scheduleCapacityReconcile() {
+    clearTimeout(capacityReconcileTimer);
+    capacityReconcileTimer = setTimeout(
+      () => reconcileDayCapacity(lastWebsiteOrders), 1200);
+  }
 
   function portionsOfItems(items) {
     return (items || []).reduce(
