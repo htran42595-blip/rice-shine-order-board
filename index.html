@@ -7477,6 +7477,7 @@
     const items = Array.isArray(d.items) ? d.items : [];
     const notes = [
       ref ? `🌐 Website order #${ref}` : "🌐 Website order",
+      d.email ? `✉️ ${d.email}` : "",
       d.contact ? `📞 ${d.contact}` : "",
       d.notes || "",
     ]
