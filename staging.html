@@ -7347,6 +7347,7 @@
     // "can I change order T0EGHQ", that code can actually be matched to a
     // ticket on this board instead of being a number only they can see.
     const ref = String(d.id || "").slice(-6).toUpperCase();
+    const items = Array.isArray(d.items) ? d.items : [];
     const notes = [
       ref ? `🌐 Website order #${ref}` : "🌐 Website order",
       d.contact ? `📞 ${d.contact}` : "",
@@ -7358,8 +7359,15 @@
       webId: d.id,
       name: d.name || "(no name given)",
       handle: d.handle || d.name || "website",
-      items: Array.isArray(d.items) ? d.items : [],
-      total: typeof d.total === "number" ? d.total : 0,
+      items: items,
+      // Deliberately recomputed here rather than trusting d.total. The total
+      // is sent by the customer's browser, and Firestore rules can't sum a
+      // list to check it, so a tampered-with or stale total could otherwise
+      // show a wrong price on the board. Adding it up from the items is the
+      // one number that can't be lied about. (Website orders have no comped
+      // items, so the sum is always the real price; DM orders further up
+      // keep their hand-entered totals, which do account for comps.)
+      total: items.reduce((sum, it) => sum + (Number(it.qty) || 0) * (Number(it.price) || 0), 0),
       orderDate: d.orderDate || "",
       orderTime: d.orderTime || "",
       pickupDate: d.pickupDate || "",
