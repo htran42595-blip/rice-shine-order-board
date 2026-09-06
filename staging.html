@@ -7342,7 +7342,16 @@
   // the one thing you'd want on hand when an order needs a call, and it
   // avoids changing the order-card markup for a first version.
   function websiteDocToOrder(d) {
-    const notes = ["🌐 Website order", d.contact ? `📞 ${d.contact}` : "", d.notes || ""]
+    // The same short code the customer sees on their confirmation screen
+    // (last 6 of the record id). Shown here so that when someone messages
+    // "can I change order T0EGHQ", that code can actually be matched to a
+    // ticket on this board instead of being a number only they can see.
+    const ref = String(d.id || "").slice(-6).toUpperCase();
+    const notes = [
+      ref ? `🌐 Website order #${ref}` : "🌐 Website order",
+      d.contact ? `📞 ${d.contact}` : "",
+      d.notes || "",
+    ]
       .filter(Boolean)
       .join(" · ");
     return {
