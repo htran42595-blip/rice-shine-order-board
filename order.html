@@ -1,0 +1,747 @@
+<title>Order — Rice & Shine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Karla:ital,wght@0,400..700;1,400..700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --rice: #f8f2c2; --rice-2: #efe4a8; --card: #fffdf3;
+    --nori: #2c2140; --nori-2: #453361; --ink: #251a38; --ink-soft: #6f6280;
+    --line: #e6dcef; --tea: #7a58ad; --tea-ink: #ffffff;
+    --salmon: #d97a63; --salmon-soft: #f6e3dc;
+    --matcha: #4f7a45; --matcha-soft: #e4ede0;
+    --warn: #a94430; --warn-soft: #f5ddd5;
+    --shadow: 0 1px 2px rgba(37,26,56,.07), 0 8px 20px -12px rgba(37,26,56,.3);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --rice: #191420; --rice-2: #221b2c; --card: #251e30;
+      --nori: #0f0b16; --nori-2: #382c4c; --ink: #f1e9da; --ink-soft: #ada0be;
+      --line: #3b3049; --tea: #c9a9ee; --tea-ink: #241635;
+      --salmon: #eda08e; --salmon-soft: #3a2a27;
+      --matcha: #8ab97b; --matcha-soft: #24332450;
+      --warn: #e08a76; --warn-soft: #3a241f;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; background: var(--rice); color: var(--ink);
+    font-family:'Karla', system-ui, sans-serif; }
+  h1,h2,h3,.brand { font-family:'Bricolage Grotesque', system-ui, sans-serif; }
+  .mono { font-family:'Space Mono', monospace; }
+
+  header.top { background: var(--nori); color:#fff; padding:28px 20px 34px; text-align:center; }
+  header.top .brand { font-size:26px; font-weight:800; letter-spacing:.3px; }
+  header.top .tagline { color:#cfc3e6; font-size:14px; margin-top:4px; }
+
+  main { max-width:560px; margin:-18px auto 60px; padding:0 16px; }
+
+  .card { background: var(--card); border:1px solid var(--line); border-radius:16px;
+    box-shadow: var(--shadow); padding:20px; margin-bottom:16px; }
+  .card h2 { font-size:15px; text-transform:uppercase; letter-spacing:.06em;
+    color: var(--ink-soft); margin:0 0 14px; }
+
+  .item-row { display:flex; align-items:center; justify-content:space-between;
+    padding:10px 0; border-bottom:1px solid var(--line); gap:12px; }
+  .item-row:last-child { border-bottom:none; }
+  .item-info { flex:1; min-width:0; }
+  .item-name { font-weight:700; font-size:15px; }
+  .item-desc { color: var(--ink-soft); font-size:12.5px; margin-top:2px; }
+  .item-price { color: var(--tea); font-weight:700; font-size:14px; margin-top:2px; }
+
+  .stepper { display:flex; align-items:center; border:1px solid var(--line);
+    border-radius:10px; overflow:hidden; flex-shrink:0; }
+  .stepper button { width:34px; height:34px; border:none; background: var(--rice-2);
+    color: var(--nori); font-size:18px; cursor:pointer; font-weight:700; }
+  .stepper button:active { background: var(--tea); color:#fff; }
+  .stepper .count { width:32px; text-align:center; font-weight:700; font-size:15px; }
+
+  label.field-label { display:block; font-size:13px; font-weight:700; color: var(--ink);
+    margin:14px 0 6px; }
+  label.field-label:first-child { margin-top:0; }
+  input[type=text], input[type=tel], input[type=date], textarea, select {
+    width:100%; padding:11px 12px; border:1px solid var(--line); border-radius:10px;
+    background: var(--card); color: var(--ink); font-family:inherit; font-size:15px; }
+  input:focus, textarea:focus, select:focus { outline:2px solid var(--tea); outline-offset:1px; }
+  textarea { resize:vertical; min-height:60px; }
+  .hint { font-size:12px; color: var(--ink-soft); margin-top:5px; }
+
+  .total-row { display:flex; justify-content:space-between; align-items:baseline;
+    padding-top:12px; margin-top:6px; border-top:2px solid var(--nori); }
+  .total-row .label { font-weight:700; }
+  .total-row .amount { font-size:24px; font-weight:800; color: var(--tea); }
+
+  .pay-note { background: var(--matcha-soft); color: var(--matcha); border-radius:10px;
+    padding:10px 12px; font-size:13px; margin-top:14px; }
+
+  button.primary { width:100%; padding:16px; border:none; border-radius:12px;
+    background: var(--nori); color:#fff; font-size:16px; font-weight:800;
+    cursor:pointer; margin-top:4px; font-family:inherit; }
+  button.primary:disabled { opacity:.55; cursor:not-allowed; }
+  button.primary:not(:disabled):active { background: var(--nori-2); }
+
+  .notice { border-radius:10px; padding:12px 14px; font-size:13.5px; line-height:1.5; }
+  .notice.warn { background: var(--warn-soft); color: var(--warn); }
+  .notice.ok { background: var(--matcha-soft); color: var(--matcha); }
+  .notice.info { background: var(--rice-2); color: var(--ink); }
+
+  .error-box { background: var(--warn-soft); color: var(--warn); border-radius:10px;
+    padding:10px 12px; font-size:13px; margin-top:12px; display:none; }
+  .error-box.show { display:block; }
+
+  /* Invisible to real visitors; bots tend to fill every field they find. */
+  .hp { position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden; }
+
+  .confirm-screen { display:none; text-align:center; padding:32px 0 20px; }
+  .confirm-screen.show { display:block; }
+  .confirm-screen .check { width:72px; height:72px; border-radius:50%;
+    background: var(--matcha-soft); color: var(--matcha); display:flex;
+    align-items:center; justify-content:center; font-size:38px; margin:0 auto 18px; font-weight:700; }
+  .confirm-screen h2 { text-transform:none; letter-spacing:normal; font-size:26px;
+    color: var(--ink); margin:0 0 8px; }
+  .confirm-lead { color: var(--ink-soft); font-size:15px; margin:0 auto 4px;
+    max-width:400px; line-height:1.5; }
+
+  .pickup-box { background: var(--nori); color:#fff; border-radius:14px;
+    padding:16px; margin:18px 0 0; text-align:center; }
+  .pickup-box .pickup-label { font-size:11px; letter-spacing:.12em; text-transform:uppercase;
+    color:#cfc3e6; margin-bottom:6px; }
+  .pickup-box .pickup-day { font-size:19px; font-weight:800;
+    font-family:'Bricolage Grotesque', system-ui, sans-serif; }
+  .pickup-box .pickup-time { font-size:15px; color:#e8dffa; margin-top:2px; }
+
+  .confirm-summary { text-align:left; margin-top:14px; }
+
+  .manage-box { background: var(--card); border:1px dashed var(--tea); border-radius:14px;
+    padding:16px; margin-top:16px; text-align:left; }
+  .manage-title { font-weight:700; font-size:15px; margin-bottom:4px; }
+  .manage-sub { font-size:13px; color: var(--ink-soft); line-height:1.5; }
+  .manage-link { display:block; margin-top:10px; font-family:'Space Mono', monospace;
+    font-size:12px; color: var(--tea); word-break:break-all; line-height:1.4; }
+  .manage-copy { margin-top:10px; width:100%; padding:11px; border:none; border-radius:10px;
+    background: var(--tea); color: var(--tea-ink); font-family:inherit;
+    font-size:14px; font-weight:700; cursor:pointer; }
+
+  .ref-line { font-size:12.5px; color: var(--ink-soft); margin-top:16px; }
+  .ref-line .ref-code { font-family:'Space Mono', monospace; font-weight:700;
+    color: var(--ink); background: var(--rice-2); padding:2px 7px; border-radius:6px; }
+  .confirm-foot { font-size:13.5px; color: var(--ink-soft); margin-top:18px; line-height:1.55; }
+
+  .state { text-align:center; padding:50px 20px; color: var(--ink-soft); }
+  .hidden { display:none !important; }
+</style>
+
+<header class="top">
+  <div class="brand">🍙 Rice &amp; Shine</div>
+  <div class="tagline" id="tagline">Sushi bake, made fresh · place your pickup order below</div>
+</header>
+
+<main>
+  <div class="card hidden" id="bootFallback">
+    <div class="notice warn">
+      We're having trouble loading the order form. Please refresh the page, or
+      message us on Instagram <strong>@ricenshine.sushibake</strong> and we'll
+      take your order there.
+    </div>
+  </div>
+
+  <!-- ============ NEW ORDER ============
+       Deliberately NOT hidden by default. If the Firebase script fails to
+       load (blocked network, offline, an old browser), the page still shows
+       the brand and the form shell plus the fallback message above, instead
+       of a blank white screen that reads as "this business is broken". -->
+  <div id="orderView">
+    <form id="riceForm" autocomplete="off">
+      <div class="card">
+        <h2>Menu</h2>
+        <div id="menuList"></div>
+      </div>
+
+      <div class="card">
+        <h2>Pickup</h2>
+        <label class="field-label" for="pickupDate">Pickup date</label>
+        <input type="date" id="pickupDate" required>
+        <label class="field-label" for="pickupTime">Pickup time</label>
+        <select id="pickupTime" required>
+          <option value="" disabled selected>Choose a time</option>
+        </select>
+        <div class="hint">We'll do our best to have it ready at your chosen time. If we're running behind we'll reach out.</div>
+      </div>
+
+      <div class="card">
+        <h2>Your info</h2>
+        <label class="field-label" for="custName">Name *</label>
+        <input type="text" id="custName" required maxlength="80">
+
+        <label class="field-label" for="custHandle">Instagram handle</label>
+        <input type="text" id="custHandle" maxlength="60" placeholder="@yourhandle">
+
+        <label class="field-label" for="custContact">Phone number *</label>
+        <input type="tel" id="custContact" required maxlength="40" placeholder="So we can reach you about your order">
+
+        <label class="field-label" for="custNotes">Notes (allergies, special requests)</label>
+        <textarea id="custNotes" maxlength="300"></textarea>
+
+        <div class="hp" aria-hidden="true">
+          <label for="website">Leave blank</label>
+          <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="total-row">
+          <div class="label">Total</div>
+          <div class="amount mono" id="totalAmount">$0</div>
+        </div>
+        <div class="pay-note">💵 Pay at pickup. Venmo, Zelle, Apple Pay, or cash. No payment needed to place this order.</div>
+        <div class="error-box" id="errorBox"></div>
+        <button type="submit" class="primary" id="submitBtn" disabled>Place order</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ============ CONFIRMATION ============ -->
+  <div class="confirm-screen" id="confirmScreen">
+    <div class="check">✓</div>
+    <h2>Order received!</h2>
+    <p class="confirm-lead" id="confirmLead">We've got your order. Nothing else is needed from you.</p>
+
+    <div class="pickup-box">
+      <div class="pickup-label">Pick up your order</div>
+      <div class="pickup-day" id="confirmPickupDay"></div>
+      <div class="pickup-time" id="confirmPickupTime"></div>
+    </div>
+
+    <div class="card confirm-summary" id="confirmSummary"></div>
+
+    <div class="manage-box" id="manageBox" hidden>
+      <div class="manage-title">Need to change your order?</div>
+      <div class="manage-sub">You can update it yourself up until 24 hours before pickup. Save this link:</div>
+      <a class="manage-link" id="manageLink" href="#"></a>
+      <button type="button" class="manage-copy" id="manageCopy">Copy link</button>
+    </div>
+
+    <div class="ref-line" id="confirmRefLine" hidden>
+      Order reference <span class="ref-code" id="confirmRef"></span>
+    </div>
+
+    <div class="confirm-foot">
+      Questions, or need something we can't change online?<br>
+      Message us on Instagram <strong>@ricenshine.sushibake</strong>
+    </div>
+  </div>
+
+  <!-- ============ MANAGE EXISTING ORDER ============ -->
+  <div class="state hidden" id="loadingState">Loading your order…</div>
+
+  <div class="hidden" id="notFoundState">
+    <div class="card">
+      <h2>Order not found</h2>
+      <p style="color:var(--ink-soft);line-height:1.55">
+        This link doesn't match an order. It may have been changed, or the order may have been cancelled.
+      </p>
+      <p style="color:var(--ink-soft)">Message us on Instagram <strong>@ricenshine.sushibake</strong> and we'll sort it out.</p>
+    </div>
+  </div>
+
+  <div class="hidden" id="manageView">
+    <div id="lockedNotice" class="card hidden">
+      <div class="notice warn" id="lockedText"></div>
+    </div>
+
+    <div class="card">
+      <div class="pickup-box" style="margin:0">
+        <div class="pickup-label">Picking up</div>
+        <div class="pickup-day" id="curPickupDay"></div>
+        <div class="pickup-time" id="curPickupTime"></div>
+      </div>
+      <div class="hint" style="margin-top:10px" id="whoLine"></div>
+    </div>
+
+    <div class="card" id="itemsCard">
+      <h2>Your items</h2>
+      <div id="mMenuList"></div>
+      <div class="total-row">
+        <div class="label">Total</div>
+        <div class="amount mono" id="mTotalAmount">$0</div>
+      </div>
+    </div>
+
+    <div class="card" id="detailsCard">
+      <h2>Pickup &amp; notes</h2>
+      <label class="field-label" for="mPickupDate">Pickup date</label>
+      <input type="date" id="mPickupDate">
+      <div class="hint">Pickup time stays <strong id="timeEcho"></strong>. To move the time, message us on Instagram.</div>
+
+      <label class="field-label" for="mNotes">Notes (allergies, special requests)</label>
+      <textarea id="mNotes" maxlength="300"></textarea>
+    </div>
+
+    <div class="card" id="saveCard">
+      <div class="notice info" style="margin-bottom:12px">
+        Changes are allowed up until 24 hours before pickup.
+      </div>
+      <div class="notice warn hidden" id="saveError" style="margin-bottom:12px"></div>
+      <div class="notice ok hidden" id="saveOk" style="margin-bottom:12px">Your order has been updated.</div>
+      <button type="button" class="primary" id="saveBtn" disabled>Save changes</button>
+    </div>
+  </div>
+</main>
+
+<script>
+  // A plain (non-module) script, so it still runs even when the module below
+  // never loads. If nothing has booted after 8 seconds, tell the customer
+  // something is wrong and how to reach a human, rather than leaving them
+  // staring at a form that will never work.
+  window.__riceShineBooted = false;
+  setTimeout(function () {
+    if (window.__riceShineBooted) return;
+    var el = document.getElementById("bootFallback");
+    if (el) el.classList.remove("hidden");
+  }, 8000);
+</script>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import {
+    initializeFirestore, collection, addDoc, getDocs, doc, getDoc, updateDoc, serverTimestamp,
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  // Public client config. Safe to expose: Firestore security rules, not this,
+  // decide who can read or write what.
+  const firebaseConfig = {
+    apiKey: "AIzaSyDhQa0SwA-UJwcgdwrEu0wX_gPonSwy4hI",
+    authDomain: "rice-shine-order-board.firebaseapp.com",
+    projectId: "rice-shine-order-board",
+    storageBucket: "rice-shine-order-board.firebasestorage.app",
+    messagingSenderId: "825722400081",
+    appId: "1:825722400081:web:0f9f6c7781b7e9e1193770",
+  };
+  window.__riceShineBooted = true;
+  const app = initializeApp(firebaseConfig);
+
+  // Some mobile carriers and cafe wifi block the streaming connection
+  // Firestore prefers. Without this the SDK can retry for a long time before
+  // falling back; with it, it notices quickly and switches.
+  const db = initializeFirestore(app, { experimentalAutoDetectLongPolling: true });
+
+  // Fill in once the Google Apps Script Web App is deployed. Blank simply
+  // skips the Sheet mirror; the order still saves to Firestore either way.
+  const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyhgR25wpULYLhiKe-BAIKL81-kR53XNLRQjCeqalZ_lXV0fOFIEEv2A2XdssPQMK8Y/exec";
+
+  const EDIT_LOCK_HOURS = 24;
+
+  // One menu for both the order form and the edit screen. These used to be
+  // two separate files with two copies of this list, which meant a price
+  // change had to be made twice or the two screens would disagree.
+  const MENU = [
+    { id: "personal",    name: "Personal Tray",     price: 15, desc: "Single-serving sushi bake" },
+    { id: "shareable",   name: "Shareable Tray",    price: 45, desc: "Feeds a group" },
+    { id: "green-tea",   name: "Green Thai Tea",    price: 4,  desc: "" },
+    { id: "orange-tea",  name: "Orange Thai Tea",   price: 4,  desc: "" },
+    { id: "viet-coffee", name: "Vietnamese Coffee", price: 4,  desc: "" },
+  ];
+  const PAY_METHOD = "Venmo / Zelle / Apple Pay / cash — at pickup";
+
+  // ---------- shared helpers ----------
+
+  // "2026-09-12" -> "Saturday, September 12". Built from the parts rather
+  // than new Date("2026-09-12"), because that string parses as UTC midnight,
+  // which in California is the evening BEFORE. That would show the wrong
+  // pickup day to every customer west of Greenwich.
+  function friendlyDate(iso) {
+    const p = String(iso).split("-");
+    if (p.length !== 3) return iso;
+    const d = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+    if (isNaN(d.getTime())) return iso;
+    return d.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
+  }
+
+  // Turns date + "1:00 PM" into a real timestamp, which is what lets the
+  // 24-hour edit cutoff be enforced by the database rather than trusted to
+  // the page. Built in the visitor's own timezone, which is right for local
+  // customers; an out-of-area visitor could be off by a few hours, which
+  // only ever nudges the cutoff and never mis-dates the order itself.
+  function pickupTimestamp(dateStr, timeStr) {
+    const p = String(dateStr).split("-").map(Number);
+    const m = /^(\d{1,2}):(\d{2})\s*(AM|PM)$/i.exec(String(timeStr).trim());
+    if (p.length !== 3 || !m) return null;
+    let hh = Number(m[1]) % 12;
+    if (/PM/i.test(m[3])) hh += 12;
+    const d = new Date(p[0], p[1] - 1, p[2], hh, Number(m[2]), 0, 0);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  function isoLocal(d) {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  }
+
+  function buildStepperRows(containerId, qtyMap) {
+    const list = document.getElementById(containerId);
+    list.innerHTML = "";
+    MENU.forEach(item => {
+      const row = document.createElement("div");
+      row.className = "item-row";
+      row.innerHTML = `
+        <div class="item-info">
+          <div class="item-name">${item.name}</div>
+          ${item.desc ? `<div class="item-desc">${item.desc}</div>` : ""}
+          <div class="item-price">$${item.price}</div>
+        </div>
+        <div class="stepper">
+          <button type="button" data-act="dec" data-id="${item.id}" aria-label="Decrease">−</button>
+          <div class="count mono" id="${containerId}-count-${item.id}">${qtyMap[item.id]}</div>
+          <button type="button" data-act="inc" data-id="${item.id}" aria-label="Increase">+</button>
+        </div>`;
+      list.appendChild(row);
+    });
+  }
+
+  function itemsFrom(qtyMap) {
+    return MENU.filter(m => qtyMap[m.id] > 0)
+      .map(m => ({ qty: qtyMap[m.id], name: m.name, price: m.price }));
+  }
+  function totalFrom(qtyMap) {
+    return MENU.reduce((s, m) => s + m.price * qtyMap[m.id], 0);
+  }
+
+  function show(id) {
+    ["orderView", "confirmScreen", "loadingState", "notFoundState", "manageView"]
+      .forEach(v => document.getElementById(v).classList.add("hidden"));
+    document.getElementById(id).classList.remove("hidden");
+  }
+
+  // ---------- new order ----------
+
+  function initOrderForm() {
+    show("orderView");
+
+    // Open the connection now, while they're still picking items, rather
+    // than at the moment they hit "Place order". This read is expected to be
+    // refused (customers can't list orders, by design); it exists only to get
+    // the handshake done so submitting is a warm request.
+    getDocs(collection(db, "onlineOrders")).catch(() => {});
+
+    const qty = {};
+    MENU.forEach(m => qty[m.id] = 0);
+    buildStepperRows("menuList", qty);
+
+    const timeSelect = document.getElementById("pickupTime");
+    for (let h = 11; h <= 18; h++) {
+      for (const m of [0, 30]) {
+        if (h === 18 && m === 30) continue;
+        const period = h >= 12 ? "PM" : "AM";
+        let hh = h % 12; if (hh === 0) hh = 12;
+        const label = `${hh}:${m === 0 ? "00" : m} ${period}`;
+        const opt = document.createElement("option");
+        opt.value = label; opt.textContent = label;
+        timeSelect.appendChild(opt);
+      }
+    }
+
+    const dateInput = document.getElementById("pickupDate");
+    dateInput.min = isoLocal(new Date());
+
+    function refresh() {
+      document.getElementById("totalAmount").textContent = "$" + totalFrom(qty);
+      const ok = itemsFrom(qty).length > 0
+        && document.getElementById("custName").value.trim()
+        && document.getElementById("custContact").value.trim()
+        && dateInput.value && timeSelect.value;
+      document.getElementById("submitBtn").disabled = !ok;
+    }
+
+    document.getElementById("menuList").addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-act]");
+      if (!btn) return;
+      const id = btn.dataset.id;
+      qty[id] = btn.dataset.act === "inc" ? Math.min(99, qty[id] + 1) : Math.max(0, qty[id] - 1);
+      document.getElementById("menuList-count-" + id).textContent = qty[id];
+      refresh();
+    });
+    ["input", "change"].forEach(ev => {
+      ["custName", "custContact", "pickupDate", "pickupTime"].forEach(id =>
+        document.getElementById(id).addEventListener(ev, refresh));
+    });
+
+    function showError(msg) {
+      const b = document.getElementById("errorBox");
+      b.textContent = msg; b.classList.add("show");
+    }
+
+    document.getElementById("riceForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      document.getElementById("errorBox").classList.remove("show");
+
+      // Honeypot: real visitors never fill this. Drop silently so the bot
+      // gets no signal about why it failed.
+      if (document.getElementById("website").value.trim() !== "") return;
+
+      const items = itemsFrom(qty);
+      const total = totalFrom(qty);
+      if (!items.length) { showError("Add at least one item to your order."); return; }
+
+      const name = document.getElementById("custName").value.trim();
+      const handle = document.getElementById("custHandle").value.trim().replace(/^@/, "");
+      const contact = document.getElementById("custContact").value.trim();
+      const notes = document.getElementById("custNotes").value.trim();
+      const pickupDate = dateInput.value;
+      const pickupTime = timeSelect.value;
+
+      const pickupAt = pickupTimestamp(pickupDate, pickupTime);
+      if (!pickupAt) { showError("That pickup date and time didn't look right. Please pick them again."); return; }
+
+      const now = new Date();
+      const submitBtn = document.getElementById("submitBtn");
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Placing order…";
+
+      const savePromise = addDoc(collection(db, "onlineOrders"), {
+        name, handle, contact, items, total,
+        pickupDate, pickupTime, pickupAt,
+        orderDate: now.toISOString().slice(0, 10),
+        orderTime: now.toISOString().slice(11, 16),
+        paid: false, payMethod: PAY_METHOD,
+        notes, source: "website",
+        submittedAt: serverTimestamp(),
+      });
+
+      // The Sheet mirror takes about 4 seconds on its own (Apps Script is
+      // slow to wake), so it is deliberately never awaited. A customer
+      // should never wait on bookkeeping.
+      if (SHEET_WEBHOOK_URL) {
+        fetch(SHEET_WEBHOOK_URL, {
+          method: "POST", mode: "no-cors",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ name, handle, contact, items, total, pickupDate, pickupTime, notes }),
+        }).catch(() => {});
+      }
+
+      // saved  = server confirmed (the normal case, a few hundred ms)
+      // failed = genuinely rejected, so say so and let them retry
+      // slow   = network being slow. Firestore has already committed locally
+      //          and keeps retrying, so confirm rather than show a spinner
+      //          that looks stuck.
+      const outcome = await Promise.race([
+        savePromise.then(() => "saved", () => "failed"),
+        new Promise(r => setTimeout(() => r("slow"), 2500)),
+      ]);
+
+      if (outcome === "failed") {
+        showError("Something went wrong placing your order. Please try again, or message us on Instagram.");
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Place order";
+        return;
+      }
+
+      document.getElementById("confirmLead").textContent =
+        `Thanks ${name.split(" ")[0]}, we've got your order. Nothing else is needed from you.`;
+      document.getElementById("confirmPickupDay").textContent = friendlyDate(pickupDate);
+      document.getElementById("confirmPickupTime").textContent = pickupTime;
+      document.getElementById("confirmSummary").innerHTML = `
+        <h2 style="font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);margin:0 0 10px">Your order</h2>
+        ${items.map(it => `<div class="item-row"><div class="item-info"><div class="item-name">${it.qty}× ${it.name}</div></div><div class="item-price">$${it.qty * it.price}</div></div>`).join("")}
+        <div class="total-row"><div class="label">Total</div><div class="amount mono">$${total}</div></div>
+        <div class="pay-note" style="margin-top:12px">💵 Pay when you pick up. Venmo, Zelle, Apple Pay, or cash. Nothing is charged now.</div>`;
+      show("confirmScreen");
+      document.getElementById("confirmScreen").classList.add("show");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+
+      savePromise.then((ref) => {
+        if (!ref || !ref.id) return;
+        document.getElementById("confirmRef").textContent = ref.id.slice(-6).toUpperCase();
+        document.getElementById("confirmRefLine").hidden = false;
+
+        // Same page, just with the order id attached. Keeping this in one
+        // file means the edit link can never point at a file that isn't
+        // there, which is what broke when this was two separate pages.
+        const base = window.location.href.split("?")[0].split("#")[0];
+        const href = `${base}?order=${ref.id}`;
+
+        const linkEl = document.getElementById("manageLink");
+        linkEl.href = href;
+        linkEl.textContent = href;
+        document.getElementById("manageBox").hidden = false;
+
+        // Most people close the tab and lose the link, so remember it here
+        // too: coming back to the site later finds their order for them.
+        try {
+          localStorage.setItem("riceShineMyOrder", JSON.stringify({
+            id: ref.id, pickupDate, pickupTime, savedAt: Date.now(),
+          }));
+        } catch (e) {}
+
+        document.getElementById("manageCopy").addEventListener("click", async () => {
+          const btn = document.getElementById("manageCopy");
+          try {
+            await navigator.clipboard.writeText(href);
+            btn.textContent = "Copied!";
+          } catch (e) {
+            // Clipboard access is blocked in some mobile browsers; selecting
+            // the text is the reliable fallback.
+            const r = document.createRange();
+            r.selectNodeContents(linkEl);
+            const sel = window.getSelection();
+            sel.removeAllRanges(); sel.addRange(r);
+            btn.textContent = "Link selected — copy it";
+          }
+          setTimeout(() => { btn.textContent = "Copy link"; }, 2500);
+        });
+      }).catch(() => {});
+
+      if (outcome === "slow") {
+        savePromise.catch(() => {
+          const warn = document.createElement("div");
+          warn.className = "error-box show";
+          warn.style.marginTop = "14px";
+          warn.textContent = "We couldn't confirm your order with our system. Please message us on Instagram so we don't miss it.";
+          document.getElementById("confirmSummary").appendChild(warn);
+        });
+      }
+    });
+
+    refresh();
+  }
+
+  // ---------- manage an existing order ----------
+
+  async function initManageView(orderId) {
+    document.getElementById("tagline").textContent = "Your order";
+    show("loadingState");
+
+    let snap;
+    try {
+      snap = await getDoc(doc(db, "onlineOrders", orderId));
+    } catch (e) {
+      console.error("Could not load order:", e);
+      show("notFoundState");
+      return;
+    }
+    if (!snap.exists()) { show("notFoundState"); return; }
+
+    let original = snap.data();
+    const qty = {};
+    MENU.forEach(m => qty[m.id] = 0);
+    (original.items || []).forEach(it => {
+      const match = MENU.find(m => m.name === it.name);
+      if (match) qty[match.id] = Number(it.qty) || 0;
+    });
+
+    document.getElementById("curPickupDay").textContent = friendlyDate(original.pickupDate);
+    document.getElementById("curPickupTime").textContent = original.pickupTime || "";
+    document.getElementById("whoLine").textContent =
+      `${original.name || ""} · order #${orderId.slice(-6).toUpperCase()}`;
+    document.getElementById("timeEcho").textContent = original.pickupTime || "";
+    buildStepperRows("mMenuList", qty);
+    document.getElementById("mPickupDate").value = original.pickupDate || "";
+    document.getElementById("mNotes").value = original.notes || "";
+
+    // A new date can't be sooner than the cutoff either, so don't offer days
+    // the save would just reject.
+    document.getElementById("mPickupDate").min =
+      isoLocal(new Date(Date.now() + EDIT_LOCK_HOURS * 3600 * 1000));
+
+    show("manageView");
+
+    function changed() {
+      const a = JSON.stringify(itemsFrom(qty));
+      const b = JSON.stringify((original.items || []).map(i => ({ qty: i.qty, name: i.name, price: i.price })));
+      return a !== b
+        || document.getElementById("mPickupDate").value !== original.pickupDate
+        || document.getElementById("mNotes").value.trim() !== (original.notes || "");
+    }
+    function refresh() {
+      document.getElementById("mTotalAmount").textContent = "$" + totalFrom(qty);
+      document.getElementById("saveBtn").disabled =
+        !(itemsFrom(qty).length > 0 && document.getElementById("mPickupDate").value && changed());
+    }
+
+    document.getElementById("mMenuList").addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-act]");
+      if (!btn) return;
+      const id = btn.dataset.id;
+      qty[id] = btn.dataset.act === "inc" ? Math.min(99, qty[id] + 1) : Math.max(0, qty[id] - 1);
+      document.getElementById("mMenuList-count-" + id).textContent = qty[id];
+      refresh();
+    });
+    ["input", "change"].forEach(ev => {
+      document.getElementById("mPickupDate").addEventListener(ev, refresh);
+      document.getElementById("mNotes").addEventListener(ev, refresh);
+    });
+
+    // An order stops being editable 24h before pickup. Saying that clearly,
+    // with a way to reach a human, is the difference between "this is
+    // closed" and "this is broken".
+    const pickupAt = original.pickupAt && original.pickupAt.toDate
+      ? original.pickupAt.toDate()
+      : pickupTimestamp(original.pickupDate, original.pickupTime);
+
+    if (pickupAt && Date.now() >= pickupAt.getTime() - EDIT_LOCK_HOURS * 3600 * 1000) {
+      document.getElementById("lockedNotice").classList.remove("hidden");
+      document.getElementById("lockedText").innerHTML =
+        `This order is too close to pickup to change online (we lock changes ${EDIT_LOCK_HOURS} hours before, so we can shop and prep for it). ` +
+        `Message us on Instagram <strong>@ricenshine.sushibake</strong> and we'll do what we can.`;
+      ["itemsCard", "detailsCard", "saveCard"].forEach(id =>
+        document.getElementById(id).classList.add("hidden"));
+      return;
+    }
+
+    document.getElementById("saveBtn").addEventListener("click", async () => {
+      const btn = document.getElementById("saveBtn");
+      const errEl = document.getElementById("saveError");
+      const okEl = document.getElementById("saveOk");
+      errEl.classList.add("hidden"); okEl.classList.add("hidden");
+
+      const items = itemsFrom(qty);
+      if (!items.length) {
+        errEl.textContent = "Your order needs at least one item.";
+        errEl.classList.remove("hidden");
+        return;
+      }
+      const newDate = document.getElementById("mPickupDate").value;
+      const newPickupAt = pickupTimestamp(newDate, original.pickupTime);
+      if (!newPickupAt) {
+        errEl.textContent = "That pickup date didn't look right. Please pick it again.";
+        errEl.classList.remove("hidden");
+        return;
+      }
+      if (newPickupAt.getTime() - Date.now() < EDIT_LOCK_HOURS * 3600 * 1000) {
+        errEl.innerHTML = `Please choose a pickup date at least ${EDIT_LOCK_HOURS} hours from now. ` +
+          `For anything sooner, message us on Instagram <strong>@ricenshine.sushibake</strong>.`;
+        errEl.classList.remove("hidden");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = "Saving…";
+      const newNotes = document.getElementById("mNotes").value.trim();
+      try {
+        await updateDoc(doc(db, "onlineOrders", orderId), {
+          items, total: totalFrom(qty),
+          pickupDate: newDate, pickupAt: newPickupAt, notes: newNotes,
+        });
+        original = Object.assign({}, original, {
+          items, total: totalFrom(qty), pickupDate: newDate, notes: newNotes,
+        });
+        document.getElementById("curPickupDay").textContent = friendlyDate(newDate);
+        okEl.classList.remove("hidden");
+        okEl.scrollIntoView({ block: "center", behavior: "smooth" });
+      } catch (e) {
+        console.error("Save failed:", e);
+        errEl.innerHTML = "We couldn't save that change. It may be too close to pickup now. " +
+          "Message us on Instagram <strong>@ricenshine.sushibake</strong>.";
+        errEl.classList.remove("hidden");
+      }
+      btn.textContent = "Save changes";
+      refresh();
+    });
+
+    refresh();
+  }
+
+  // ---------- routing ----------
+  // One file serves both screens: no ?order= means a new order, ?order=<id>
+  // means "open my order". Nothing to keep in the same folder, nothing that
+  // can 404.
+  const orderId = new URLSearchParams(window.location.search).get("order");
+  if (orderId) initManageView(orderId);
+  else initOrderForm();
+</script>
