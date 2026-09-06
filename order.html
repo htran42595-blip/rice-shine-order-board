@@ -280,8 +280,36 @@
         Changes are allowed up until 24 hours before pickup.
       </div>
       <div class="notice warn hidden" id="saveError" style="margin-bottom:12px"></div>
-      <div class="notice ok hidden" id="saveOk" style="margin-bottom:12px">Your order has been updated.</div>
       <button type="button" class="primary" id="saveBtn" disabled>Save changes</button>
+    </div>
+  </div>
+
+  <!-- ============ EDIT CONFIRMED ============
+       A saved edit gets the same weight as a placed order. A small inline
+       "updated" line was easy to miss, which left customers unsure whether
+       the change actually took. -->
+  <div class="confirm-screen" id="editedScreen">
+    <div class="check">✓</div>
+    <h2>Order updated!</h2>
+    <p class="confirm-lead" id="editedLead">Your changes are saved.</p>
+
+    <div class="pickup-box">
+      <div class="pickup-label">Pick up your order</div>
+      <div class="pickup-day" id="editedPickupDay"></div>
+      <div class="pickup-time" id="editedPickupTime"></div>
+    </div>
+
+    <div class="card confirm-summary" id="editedSummary"></div>
+
+    <div class="ref-line">
+      Order reference <span class="ref-code" id="editedRef"></span>
+    </div>
+
+    <button type="button" class="primary" id="editAgainBtn" style="margin-top:18px">Make another change</button>
+
+    <div class="confirm-foot">
+      Questions, or need something we can't change online?<br>
+      Message us on Instagram <strong>@ricenshine.sushibake</strong>
     </div>
   </div>
 </main>
@@ -404,9 +432,19 @@
   }
 
   function show(id) {
-    ["orderView", "confirmScreen", "loadingState", "notFoundState", "manageView"]
+    ["orderView", "confirmScreen", "loadingState", "notFoundState", "manageView", "editedScreen"]
       .forEach(v => document.getElementById(v).classList.add("hidden"));
     document.getElementById(id).classList.remove("hidden");
+  }
+
+  // The order summary block shared by the "received" and "updated" screens,
+  // so a customer sees their order laid out the same way both times.
+  function summaryHtml(items, total) {
+    return `
+      <h2 style="font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);margin:0 0 10px">Your order</h2>
+      ${items.map(it => `<div class="item-row"><div class="item-info"><div class="item-name">${it.qty}× ${it.name}</div></div><div class="item-price">$${it.qty * it.price}</div></div>`).join("")}
+      <div class="total-row"><div class="label">Total</div><div class="amount mono">$${total}</div></div>
+      <div class="pay-note" style="margin-top:12px">💵 Pay when you pick up. Venmo, Zelle, Apple Pay, or cash. Nothing is charged now.</div>`;
   }
 
   // ---------- new order ----------
@@ -536,11 +574,7 @@
         `Thanks ${name.split(" ")[0]}, we've got your order. Nothing else is needed from you.`;
       document.getElementById("confirmPickupDay").textContent = friendlyDate(pickupDate);
       document.getElementById("confirmPickupTime").textContent = pickupTime;
-      document.getElementById("confirmSummary").innerHTML = `
-        <h2 style="font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);margin:0 0 10px">Your order</h2>
-        ${items.map(it => `<div class="item-row"><div class="item-info"><div class="item-name">${it.qty}× ${it.name}</div></div><div class="item-price">$${it.qty * it.price}</div></div>`).join("")}
-        <div class="total-row"><div class="label">Total</div><div class="amount mono">$${total}</div></div>
-        <div class="pay-note" style="margin-top:12px">💵 Pay when you pick up. Venmo, Zelle, Apple Pay, or cash. Nothing is charged now.</div>`;
+      document.getElementById("confirmSummary").innerHTML = summaryHtml(items, total);
       show("confirmScreen");
       document.getElementById("confirmScreen").classList.add("show");
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -687,8 +721,7 @@
     document.getElementById("saveBtn").addEventListener("click", async () => {
       const btn = document.getElementById("saveBtn");
       const errEl = document.getElementById("saveError");
-      const okEl = document.getElementById("saveOk");
-      errEl.classList.add("hidden"); okEl.classList.add("hidden");
+      errEl.classList.add("hidden");
 
       const items = itemsFrom(qty);
       if (!items.length) {
@@ -722,8 +755,21 @@
           items, total: totalFrom(qty), pickupDate: newDate, notes: newNotes,
         });
         document.getElementById("curPickupDay").textContent = friendlyDate(newDate);
-        okEl.classList.remove("hidden");
-        okEl.scrollIntoView({ block: "center", behavior: "smooth" });
+
+        // Same treatment a new order gets, because "did my change actually
+        // save?" is exactly as anxious a question as "did my order go
+        // through?" and deserves the same clear answer.
+        document.getElementById("editedLead").textContent =
+          `Thanks ${String(original.name || "").split(" ")[0]}, your changes are saved. This is your order now.`;
+        document.getElementById("editedPickupDay").textContent = friendlyDate(newDate);
+        document.getElementById("editedPickupTime").textContent = original.pickupTime || "";
+        document.getElementById("editedSummary").innerHTML = summaryHtml(items, totalFrom(qty));
+        document.getElementById("editedRef").textContent = orderId.slice(-6).toUpperCase();
+        show("editedScreen");
+        document.getElementById("editedScreen").classList.add("show");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        btn.textContent = "Save changes";
+        return;
       } catch (e) {
         console.error("Save failed:", e);
         errEl.innerHTML = "We couldn't save that change. It may be too close to pickup now. " +
@@ -731,6 +777,16 @@
         errEl.classList.remove("hidden");
       }
       btn.textContent = "Save changes";
+      refresh();
+    });
+
+    // Lets them keep tweaking without hunting for their link again. The edit
+    // screen still holds their just-saved order, so Save stays disabled
+    // until they actually change something else.
+    document.getElementById("editAgainBtn").addEventListener("click", () => {
+      document.getElementById("editedScreen").classList.remove("show");
+      show("manageView");
+      window.scrollTo({ top: 0, behavior: "smooth" });
       refresh();
     });
 
