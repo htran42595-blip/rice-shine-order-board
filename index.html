@@ -1030,6 +1030,51 @@
   .badge.paid { background: var(--matcha-soft); color: var(--matcha); }
   .badge.unpaid { background: var(--warn-soft); color: var(--warn); }
 
+  /* ---- Copy edit link (website orders only) ---- */
+  /* Sits under the paid/unpaid badge on the right of the card. Only website
+     orders have one, because only they have a customer-facing edit page —
+     DM orders have no link to copy, so the button simply isn't rendered.
+     The link itself is a capability URL: whoever holds it can edit that one
+     order. That's fine here — this button only exists inside the dashboard,
+     which is behind Google sign-in, so the link never leaves staff hands
+     unless Tony deliberately sends it. */
+  .who-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    flex: none;
+  }
+
+  .copy-link-btn {
+    font-family: inherit;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    padding: 3px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+    cursor: pointer;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--ink-soft);
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+
+  .copy-link-btn:hover,
+  .copy-link-btn:focus-visible {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--card);
+    outline: none;
+  }
+
+  .copy-link-btn.copied {
+    background: var(--matcha-soft);
+    border-color: var(--matcha);
+    color: var(--matcha);
+  }
+
   /* ---- New / updated order flag ---- */
   /* A ring around the whole card plus a corner badge — two cues so it reads
      as "outstanding" even at a glance across a long grid, not just on close
@@ -5013,6 +5058,10 @@
       toggle_title_move_back: "Move back to active",
       toggle_title_mark_done: "Mark as picked up / completed",
       delete_btn_title: "Delete this order",
+      copy_link_btn: "🔗 Copy edit link",
+      copy_link_title: "Copy this customer's private edit link. Anyone with the link can change the items, pickup date and notes — up until 24 hours before pickup.",
+      copy_link_done: "✓ Copied",
+      copy_link_manual: "Copy this link:",
       restore_btn: "↩ Restore",
       restore_btn_title: "Restore this order",
       empty_no_deleted: "No deleted orders.",
@@ -5156,6 +5205,10 @@
       toggle_title_move_back: "Chuyển lại về đang xử lý",
       toggle_title_mark_done: "Đánh dấu đã lấy hàng / hoàn tất",
       delete_btn_title: "Xóa đơn này",
+      copy_link_btn: "🔗 Chép liên kết sửa",
+      copy_link_title: "Chép liên kết sửa đơn riêng của khách. Ai có liên kết đều sửa được món, ngày lấy và ghi chú — cho tới 24 giờ trước giờ lấy.",
+      copy_link_done: "✓ Đã chép",
+      copy_link_manual: "Chép liên kết này:",
       restore_btn: "↩ Khôi phục",
       restore_btn_title: "Khôi phục đơn này",
       empty_no_deleted: "Không có đơn nào đã xóa.",
@@ -6126,7 +6179,12 @@
             <div class="name">${o.name}${expEntries.length ? `<button type="button" class="history-badge" data-idx="${idx}" aria-expanded="${histOpen}" aria-label="${strHistoryBadgeAria(expEntries.length)}">⚠ ${expEntries.length}</button>` : ""}</div>
             <span class="handle">@${o.handle}</span>
           </div>
-          <span class="badge ${o.paid ? "paid" : "unpaid"}">${o.paid ? t("badge_paid") : t("badge_unpaid")}</span>
+          <div class="who-right">
+            <span class="badge ${o.paid ? "paid" : "unpaid"}">${o.paid ? t("badge_paid") : t("badge_unpaid")}</span>
+            ${o.webId ? `
+              <button type="button" class="copy-link-btn" data-webid="${o.webId}" title="${t("copy_link_title")}">${t("copy_link_btn")}</button>
+            ` : ""}
+          </div>
         </div>
         ${histOpen && expEntries.length ? `
           <div class="history-summary">
@@ -6296,6 +6354,68 @@
     });
   }
 
+  // The customer-facing order site. Kept as http:// deliberately for now:
+  // the HTTPS certificate for ricenshine.net hasn't been issued yet, so an
+  // https:// link would land on a browser security warning. Once "Enforce
+  // HTTPS" is switched on in GitHub Pages, http:// redirects to https://
+  // automatically — so this value is correct before AND after that, and can
+  // be flipped to https:// at leisure rather than urgently.
+  const ORDER_SITE_ORIGIN = "http://ricenshine.net";
+
+  function editLinkFor(webId) {
+    return `${ORDER_SITE_ORIGIN}/?order=${encodeURIComponent(webId)}`;
+  }
+
+  function wireCopyLink(gridEl) {
+    gridEl.querySelectorAll(".copy-link-btn").forEach(btn => {
+      btn.addEventListener("click", async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const link = editLinkFor(btn.dataset.webid);
+
+        // navigator.clipboard needs a secure context and can be blocked
+        // outright. The board is used on a phone in a kitchen, so a silent
+        // failure here would be genuinely confusing — fall back to the old
+        // execCommand path, and only if BOTH fail show the raw link so it
+        // can still be copied by hand.
+        let ok = false;
+        try {
+          await navigator.clipboard.writeText(link);
+          ok = true;
+        } catch (err) {
+          try {
+            const ta = document.createElement("textarea");
+            ta.value = link;
+            ta.setAttribute("readonly", "");
+            ta.style.position = "fixed";
+            ta.style.opacity = "0";
+            document.body.appendChild(ta);
+            ta.select();
+            ok = document.execCommand("copy");
+            ta.remove();
+          } catch (err2) {
+            ok = false;
+          }
+        }
+
+        if (!ok) {
+          window.prompt(t("copy_link_manual"), link);
+          return;
+        }
+
+        // Re-rendering the whole grid just to show "Copied" would collapse
+        // any open panels, so this touches only the button that was clicked.
+        const original = btn.textContent;
+        btn.textContent = t("copy_link_done");
+        btn.classList.add("copied");
+        setTimeout(() => {
+          btn.textContent = original;
+          btn.classList.remove("copied");
+        }, 1600);
+      });
+    });
+  }
+
   function wireRestore(gridEl, list) {
     gridEl.querySelectorAll(".restore-btn").forEach(btn => {
       btn.addEventListener("click", () => {
@@ -6350,6 +6470,9 @@
     wireDelete(gridActive, active);
     wireDelete(gridCompleted, completed);
     wireRestore(gridDeleted, deleted);
+    wireCopyLink(gridActive);
+    wireCopyLink(gridCompleted);
+    wireCopyLink(gridDeleted);
 
     const activeFlagged = active.filter(o => orderFlag(o)).length;
     subtabActive.innerHTML = `${t("subtab_active")} (${active.length})${activeFlagged ? `<span class="flag-count">${activeFlagged} ${t("label_unreviewed")}</span>` : ""}`;
