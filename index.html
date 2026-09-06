@@ -5691,6 +5691,12 @@
   // time. Manually-logged orders without a placement time fall back to the
   // handle alone.
   function orderIdentity(o) {
+    // Website orders carry their Firestore document id, which is unique and
+    // never changes — a better anchor than handle+timestamp, since a website
+    // customer may not give an Instagram handle at all (two no-handle orders
+    // placed the same minute would otherwise collide and share one identity,
+    // meaning marking one complete would mark both).
+    if (o.webId) return `web__${o.webId}`;
     return (o.orderDate || o.orderTime)
       ? `${o.handle}__${o.orderDate || ""}__${o.orderTime || ""}`
       : `${o.handle}__manual`;
@@ -7324,6 +7330,68 @@
     renderPaletteList();
   }
 
+  // ---- Website orders → the board ----
+  // Orders placed on the public order form arrive here from the sync module
+  // (see its onlineOrders listener). They get merged into ORDERS tagged with
+  // a webId, so everything downstream — the stat bar, Prep by Day, Prep by
+  // Time, Active/Completed, buyer history, the new-order highlight — treats
+  // them exactly like a DM order that was hand-added to this file, including
+  // the completed/deleted marks that already sync across devices.
+  //
+  // The customer's phone number is folded into the notes line because that's
+  // the one thing you'd want on hand when an order needs a call, and it
+  // avoids changing the order-card markup for a first version.
+  function websiteDocToOrder(d) {
+    // The same short code the customer sees on their confirmation screen
+    // (last 6 of the record id). Shown here so that when someone messages
+    // "can I change order T0EGHQ", that code can actually be matched to a
+    // ticket on this board instead of being a number only they can see.
+    const ref = String(d.id || "").slice(-6).toUpperCase();
+    const items = Array.isArray(d.items) ? d.items : [];
+    const notes = [
+      ref ? `🌐 Website order #${ref}` : "🌐 Website order",
+      d.contact ? `📞 ${d.contact}` : "",
+      d.notes || "",
+    ]
+      .filter(Boolean)
+      .join(" · ");
+    return {
+      webId: d.id,
+      name: d.name || "(no name given)",
+      handle: d.handle || d.name || "website",
+      items: items,
+      // Deliberately recomputed here rather than trusting d.total. The total
+      // is sent by the customer's browser, and Firestore rules can't sum a
+      // list to check it, so a tampered-with or stale total could otherwise
+      // show a wrong price on the board. Adding it up from the items is the
+      // one number that can't be lied about. (Website orders have no comped
+      // items, so the sum is always the real price; DM orders further up
+      // keep their hand-entered totals, which do account for comps.)
+      total: items.reduce((sum, it) => sum + (Number(it.qty) || 0) * (Number(it.price) || 0), 0),
+      orderDate: d.orderDate || "",
+      orderTime: d.orderTime || "",
+      pickupDate: d.pickupDate || "",
+      pickupTime: d.pickupTime || "",
+      paid: !!d.paid,
+      payMethod: d.payMethod || "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes,
+    };
+  }
+
+  document.addEventListener("riceshine-online-orders", (e) => {
+    const incoming = (e.detail && e.detail.orders) || [];
+    // Drop the previous batch before adding the current one, so an edited or
+    // removed website order doesn't leave a duplicate behind. Only entries
+    // tagged with webId are touched; the orders baked into this file above
+    // are never disturbed.
+    for (let i = ORDERS.length - 1; i >= 0; i--) {
+      if (ORDERS[i] && ORDERS[i].webId) ORDERS.splice(i, 1);
+    }
+    incoming.forEach((d) => ORDERS.push(websiteDocToOrder(d)));
+    rebuildBuyerHistoryFromOrders();
+    renderAll();
+  });
+
   // Reloads the page from the network with a cache-busting query param —
   // the same trick used to verify a fresh deploy — instead of Tony having
   // to force-close and reopen the app to see newly-added orders. Uses
@@ -7473,8 +7541,11 @@
   } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
   import {
     getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot,
-    FieldPath, deleteField, arrayUnion,
+    FieldPath, deleteField, arrayUnion, collection, query, orderBy,
   } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import {
+    initializeAppCheck, ReCaptchaEnterpriseProvider,
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app-check.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDhQa0SwA-UJwcgdwrEu0wX_gPonSwy4hI",
@@ -7515,6 +7586,21 @@
   }
 
   const app = initializeApp(firebaseConfig);
+
+  // App Check has to be initialized on the dashboard too, not just the
+  // public order site. Both pages talk to the same Firestore project, so
+  // once App Check is enforced, any page that doesn't send a token is
+  // refused — including this one. Leaving this out would lock the staff out
+  // of their own board the moment enforcement is switched on.
+  try {
+    initializeAppCheck(app, {
+      provider: new ReCaptchaEnterpriseProvider("6Le6p6wtAAAAAJuCQo-O4G-3xVGxzj0ajz-Hf-7i"),
+      isTokenAutoRefreshEnabled: true,
+    });
+  } catch (e) {
+    console.warn("Rice & Shine sync: App Check init failed", e);
+  }
+
   const auth = getAuth(app);
   const db = getFirestore(app);
   const stateDocRef = doc(db, "riceShineBoard", "state");
@@ -7591,6 +7677,43 @@
     lastRemoteData = null;
   }
 
+  // ---- Website orders (from the public order form) ----
+  // Orders customers place on the website land in their own top-level
+  // "onlineOrders" collection, kept separate from the staff-only board state
+  // above. Firestore rules let the public CREATE one order there and nothing
+  // else — only the 3 allowed accounts can read it back, so this listener
+  // only ever runs once someone is signed in. Each snapshot carries the full
+  // current set; the main script merges it into ORDERS and re-renders, which
+  // is what makes a new order appear on the board within a second or two of
+  // the customer tapping "Place order", with no refresh and no DM reading.
+  let unsubscribeOrders = null;
+
+  function attachOnlineOrdersListener() {
+    if (unsubscribeOrders) return;
+    const ordersQuery = query(collection(db, "onlineOrders"), orderBy("submittedAt", "asc"));
+    unsubscribeOrders = onSnapshot(ordersQuery, (snap) => {
+      const orders = [];
+      snap.forEach((d) => orders.push(Object.assign({ id: d.id }, d.data())));
+      document.dispatchEvent(new CustomEvent("riceshine-online-orders", {
+        detail: { orders },
+      }));
+    }, (err) => {
+      console.warn("Rice & Shine sync: website-order listener error", err);
+    });
+  }
+
+  function detachOnlineOrdersListener() {
+    if (unsubscribeOrders) {
+      unsubscribeOrders();
+      unsubscribeOrders = null;
+    }
+    // Signing out should clear website orders off the board rather than
+    // leaving a stale copy of customer data on screen.
+    document.dispatchEvent(new CustomEvent("riceshine-online-orders", {
+      detail: { orders: [] },
+    }));
+  }
+
   onAuthStateChanged(auth, async (user) => {
     currentUser = user;
     authorized = !!(user && user.email && ALLOWED_EMAILS.has(user.email));
@@ -7602,8 +7725,10 @@
         console.warn("Rice & Shine sync: migration check failed", e);
       }
       attachSnapshotListener();
+      attachOnlineOrdersListener();
     } else {
       detachSnapshotListener();
+      detachOnlineOrdersListener();
     }
     dispatchAuthChange();
     updateSyncStatusUI();
