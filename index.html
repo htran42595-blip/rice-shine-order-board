@@ -6354,13 +6354,13 @@
     });
   }
 
-  // The customer-facing order site. Kept as http:// deliberately for now:
-  // the HTTPS certificate for ricenshine.net hasn't been issued yet, so an
-  // https:// link would land on a browser security warning. Once "Enforce
-  // HTTPS" is switched on in GitHub Pages, http:// redirects to https://
-  // automatically — so this value is correct before AND after that, and can
-  // be flipped to https:// at leisure rather than urgently.
-  const ORDER_SITE_ORIGIN = "http://ricenshine.net";
+  // The customer-facing order site. https:// as of 2026-09-06, when the
+  // certificate for ricenshine.net was issued and "Enforce HTTPS" was
+  // switched on in GitHub Pages. Copied links go straight to https rather
+  // than bouncing through an http redirect, so nothing a customer receives
+  // ever shows a "Not secure" address bar, even for the instant before the
+  // redirect fires.
+  const ORDER_SITE_ORIGIN = "https://ricenshine.net";
 
   function editLinkFor(webId) {
     return `${ORDER_SITE_ORIGIN}/?order=${encodeURIComponent(webId)}`;
