@@ -1,3 +1,5 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Rice & Shine Order Board</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1286,6 +1288,90 @@
     flex-direction: column;
     gap: 8px;
   }
+
+  /* ---- accept / decline ---- */
+  /* Deliberately quiet by default. This is for the rare order that needs a
+     reply; a loud pair of Accept/Decline buttons on every card would imply
+     every order is waiting on a decision, which is the opposite of how the
+     site works. */
+  .status-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    border-top: 1px dashed var(--line);
+    padding-top: 9px;
+    margin-top: 2px;
+  }
+  .status-open-btn {
+    background: none;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 5px 11px;
+    font-family: inherit;
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .status-open-btn:hover, .status-open-btn:focus-visible {
+    border-color: var(--tea); color: var(--tea);
+  }
+  .status-summary { flex: 1 1 160px; min-width: 0; }
+  .status-summary-label { font-size: 0.74rem; font-weight: 700; }
+  .status-summary.confirmed .status-summary-label { color: var(--matcha); }
+  .status-summary.declined .status-summary-label { color: var(--warn); }
+  .status-summary-note {
+    font-size: 0.74rem; color: var(--ink-soft); margin-top: 2px;
+    overflow-wrap: anywhere;
+  }
+  .status-panel {
+    border-top: 1px dashed var(--line);
+    padding-top: 10px;
+    margin-top: 2px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .status-hint { font-size: 0.72rem; color: var(--ink-soft); line-height: 1.45; }
+  .status-note-input {
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 58px;
+    resize: vertical;
+    font-family: inherit;
+    font-size: 0.8rem;
+    padding: 8px 10px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--card);
+    color: var(--ink);
+  }
+  .status-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+  .status-actions button {
+    font-family: inherit;
+    font-size: 0.74rem;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: none;
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+  .status-actions button:disabled { opacity: .5; cursor: default; }
+  .status-confirm-btn { border-color: var(--matcha) !important; color: var(--matcha) !important; }
+  .status-decline-btn { border-color: var(--warn) !important; color: var(--warn) !important; }
+  .status-error {
+    font-size: 0.74rem;
+    color: var(--warn);
+    background: var(--warn-soft);
+    border-radius: 8px;
+    padding: 7px 10px;
+  }
+  .badge.status-confirmed { background: var(--matcha-soft); color: var(--matcha); }
+  .badge.status-declined { background: var(--warn-soft); color: var(--warn); }
 
   .exp-tags {
     display: flex;
@@ -5062,6 +5148,21 @@
       copy_link_title: "Copy this customer's private edit link. Anyone with the link can change the items, pickup date and notes — up until 24 hours before pickup.",
       copy_link_done: "✓ Copied",
       copy_link_manual: "Copy this link:",
+      status_confirmed: "Confirmed",
+      status_declined: "Declined",
+      status_open_btn: "✉️ Reply to customer",
+      status_open_title: "Send this customer a confirmation, or tell them you can't take this order",
+      status_change_btn: "Change",
+      status_confirmed_line: "You confirmed this order by email.",
+      status_declined_line: "You declined this order by email.",
+      status_hint: "This emails the customer. Most orders need nothing here — the site already confirmed it automatically.",
+      status_note_placeholder: "Add a short message (required if you're declining)",
+      status_confirm_btn: "Confirm order",
+      status_decline_btn: "Decline order",
+      status_clear_btn: "Undo",
+      status_cancel_btn: "Cancel",
+      status_need_reason: "Please give a short reason — it goes in the email to the customer.",
+      status_write_failed: "Couldn't save that. Check your connection and try again.",
       restore_btn: "↩ Restore",
       restore_btn_title: "Restore this order",
       empty_no_deleted: "No deleted orders.",
@@ -5209,6 +5310,21 @@
       copy_link_title: "Chép liên kết sửa đơn riêng của khách. Ai có liên kết đều sửa được món, ngày lấy và ghi chú — cho tới 24 giờ trước giờ lấy.",
       copy_link_done: "✓ Đã chép",
       copy_link_manual: "Chép liên kết này:",
+      status_confirmed: "Đã xác nhận",
+      status_declined: "Đã từ chối",
+      status_open_btn: "✉️ Trả lời khách",
+      status_open_title: "Gửi xác nhận cho khách, hoặc báo là không nhận được đơn này",
+      status_change_btn: "Đổi",
+      status_confirmed_line: "Bạn đã xác nhận đơn này qua email.",
+      status_declined_line: "Bạn đã từ chối đơn này qua email.",
+      status_hint: "Thao tác này gửi email cho khách. Hầu hết đơn không cần — trang web đã tự xác nhận rồi.",
+      status_note_placeholder: "Thêm lời nhắn ngắn (bắt buộc nếu từ chối)",
+      status_confirm_btn: "Xác nhận đơn",
+      status_decline_btn: "Từ chối đơn",
+      status_clear_btn: "Hoàn tác",
+      status_cancel_btn: "Hủy",
+      status_need_reason: "Vui lòng ghi lý do ngắn gọn — nội dung này sẽ gửi cho khách.",
+      status_write_failed: "Không lưu được. Kiểm tra kết nối rồi thử lại.",
       restore_btn: "↩ Khôi phục",
       restore_btn_title: "Khôi phục đơn này",
       empty_no_deleted: "Không có đơn nào đã xóa.",
@@ -6016,6 +6132,11 @@
   // that can be open independently of each other.
   const openHistoryBadges = new Set();
 
+  // And again for the accept/decline panel. Same in-memory-only reasoning:
+  // whether the panel is open is not something worth syncing to the other
+  // staff devices, and a reload closing it is the right behaviour.
+  const openStatusPanels = new Set();
+
   function fmtDateTime(iso) {
     const dt = new Date(iso);
     return dt.toLocaleString(localeCode(), {
@@ -6226,6 +6347,8 @@
           </div>
           <div class="who-right">
             <span class="badge ${o.paid ? "paid" : "unpaid"}">${o.paid ? t("badge_paid") : t("badge_unpaid")}</span>
+            ${o.status === "confirmed" ? `<span class="badge status-confirmed">${t("status_confirmed")}</span>` : ""}
+            ${o.status === "declined" ? `<span class="badge status-declined">${t("status_declined")}</span>` : ""}
             ${o.webId ? `
               <button type="button" class="copy-link-btn" data-webid="${o.webId}" title="${t("copy_link_title")}">${t("copy_link_btn")}</button>
             ` : ""}
@@ -6272,8 +6395,52 @@
           `}
         </div>
         ${expOpen ? renderExpPanel(o, idx, expEntries) : ""}
+        ${o.webId && !deletedMode ? renderStatusRow(o, idx) : ""}
       </article>
     `;
+  }
+
+  // Accept / decline, for the exceptions only.
+  //
+  // The site auto-confirms every order, which is the right default — most of
+  // them are fine and nobody should have to approve them one by one. This row
+  // exists for the two cases that default gets wrong: an order worth an
+  // explicit "yes, we've got you" reply, and one that can't be made at all.
+  //
+  // Declining asks for a reason before it will send. A customer who gets
+  // "we can't do your order" with no explanation has to message you to find
+  // out why, which costs you the very conversation the email was supposed to
+  // save — and reads as far colder than it's meant to.
+  function renderStatusRow(o, idx) {
+    const open = openStatusPanels.has(orderIdentity(o));
+    if (!o.status && !open) {
+      return `
+        <div class="status-row">
+          <button type="button" class="status-open-btn" data-idx="${idx}" title="${t("status_open_title")}">${t("status_open_btn")}</button>
+        </div>`;
+    }
+    if (o.status && !open) {
+      return `
+        <div class="status-row">
+          <div class="status-summary ${o.status}">
+            <div class="status-summary-label">${o.status === "declined" ? t("status_declined_line") : t("status_confirmed_line")}</div>
+            ${o.statusNote ? `<div class="status-summary-note">${escapeHtml(o.statusNote)}</div>` : ""}
+          </div>
+          <button type="button" class="status-open-btn" data-idx="${idx}">${t("status_change_btn")}</button>
+        </div>`;
+    }
+    return `
+      <div class="status-panel" data-idx="${idx}">
+        <div class="status-hint">${t("status_hint")}</div>
+        <textarea class="status-note-input" maxlength="300" placeholder="${t("status_note_placeholder")}">${escapeHtml(o.statusNote || "")}</textarea>
+        <div class="status-actions">
+          <button type="button" class="status-confirm-btn" data-idx="${idx}">${t("status_confirm_btn")}</button>
+          <button type="button" class="status-decline-btn" data-idx="${idx}">${t("status_decline_btn")}</button>
+          ${o.status ? `<button type="button" class="status-clear-btn" data-idx="${idx}">${t("status_clear_btn")}</button>` : ""}
+          <button type="button" class="status-cancel-btn" data-idx="${idx}">${t("status_cancel_btn")}</button>
+        </div>
+        <div class="status-error" hidden></div>
+      </div>`;
   }
 
   function renderExpPanel(o, idx, entries) {
@@ -6380,6 +6547,66 @@
         renderExperienceLog();
       });
     });
+  }
+
+  function wireStatus(gridEl, list) {
+    gridEl.querySelectorAll(".status-open-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const id = orderIdentity(list[Number(btn.dataset.idx)]);
+        openStatusPanels.add(id);
+        renderOrders();
+      });
+    });
+
+    gridEl.querySelectorAll(".status-cancel-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        openStatusPanels.delete(orderIdentity(list[Number(btn.dataset.idx)]));
+        renderOrders();
+      });
+    });
+
+    // One handler for all three writes. The optimistic local update is what
+    // makes the pill change instantly; the snapshot from Firestore arrives a
+    // moment later and confirms it. If the write fails the panel stays open
+    // with the reason showing, rather than silently reverting and leaving
+    // Tony thinking a customer was told something they weren't.
+    async function apply(btn, status) {
+      const o = list[Number(btn.dataset.idx)];
+      const panel = btn.closest(".status-panel");
+      const errEl = panel.querySelector(".status-error");
+      const note = (panel.querySelector(".status-note-input").value || "").trim();
+
+      if (status === "declined" && !note) {
+        errEl.textContent = t("status_need_reason");
+        errEl.hidden = false;
+        panel.querySelector(".status-note-input").focus();
+        return;
+      }
+
+      errEl.hidden = true;
+      panel.querySelectorAll("button").forEach(b => { b.disabled = true; });
+      try {
+        await window.riceShineSetOrderStatus(o.webId, status, status === null ? "" : note);
+        o.status = status || "";
+        o.statusNote = status === null ? "" : note;
+        openStatusPanels.delete(orderIdentity(o));
+        renderOrders();
+        // A decline hands the day's portions back, so the tally has to move.
+        scheduleCapacityReconcile();
+      } catch (e) {
+        console.error("Could not set order status:", e);
+        errEl.textContent = t("status_write_failed");
+        errEl.hidden = false;
+        panel.querySelectorAll("button").forEach(b => { b.disabled = false; });
+      }
+    }
+
+    gridEl.querySelectorAll(".status-confirm-btn").forEach(b =>
+      b.addEventListener("click", () => apply(b, "confirmed")));
+    gridEl.querySelectorAll(".status-decline-btn").forEach(b =>
+      b.addEventListener("click", () => apply(b, "declined")));
+    gridEl.querySelectorAll(".status-clear-btn").forEach(b =>
+      b.addEventListener("click", () => apply(b, null)));
   }
 
   function wireDelete(gridEl, list) {
@@ -6518,6 +6745,12 @@
     wireCopyLink(gridActive);
     wireCopyLink(gridCompleted);
     wireCopyLink(gridDeleted);
+
+    // Not wired for the deleted grid: renderStatusRow doesn't draw the row
+    // there, because accepting or declining an order you've already removed
+    // would email the customer about an order that no longer exists.
+    wireStatus(gridActive, active);
+    wireStatus(gridCompleted, completed);
 
     const activeFlagged = active.filter(o => orderFlag(o)).length;
     subtabActive.innerHTML = `${t("subtab_active")} (${active.length})${activeFlagged ? `<span class="flag-count">${activeFlagged} ${t("label_unreviewed")}</span>` : ""}`;
@@ -7546,6 +7779,10 @@
       // Carried through so History can report which channel an order came
       // from without having to infer it from the presence of a webId.
       source: d.source || "website",
+      // Accept/decline. Absent means the normal case — the site already
+      // auto-confirmed it — so only the exceptions carry a value here.
+      status: d.status || "",
+      statusNote: d.statusNote || "",
       notes,
     };
   }
@@ -7610,10 +7847,15 @@
 
     // Deleted orders free their capacity; completed ones do not, because the
     // food was still made and the day's kitchen time was still spent.
+    // A declined order is food that is no longer being made, so its portions
+    // go back to the day exactly the way a deleted one's do. Without this,
+    // turning an order away would keep the day looking full and quietly cost
+    // the next customer the slot you just freed.
     const truth = {};
     incoming.forEach((d) => {
       const iso = d.pickupDate;
       if (!iso || iso < todayIso) return;
+      if (d.status === "declined") return;
       const asOrder = ORDERS.find((o) => o.webId === d.id);
       if (asOrder && isDeleted(asOrder)) return;
       truth[iso] = (truth[iso] || 0) + portionsOfItems(d.items);
@@ -7777,6 +8019,7 @@
   import {
     getFirestore, doc, getDoc, getDocs, setDoc, updateDoc, onSnapshot,
     FieldPath, deleteField, arrayUnion, collection, query, orderBy,
+    serverTimestamp,
   } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
   import {
     initializeAppCheck, ReCaptchaEnterpriseProvider,
@@ -7967,6 +8210,35 @@
       }
     }
     void dates;
+  };
+
+  // Sets (or clears) the accept/decline mark on one website order.
+  //
+  // This writes to the ORDER document, not to the board's own state, and that
+  // is the whole point: the customer's page reads it, and a Cloud Function
+  // watches for the change and emails them. A mark kept in board state would
+  // be invisible to both.
+  //
+  // Clearing sends null, which the caller turns into a field delete, so an
+  // order returned to normal looks exactly like one that was never touched
+  // rather than carrying a "status: none" that every later reader has to
+  // know about.
+  window.riceShineSetOrderStatus = async function (webId, status, note) {
+    if (!authorized) throw new Error("not signed in");
+    const ref = doc(db, "onlineOrders", webId);
+    if (status === null) {
+      await updateDoc(ref, {
+        status: deleteField(),
+        statusNote: deleteField(),
+        statusAt: deleteField(),
+      });
+      return;
+    }
+    await updateDoc(ref, {
+      status,
+      statusNote: String(note || "").slice(0, 300),
+      statusAt: serverTimestamp(),
+    });
   };
 
   function detachOnlineOrdersListener() {
