@@ -5881,9 +5881,50 @@
   // for them in this browser — not just whatever's in this week's ORDERS.
   // Picks the most recent order's spelling of their name, same idea as
   // groupExperienceByBuyer below.
+  // Has the website-orders snapshot arrived yet this session? Until it has,
+  // ORDERS holds no website orders, so "this buyer-history entry has no
+  // matching order" would be true of every website order and would wrongly
+  // hide all of them. Nothing below prunes until this is true.
+  let websiteOrdersLoaded = false;
+
+  // Buyer history is a separate, persisted map keyed by order identity, and
+  // two things can leave junk in it that the leaderboards would otherwise
+  // count as real customers:
+  //
+  //   - a website order deleted on the board can be re-added by the rebuild
+  //     that runs when the orders snapshot lands, because on a fresh load
+  //     that snapshot can arrive before the board state that says which
+  //     orders are deleted
+  //   - an entry whose order no longer exists at all is never revisited,
+  //     because deleting an order is what removes its entry, and an order
+  //     that is already gone can't be deleted again
+  //
+  // Both leave a buyer who never existed sitting in Returning and Biggest
+  // buyers. Filtering here means the leaderboards are correct even when the
+  // stored map isn't, and the prune below then clears the stored map too.
+  function isJunkBuyerKey(key) {
+    if (deletedSet.has(key)) return true;
+    if (!websiteOrdersLoaded) return false;
+    if (!String(key).startsWith("web__")) return false;
+    return !ORDERS.some((o) => o.webId && `web__${o.webId}` === key);
+  }
+
+  function pruneOrphanBuyerHistory() {
+    if (!websiteOrdersLoaded) return;
+    const gone = Object.keys(buyerHistory).filter(isJunkBuyerKey);
+    if (!gone.length) return;
+    gone.forEach((key) => { delete buyerHistory[key]; });
+    persistBuyerHistory();
+    if (window.RiceShineSync?.isSharedMode?.()) {
+      gone.forEach((key) => window.RiceShineSync.deleteBuyerHistoryEntry(key));
+    }
+    console.info(`Rice & Shine: cleared ${gone.length} buyer-history entries with no live order`);
+  }
+
   function buyerOrderSummary() {
     const byHandle = {};
-    Object.values(buyerHistory).forEach((e) => {
+    Object.entries(buyerHistory).forEach(([key, e]) => {
+      if (isJunkBuyerKey(key)) return;
       (byHandle[e.handle] ||= []).push(e);
     });
     return Object.values(byHandle).map((entries) => {
@@ -7519,7 +7560,9 @@
       if (ORDERS[i] && ORDERS[i].webId) ORDERS.splice(i, 1);
     }
     incoming.forEach((d) => ORDERS.push(websiteDocToOrder(d)));
+    websiteOrdersLoaded = true;
     rebuildBuyerHistoryFromOrders();
+    pruneOrphanBuyerHistory();
     renderAll();
     lastWebsiteOrders = incoming;
     scheduleCapacityReconcile();
@@ -7704,6 +7747,11 @@
       if (localOnlyDeleted.length) window.RiceShineSync.setDeletedBatch(localOnlyDeleted.map((k) => [k, true]));
       if (localOnlySeenPairs.length && window.RiceShineSync.setSeenBatch) window.RiceShineSync.setSeenBatch(localOnlySeenPairs);
     }
+    // The board state that just landed is what says which orders are
+    // deleted, and it can arrive after the orders themselves. Re-running the
+    // prune here is what catches a deleted website order that the earlier
+    // pass had no way of knowing was deleted.
+    pruneOrphanBuyerHistory();
     renderAll();
   });
 
