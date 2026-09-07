@@ -2256,6 +2256,14 @@
     <div class="hist-charts">
       <div class="hist-card">
         <div class="hist-card-head">
+          <div class="title" data-i18n="hist_source_title">Where orders came from</div>
+          <div class="sub" id="histSourceSub" data-i18n="hist_source_sub">Every channel, counted together</div>
+        </div>
+        <div class="hist-card-body" id="histSource"></div>
+      </div>
+
+      <div class="hist-card">
+        <div class="hist-card-head">
           <div class="title" data-i18n="hist_dow_title">Orders by pickup day</div>
           <div class="sub" data-i18n="hist_dow_sub">Which day people pick up their food</div>
         </div>
@@ -5018,6 +5026,11 @@
       th_item: "Item",
       th_qty: "Qty",
       th_revenue: "Revenue",
+      hist_source_title: "Where orders came from",
+      hist_source_sub: "Every channel, counted together",
+      src_website: "Website",
+      src_instagram: "Instagram DM",
+      src_phone: "Phone / manual",
       hist_dow_title: "Orders by pickup day",
       hist_dow_sub: "Which day people pick up their food",
       hist_tod_title: "Orders by time of day",
@@ -5165,6 +5178,11 @@
       th_item: "Món",
       th_qty: "SL",
       th_revenue: "Doanh thu",
+      hist_source_title: "Đơn hàng đến từ đâu",
+      hist_source_sub: "Tất cả các kênh, tính chung",
+      src_website: "Trang web",
+      src_instagram: "Tin nhắn Instagram",
+      src_phone: "Điện thoại / nhập tay",
       hist_dow_title: "Đơn hàng theo ngày lấy",
       hist_dow_sub: "Khách thường lấy hàng vào ngày nào",
       hist_tod_title: "Đơn hàng theo giờ trong ngày",
@@ -6915,6 +6933,64 @@
       : `<tr><td colspan="3" class="empty-state">${t("empty_no_orders_window")}</td></tr>`;
   }
 
+  // ---- Where an order came from ----
+  //
+  // Orders arrive by several routes and always have: Instagram DMs, the
+  // website, and the occasional phone call Tony logs by hand. Nothing ever
+  // recorded which was which, because until the website existed there was
+  // only one answer. Now that a second channel is live and the intention is
+  // to move people onto it, "is the website actually taking over from the
+  // DMs" is a question the History tab should be able to answer.
+  //
+  // Rather than back-fill a field onto two hundred existing orders, the
+  // channel is derived. Only website orders carry hard evidence (a webId
+  // from Firestore); everything else is read off how it was logged, and the
+  // fallback is Instagram because that is where every pre-website order
+  // came from. Orders written from here on can set `source` explicitly and
+  // this will prefer it.
+  const ORDER_SOURCES = [
+    { key: "website",   i18n: "src_website",   color: "var(--tg-1)" },
+    { key: "instagram", i18n: "src_instagram", color: "var(--tg-2)" },
+    { key: "phone",     i18n: "src_phone",     color: "var(--tg-3)" },
+  ];
+
+  function orderSource(o) {
+    if (o.webId || o.source === "website") return "website";
+    if (o.source) return o.source;
+    // Tony's own wording when he logs one of these by hand.
+    if (/phone order/i.test(o.notes || "")) return "phone";
+    return "instagram";
+  }
+
+  function renderHistSource(list) {
+    const counts = {}, revenue = {};
+    ORDER_SOURCES.forEach((s) => { counts[s.key] = 0; revenue[s.key] = 0; });
+    list.forEach((o) => {
+      const k = orderSource(o);
+      if (!(k in counts)) { counts[k] = 0; revenue[k] = 0; }
+      counts[k] += 1;
+      revenue[k] += Number(o.total) || 0;
+    });
+
+    // Only show a channel that has actually been used, so the card doesn't
+    // carry a permanent empty "Phone" row for a route used twice in a year.
+    const known = ORDER_SOURCES.filter((s) => counts[s.key] > 0);
+    const extra = Object.keys(counts)
+      .filter((k) => !ORDER_SOURCES.some((s) => s.key === k) && counts[k] > 0)
+      .map((k) => ({ key: k, label: k, color: "var(--ink-soft)" }));
+
+    const rows = known.map((s) => ({ label: t(s.i18n), value: counts[s.key], color: s.color }))
+      .concat(extra.map((e) => ({ label: e.label, value: counts[e.key], color: e.color })));
+
+    document.getElementById("histSource").innerHTML = hbarChart(rows);
+    document.getElementById("histSourceSub").textContent =
+      known.concat(extra).length
+        ? known.concat(extra)
+            .map((s) => `${t(s.i18n) || s.label} ${fmtMoney(revenue[s.key])}`)
+            .join(" · ")
+        : t("hist_source_sub");
+  }
+
   function renderHistDayOfWeek(list) {
     const counts = [0, 0, 0, 0, 0, 0, 0];
     list.forEach((o) => {
@@ -7118,6 +7194,7 @@
     const list = ordersInWindow(currentWindow);
     renderHistStats(list);
     renderHistItemized(list);
+    renderHistSource(list);
     renderHistDayOfWeek(list);
     renderHistTimeOfDay(list);
     renderHistTraySize(list);
@@ -7502,6 +7579,9 @@
       pickupTime: d.pickupTime || "",
       paid: !!d.paid,
       payMethod: d.payMethod || "Venmo / Zelle / Apple Pay / cash — at pickup",
+      // Carried through so History can report which channel an order came
+      // from without having to infer it from the presence of a webId.
+      source: d.source || "website",
       notes,
     };
   }
