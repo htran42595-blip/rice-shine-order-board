@@ -33,6 +33,7 @@
  */
 
 const { onDocumentCreated, onDocumentUpdated } = require("firebase-functions/v2/firestore");
+const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { defineSecret } = require("firebase-functions/params");
 const { setGlobalOptions } = require("firebase-functions/v2");
 const logger = require("firebase-functions/logger");
@@ -415,5 +416,134 @@ exports.sendOrderStatusEmail = onDocumentUpdated(
       logger.error("Status email failed", { orderId, err: String(err) });
       throw err;
     }
+  }
+);
+
+// ---------------------------------------------------------------------------
+// The sign-in email
+// ---------------------------------------------------------------------------
+
+/**
+ * Sends the "click to sign in" email for editing an order.
+ *
+ * Firebase can send this itself, in one line, from the browser. The reason it
+ * doesn't is that the message it sends can't be changed: the Firebase console
+ * exposes templates for password reset, email change and verification, and
+ * nothing for passwordless sign-in. So the first email a customer gets when
+ * they try to change an order would arrive from
+ * noreply@rice-shine-order-board.firebaseapp.com, in Firebase's own wording,
+ * looking nothing like the confirmation they got an hour earlier. That reads
+ * like a phishing attempt, which is exactly the wrong feeling to give someone
+ * about a link they're being asked to click.
+ *
+ * So the link is generated here with the Admin SDK and sent through Resend
+ * with the same template as everything else. The link itself is identical to
+ * the one Firebase would have mailed, so signInWithEmailLink on the page is
+ * unchanged.
+ *
+ * Two guards, and both matter:
+ *
+ *   - App Check, so this can only be called from the real website. Without
+ *     it this is an open endpoint that emails arbitrary addresses on demand,
+ *     which is a spam relay with Rice & Shine's name on it.
+ *   - The address must actually appear on an order. Even from the real site,
+ *     letting anyone type any address and have mail sent to it is the same
+ *     problem wearing a nicer hat.
+ */
+exports.sendSignInEmail = onCall(
+  { secrets: [RESEND_API_KEY], enforceAppCheck: true, maxInstances: 5 },
+  async (request) => {
+    const email = String((request.data && request.data.email) || "").trim().toLowerCase();
+    const continueUrl = String((request.data && request.data.continueUrl) || "").trim();
+
+    if (!validEmail(email)) {
+      throw new HttpsError("invalid-argument", "That email address doesn't look right.");
+    }
+    // Only ever send people back to our own site.
+    if (!/^https:\/\/ricenshine\.net(\/|$)/.test(continueUrl)) {
+      throw new HttpsError("invalid-argument", "Bad return address.");
+    }
+
+    const match = await db.collection("onlineOrders")
+      .where("email", "==", email).limit(1).get();
+    if (match.empty) {
+      // Deliberately vague to the caller: confirming whether an address has
+      // ordered here would turn this into a way to test whether someone is a
+      // customer. The page shows the same "check your email" screen either
+      // way, so a stranger learns nothing.
+      logger.info("Sign-in email requested for an address with no orders");
+      return { ok: true };
+    }
+
+    let link;
+    try {
+      link = await admin.auth().generateSignInWithEmailLink(email, {
+        url: continueUrl,
+        handleCodeInApp: true,
+      });
+    } catch (err) {
+      logger.error("Could not generate sign-in link", { err: String(err) });
+      throw new HttpsError("internal", "Could not create a sign-in link.");
+    }
+
+    const name = String(match.docs[0].get("name") || "").split(" ")[0];
+    const html = `<!doctype html>
+<html><body style="margin:0;padding:0;background:#f8f2c2">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f8f2c2;padding:24px 12px">
+  <tr><td align="center">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+           style="max-width:520px;background:#fffdf3;border-radius:14px;overflow:hidden;
+                  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif">
+      <tr><td style="background:#2c2140;padding:20px 24px">
+        <div style="color:#f8f2c2;font-size:20px;font-weight:700;letter-spacing:.3px">Rice &amp; Shine</div>
+        <div style="color:#ada0be;font-size:13px;margin-top:2px">Sushi bake, made fresh</div>
+      </td></tr>
+      <tr><td style="padding:26px 24px 8px">
+        <h1 style="margin:0 0 8px;font-size:22px;color:#251a38">Sign in to change your order</h1>
+        <p style="margin:0;font-size:15px;line-height:1.55;color:#6f6280">
+          ${name ? esc(name) + ", t" : "T"}his link opens your order so you can update it.
+          It only works once, and only for this email address.
+        </p>
+      </td></tr>
+      <tr><td style="padding:20px 24px 0">
+        <a href="${esc(link)}"
+           style="display:inline-block;background:#7a58ad;color:#ffffff;text-decoration:none;
+                  font-size:15px;font-weight:600;padding:12px 22px;border-radius:8px">Open my order</a>
+      </td></tr>
+      <tr><td style="padding:20px 24px 26px">
+        <p style="margin:0;font-size:12px;line-height:1.6;color:#6f6280">
+          If you didn't ask to change an order, you can ignore this email and
+          nothing will happen. Questions? Message us on Instagram
+          <strong style="color:#251a38">@${esc(IG)}</strong>
+        </p>
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+</body></html>`;
+
+    const text = [
+      "Sign in to change your Rice & Shine order",
+      "",
+      `${name ? name + ", t" : "T"}his link opens your order so you can update it.`,
+      "It only works once, and only for this email address.",
+      "",
+      link,
+      "",
+      "If you didn't ask to change an order, you can ignore this email.",
+      `Questions? Message us on Instagram @${IG}`,
+    ].join("\n");
+
+    try {
+      await sendEmail({
+        to: email,
+        subject: "Sign in to change your Rice & Shine order",
+        html, text,
+      });
+    } catch (err) {
+      logger.error("Sign-in email failed", { err: String(err) });
+      throw new HttpsError("internal", "Could not send the sign-in email.");
+    }
+    return { ok: true };
   }
 );
