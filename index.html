@@ -5414,28 +5414,20 @@
   }
   // windowKey is "thisweek" | "week" | "month" | "custom" — the pill's
   // fixed Mon-anchored period (see WINDOW_WEEKS/windowRange), not a rolling
-  // day count. "thisweek" is the current week through right now; "custom"
+  // day count. "thisweek" is the whole current Mon-Sun week; "custom"
   // is whatever start/end Tony picked in the date-range modal (this is
   // also where a picked quarter-ish range lands now that the "Last
   // quarter" pill is gone — Custom range covers that case fine); "week"
   // and "month" are fully-closed past periods.
   function strHistRangeWindow(n, windowKey) {
-    // "This week" counts completed orders only (it's still in progress, so
-    // "completed" is the meaningful number) — the label says so explicitly
-    // to avoid reading as a lower-than-expected total order count.
-    const periodEn = windowKey === "thisweek" ? "this week so far"
+    const periodEn = windowKey === "thisweek" ? "this week"
       : windowKey === "week" ? "last week"
       : windowKey === "month" ? "the last 4 weeks"
       : "the selected range";
-    const periodVi = windowKey === "thisweek" ? "tuần này (tính đến hiện tại)"
+    const periodVi = windowKey === "thisweek" ? "tuần này"
       : windowKey === "week" ? "tuần trước"
       : windowKey === "month" ? "4 tuần qua"
       : "khoảng đã chọn";
-    if (windowKey === "thisweek") {
-      return currentLang === "vi"
-        ? `${n} đơn đã hoàn thành trong ${periodVi}`
-        : `${n} completed order${n === 1 ? "" : "s"} in ${periodEn}`;
-    }
     return currentLang === "vi" ? `${n} đơn trong ${periodVi}` : `${n} order${n === 1 ? "" : "s"} in ${periodEn}`;
   }
   function strTimeOfDaySub(unknownCount) {
@@ -7056,11 +7048,26 @@
   let customRangeStart = null;
   let customRangeEnd = null;
 
+  // Today's calendar date in Vacaville, returned as UTC midnight so it lines
+  // up with parsePickupDate (which also parses "YYYY-MM-DD" as UTC midnight).
+  //
+  // This used to read the date straight off the viewer's UTC clock, which is
+  // 7 hours ahead of Pacific: from 5pm Sunday onward the board already
+  // believed it was Monday, so the week rolled over early every single
+  // Sunday evening — This week emptied out and Last week lost its last day
+  // — right when the weekend's orders were being picked up.
+  function shopToday() {
+    const [y, m, d] = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "America/Los_Angeles",
+      year: "numeric", month: "2-digit", day: "2-digit",
+    }).format(new Date()).split("-").map(Number);
+    return new Date(Date.UTC(y, m - 1, d));
+  }
+
   // 00:00 UTC on the Monday of the current (in-progress) week. Used as the
   // anchor for every window pill's start/end math below.
   function currentWeekMondayUTC() {
-    const now = new Date();
-    const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+    const today = shopToday();
     const dow = today.getUTCDay(); // 0=Sun..6=Sat
     const daysSinceMonday = dow === 0 ? 6 : dow - 1;
     today.setUTCDate(today.getUTCDate() - daysSinceMonday);
@@ -7068,9 +7075,10 @@
   }
 
   // Returns the inclusive [start, end] range for a window pill.
-  // "thisweek" is the odd one out: it's the current, still-in-progress week
-  // — 12:00am UTC this Monday through right now — so people can see what's
-  // been ordered for the week so far, not just fully-closed weeks.
+  // "thisweek" is the odd one out: it looks forward as well as back — this
+  // Monday 12:00am through Sunday 11:59:59pm — so a week already booked
+  // reads correctly on the Monday morning, not only once it has been lived
+  // through.
   // "week"/"month" both look backward instead: start is 12:00am UTC on the
   // Monday `weeks` weeks before this week's Monday, and end is
   // 11:59:59.999pm UTC on last Sunday (the day right before this week's
@@ -7080,7 +7088,16 @@
   // picker), not from anything computed off today's date.
   function windowRange(windowKey) {
     const thisMonday = currentWeekMondayUTC();
-    if (windowKey === "thisweek") return { start: thisMonday, end: new Date() };
+    if (windowKey === "thisweek") {
+      // The whole current week, Monday through Sunday — not Monday through
+      // right now. Ending the window at the current moment hid every pickup
+      // still to come, so on a Monday morning the tab read zero even with a
+      // full week already booked.
+      const end = new Date(thisMonday);
+      end.setUTCDate(end.getUTCDate() + 6);
+      end.setUTCHours(23, 59, 59, 999);
+      return { start: thisMonday, end };
+    }
     if (windowKey === "custom") return { start: customRangeStart, end: customRangeEnd };
     const weeks = WINDOW_WEEKS[windowKey];
     const start = new Date(thisMonday);
@@ -7099,16 +7116,14 @@
     // we prep/sell that week", which is a pickup-time question. pickupDate
     // is required on every order, so nothing silently falls out of every
     // window the way a null orderDate would.
-    // "This week" is the one exception to "all non-deleted orders count":
-    // since it's still in progress, it only counts orders Tony has actually
-    // marked complete (picked up) — Last week/Last month/Custom range all
-    // look backward at closed periods, so they include every non-deleted
-    // order (active or completed) same as before.
-    const onlyCompleted = windowKey === "thisweek";
+    // Every window counts the same thing: every non-deleted order whose
+    // pickup falls inside it. "This week" used to additionally require the
+    // order be marked complete, which meant it under-reported all week and
+    // never matched the Orders tab — an order booked and an order collected
+    // are different questions, and this tab answers the first one.
     const { start, end } = windowRange(windowKey);
     return ORDERS.filter((o) => {
       if (isDeleted(o)) return false;
-      if (onlyCompleted && !isCompleted(o)) return false;
       const d = parsePickupDate(o);
       return d && d >= start && d <= end;
     });
