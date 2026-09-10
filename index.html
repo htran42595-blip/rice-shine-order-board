@@ -14,7 +14,7 @@
     --ink: #251a38;
     --ink-soft: #6f6280;
     --line: #e6dcef;
-    --tea: #7a58ad; --pulse: rgba(122, 88, 173, .55);
+    --tea: #7a58ad; --pulse-ring: #7a58ad; --pulse-glow: rgba(122, 88, 173, .5);
     --tea-ink: #ffffff;
     --salmon: #d97a63;
     --salmon-soft: #f6e3dc;
@@ -51,7 +51,7 @@
       --ink: #f1e9da;
       --ink-soft: #ada0be;
       --line: #3b3049;
-      --tea: #c9a9ee; --pulse: rgba(201, 169, 238, .5);
+      --tea: #c9a9ee; --pulse-ring: #c9a9ee; --pulse-glow: rgba(201, 169, 238, .45);
       --tea-ink: #241635;
       --salmon: #eda08e;
       --salmon-soft: #3a2a27;
@@ -2190,10 +2190,21 @@
      the card is actually tapped means the answer to "which one did it mean"
      is still on screen whenever you get back to it. */
   @keyframes jumpPulse {
-    0%, 100% { box-shadow: var(--shadow), 0 0 0 0 var(--pulse); }
-    50%      { box-shadow: var(--shadow), 0 0 16px 4px var(--pulse); }
+    0%, 100% {
+      box-shadow: var(--shadow), 0 0 0 2px var(--pulse-ring), 0 0 0 0 var(--pulse-glow);
+      transform: scale(1);
+    }
+    50% {
+      box-shadow: var(--shadow), 0 0 0 5px var(--pulse-ring), 0 0 28px 12px var(--pulse-glow);
+      transform: scale(1.018);
+    }
   }
-  .ticket.is-jumped { animation: jumpPulse 2.6s ease-in-out infinite; }
+  .ticket.is-jumped {
+    animation: jumpPulse 2.2s ease-in-out infinite;
+    /* Lifted above its neighbours so the glow is not clipped by the cards
+       either side of it in the grid. */
+    z-index: 3;
+  }
   /* Without motion, the same job is done by a ring that simply stays put. */
   @media (prefers-reduced-motion: reduce) {
     .ticket.is-jumped { animation: none; outline: 3px solid var(--tea); outline-offset: 2px; }
