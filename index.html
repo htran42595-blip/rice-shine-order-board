@@ -7108,6 +7108,13 @@
     subtabActive.innerHTML = `${t("subtab_active")} (${active.length})${activeFlagged ? `<span class="flag-count">${activeFlagged} ${t("label_unreviewed")}</span>` : ""}`;
     subtabCompleted.textContent = `${t("subtab_completed")} (${completed.length})`;
     subtabDeleted.textContent = `${t("subtab_deleted")} (${deleted.length})`;
+
+    // Every card on the board was just replaced, so anything painted onto a
+    // card has to be painted again. This lives here rather than in renderAll
+    // because renderOrders is called directly from a dozen places — the
+    // complete toggle, delete, restore, a website order arriving — and the
+    // Lookup glow was being wiped by all of them.
+    if (window.riceShineRepaintCards) window.riceShineRepaintCards();
   }
 
   // ---- Prep by day view ----
@@ -8432,6 +8439,9 @@
     // Re-render whatever is on screen when the order data or the language
     // changes underneath it, so a live website edit shows up in an open
     // panel instead of going stale.
+    // Called at the end of every board render, not only the full one.
+    window.riceShineRepaintCards = applyPulse;
+
     window.riceShineLookupRefresh = function () {
       applyPulse();
       if (panel.hidden) return;
