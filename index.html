@@ -8410,22 +8410,24 @@
       paintJump(8);
     }
 
-    // One animation frame is not always enough. On the live board a render
-    // can still be in flight when the jump fires — a website order arriving,
-    // the shared board state landing — and the card being jumped to does not
-    // exist yet at that instant, so a single attempt silently paints nothing.
-    // Retrying for about three quarters of a second costs nothing and stops
-    // as soon as the card is there.
+    // Paint now, then keep trying briefly.
+    //
+    // Plain timers rather than an animation frame: a board sitting in a
+    // background tab has its frames throttled to nothing, so a frame-based
+    // paint simply never ran there — the glow was missing for anyone who
+    // searched, switched away and came back. Timers still fire.
+    //
+    // The retries cover the other half: a render can be in flight when the
+    // jump fires (a website order arriving, board state landing), so the
+    // card may not exist for another tick or two.
     function paintJump(tries) {
-      requestAnimationFrame(() => {
-        applyPulse();
-        const card = document.querySelector('.ticket[data-oid="' + CSS.escape(pulseKey) + '"]');
-        if (card) {
-          card.scrollIntoView({ behavior: "smooth", block: "center" });
-          return;
-        }
-        if (tries > 0) setTimeout(() => paintJump(tries - 1), 90);
-      });
+      applyPulse();
+      const card = document.querySelector('.ticket[data-oid="' + CSS.escape(pulseKey) + '"]');
+      if (card) {
+        card.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
+      if (tries > 0) setTimeout(() => paintJump(tries - 1), 90);
     }
 
     function openPanel(open) {
