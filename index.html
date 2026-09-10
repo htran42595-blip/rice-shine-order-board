@@ -2023,6 +2023,176 @@
     .statbar { grid-template-columns: repeat(2, 1fr); }
   }
 
+
+  /* ---- Order lookup ---- */
+  .lookup-bar { display: flex; justify-content: flex-end; margin: -12px 0 20px; }
+  .lookup-toggle {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: inherit; font-size: 14.5px; font-weight: 700; cursor: pointer;
+    background: var(--card); color: var(--ink);
+    border: 1.5px solid var(--line); border-radius: 999px; padding: 9px 18px;
+  }
+  .lookup-toggle:hover { border-color: var(--tea); color: var(--tea); }
+  .lookup-toggle[aria-expanded="true"] {
+    background: var(--nori); color: var(--rice); border-color: var(--nori);
+  }
+  .lookup-toggle:focus-visible { outline: 2px solid var(--tea); outline-offset: 2px; }
+
+  .lookup-panel {
+    background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+    padding: 18px 20px 20px; margin-bottom: 22px; box-shadow: var(--shadow);
+  }
+  .lookup-head { display: flex; align-items: flex-start; gap: 14px; }
+  .lookup-head h3 { margin: 0 0 3px; font-size: 18px; }
+  .lookup-sub { margin: 0; color: var(--ink-soft); font-size: 13.5px; max-width: 62ch; }
+  .lookup-close {
+    margin-left: auto; background: none; border: 0; cursor: pointer;
+    font-size: 22px; line-height: 1; color: var(--ink-soft); padding: 0 4px;
+  }
+  .lookup-close:hover { color: var(--salmon); }
+
+  .lookup-search { display: flex; gap: 10px; margin: 16px 0 12px; }
+  .lookup-search input {
+    flex: 1; min-width: 0; font: inherit; font-size: 16px;
+    color: var(--ink); background: var(--rice);
+    border: 1.5px solid var(--line); border-radius: 10px; padding: 11px 14px;
+  }
+  .lookup-search input:focus { outline: none; border-color: var(--tea); }
+  .lookup-search input::-webkit-search-cancel-button { display: none; }
+  .lookup-clear {
+    font: inherit; font-size: 14px; cursor: pointer; background: none;
+    border: 1.5px solid var(--line); border-radius: 10px; padding: 0 16px; color: var(--ink-soft);
+  }
+  .lookup-clear:hover { border-color: var(--salmon); color: var(--salmon); }
+
+  .lookup-count {
+    font-family: 'Space Mono', monospace; font-size: 11.5px; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--ink-soft); margin-bottom: 8px; min-height: 15px;
+  }
+
+  .lookup-results { display: grid; gap: 7px; max-height: 340px; overflow-y: auto; }
+  .lookup-hit {
+    display: grid; grid-template-columns: 1fr auto; gap: 3px 14px;
+    text-align: left; font: inherit; cursor: pointer;
+    background: var(--rice); border: 1px solid var(--line); border-radius: 11px;
+    padding: 10px 14px;
+  }
+  .lookup-hit:hover { border-color: var(--tea); }
+  .lookup-hit .who { grid-column: 1; grid-row: 1; font-weight: 700; font-size: 15.5px; }
+  .lookup-hit .meta { grid-column: 1; grid-row: 2; color: var(--ink-soft); font-size: 13px; }
+  .lookup-hit .amt {
+    grid-column: 2; grid-row: 1 / span 2; align-self: center; text-align: right;
+    font-family: 'Space Mono', monospace; font-weight: 700; color: var(--tea);
+  }
+  .lookup-empty { color: var(--ink-soft); font-size: 14.5px; padding: 10px 0; }
+
+  /* ---- the found order ---- */
+  .lookup-detail { margin-top: 16px; border-top: 1px solid var(--line); padding-top: 16px; }
+  .ld-trail-h {
+    margin: 0 0 2px; font-family: 'Space Mono', monospace; font-size: 10.5px;
+    font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--tea);
+  }
+  .ld-trail-h {
+    margin: 0 0 2px; font-family: 'Space Mono', monospace; font-size: 10.5px;
+    font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--tea);
+  }
+  .lookup-back {
+    font: inherit; font-size: 13px; background: none; border: 0; padding: 0;
+    color: var(--tea); cursor: pointer; text-decoration: underline;
+    text-underline-offset: 3px; margin-bottom: 14px;
+  }
+  .ld-top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; }
+  .ld-top h4 { margin: 0; font-size: 20px; }
+  .ld-handle { color: var(--ink-soft); font-family: 'Space Mono', monospace; font-size: 13.5px; }
+  .ld-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 16px; }
+  .ld-chip {
+    font-family: 'Space Mono', monospace; font-size: 10.5px; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase; border-radius: 999px;
+    padding: 3px 10px; border: 1px solid var(--line); background: var(--rice); color: var(--ink-soft);
+  }
+  .ld-chip.web { border-color: var(--tea); color: var(--tea); }
+  .ld-chip.paid { border-color: var(--matcha); color: var(--matcha); }
+  .ld-chip.unpaid { border-color: var(--salmon); color: var(--salmon); }
+  .ld-chip.declined { background: var(--salmon); border-color: var(--salmon); color: #fff; }
+  .ld-chip.confirmed { background: var(--matcha); border-color: var(--matcha); color: #fff; }
+  .ld-chip.deleted { background: var(--ink-soft); border-color: var(--ink-soft); color: var(--card); }
+
+  .ld-grid { display: grid; gap: 14px 26px; grid-template-columns: 1fr; }
+  @media (min-width: 720px) { .ld-grid { grid-template-columns: 1fr 1fr; } }
+  .ld-block h5 {
+    margin: 0 0 6px; font-family: 'Space Mono', monospace; font-size: 10.5px;
+    font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--tea);
+  }
+  .ld-rows { display: grid; gap: 4px; font-size: 14.5px; }
+  .ld-row { display: flex; gap: 12px; align-items: baseline; }
+  .ld-row .k { color: var(--ink-soft); min-width: 96px; }
+  .ld-row .v { font-weight: 700; word-break: break-word; }
+  .ld-row .v.mono { font-family: 'Space Mono', monospace; font-weight: 700; }
+  .ld-items { display: grid; gap: 3px; font-size: 14.5px; }
+  .ld-item { display: flex; gap: 10px; }
+  .ld-item .q { font-family: 'Space Mono', monospace; color: var(--ink-soft); min-width: 30px; }
+  .ld-item .p { margin-left: auto; font-family: 'Space Mono', monospace; }
+  .ld-total {
+    margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--line);
+    display: flex; font-weight: 700;
+  }
+  .ld-total .p { margin-left: auto; font-family: 'Space Mono', monospace; color: var(--tea); }
+
+  /* ---- edit trail ---- */
+  .ld-trail { margin-top: 20px; border-top: 1px solid var(--line); padding-top: 16px; }
+  .trail { display: grid; gap: 0; margin-top: 10px; }
+  .trail-entry {
+    display: grid; grid-template-columns: 16px 1fr; gap: 14px;
+    padding-bottom: 14px;
+  }
+  /* A rail down the left so several edits read as a sequence. */
+  .trail-entry .pip { position: relative; }
+  .trail-entry .pip::before {
+    content: ""; position: absolute; left: 5px; top: 5px;
+    width: 7px; height: 7px; border-radius: 50%; background: var(--tea);
+  }
+  .trail-entry:not(:last-child) .pip::after {
+    content: ""; position: absolute; left: 8px; top: 14px; bottom: -6px;
+    width: 1px; background: var(--line);
+  }
+  .trail-when {
+    font-family: 'Space Mono', monospace; font-size: 12px; color: var(--ink-soft);
+  }
+  .trail-who {
+    font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase; border-radius: 999px;
+    padding: 2px 8px; margin-left: 8px;
+  }
+  .trail-who.customer { background: var(--tea); color: #fff; }
+  .trail-who.staff { background: var(--nori); color: var(--rice); }
+  .trail-who.unknown { background: var(--rice-2); color: var(--ink-soft); }
+  .trail-change { font-size: 14.5px; margin-top: 4px; }
+  .trail-change .f { font-weight: 700; }
+  .trail-from { color: var(--ink-soft); text-decoration: line-through; }
+  .trail-arrow { color: var(--ink-soft); margin: 0 5px; }
+  .trail-to { font-weight: 700; }
+  .trail-none { color: var(--ink-soft); font-size: 14px; }
+  .ld-none { color: var(--ink-soft); font-weight: 400; }
+
+  .ld-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+  .ld-btn {
+    font: inherit; font-size: 14.5px; font-weight: 700; cursor: pointer;
+    background: var(--tea); color: var(--tea-ink);
+    border: 0; border-radius: 999px; padding: 10px 20px;
+  }
+  .ld-btn.sec { background: transparent; color: var(--ink); border: 1.5px solid var(--line); }
+  .ld-btn.sec:hover { border-color: var(--tea); color: var(--tea); }
+  .ld-btn:hover { filter: brightness(1.07); }
+
+  /* Flash the card Lookup sent you to, so it is obvious which one it meant. */
+  @keyframes jumpFlash {
+    0%, 100% { box-shadow: var(--shadow); }
+    30%      { box-shadow: 0 0 0 4px var(--tea); }
+  }
+  .ticket.is-jumped { animation: jumpFlash 1.5s ease-in-out 2; }
+  @media (prefers-reduced-motion: reduce) { .ticket.is-jumped { animation: none; outline: 3px solid var(--tea); } }
+
+
   /* ---- History view ---- */
   .hist-filterbar {
     display: flex;
@@ -2239,6 +2409,36 @@
   </header>
 
   <div class="statbar" id="statbar"></div>
+
+  <!-- Order lookup. Sits directly under the Next pickup day card because
+       that is where you are already looking when the phone rings. -->
+  <div class="lookup-bar">
+    <button type="button" id="lookupToggle" class="lookup-toggle" aria-expanded="false"
+            aria-controls="lookupPanel">
+      <span aria-hidden="true">&#128270;</span><span data-i18n="lookup_btn">Look up an order</span>
+    </button>
+  </div>
+
+  <section class="lookup-panel" id="lookupPanel" aria-label="Order lookup" hidden>
+    <div class="lookup-head">
+      <div>
+        <h3 data-i18n="lookup_title">Look up an order</h3>
+        <p class="lookup-sub" data-i18n="lookup_sub">Name, Instagram handle, phone, email or
+          order reference &mdash; or any mix of them. Everything you type has to match.</p>
+      </div>
+      <button type="button" id="lookupClose" class="lookup-close" aria-label="Close">&times;</button>
+    </div>
+
+    <div class="lookup-search">
+      <input type="search" id="lookupInput" autocomplete="off" spellcheck="false"
+             placeholder="maya &middot; @mayareyes &middot; 555 0134 &middot; maya@example.com &middot; T0EGHQ">
+      <button type="button" id="lookupClear" class="lookup-clear" data-i18n="lookup_clear">Clear</button>
+    </div>
+
+    <div class="lookup-count" id="lookupCount"></div>
+    <div class="lookup-results" id="lookupResults"></div>
+    <div class="lookup-detail" id="lookupDetail" hidden></div>
+  </section>
 
   <nav class="tabs" role="tablist" aria-label="View">
     <button role="tab" id="tab-orders" aria-selected="true" aria-controls="view-orders" data-i18n="tab_orders">Orders</button>
@@ -5146,6 +5346,52 @@
       stat_total_value: "Total value",
       stat_weekly_portions: "Weekly portions",
       stat_next_pickup: "Next pickup day",
+      lookup_btn: "Look up an order",
+      lookup_title: "Look up an order",
+      lookup_sub: "Name, Instagram handle, phone, email or order reference — or any mix of them. Everything you type has to match.",
+      lookup_clear: "Clear",
+      lookup_start: "Type a name, handle, phone, email or reference to start.",
+      lookup_one_found: "1 order found",
+      lookup_n_found: "orders found",
+      lookup_none: "Nothing matched all of that. Try one detail on its own — a first name, or just the digits of their phone number.",
+      lookup_mark_deleted: "deleted",
+      lookup_mark_picked: "picked up",
+      lookup_mark_declined: "declined",
+      lookup_mark_confirmed: "confirmed",
+      lookup_empty_val: "(empty)",
+      lookup_trail_dm: "DM and hand-logged orders have no edit trail — they only change when someone retypes them here.",
+      lookup_trail_none: "No edits recorded. This order is exactly as it was placed.",
+      lookup_by_customer: "customer",
+      lookup_by_staff: "one of us",
+      lookup_by_unknown: "unknown",
+      lookup_back: "Back to results",
+      lookup_h_order: "Order",
+      lookup_h_pickup: "Pickup",
+      lookup_h_customer: "Customer",
+      lookup_h_record: "Record",
+      lookup_h_kitchen: "Kitchen note",
+      lookup_h_trail: "Edit history",
+      lookup_total: "Total",
+      lookup_k_day: "Day",
+      lookup_k_time: "Time",
+      lookup_k_payment: "Payment",
+      lookup_k_name: "Name",
+      lookup_k_ig: "Instagram",
+      lookup_k_email: "Email",
+      lookup_k_phone: "Phone",
+      lookup_k_contact: "Contact",
+      lookup_no_contact: "not captured on DM orders",
+      lookup_k_ref: "Reference",
+      lookup_k_placed: "Placed",
+      lookup_k_source: "Source",
+      lookup_k_reason: "Your reason",
+      lookup_jump: "Go to this order on the board",
+      lookup_copy: "Copy their edit link",
+      lookup_copied: "Link copied",
+      lookup_chip_confirmed: "Confirmed by email",
+      lookup_chip_declined: "Declined by email",
+      lookup_chip_picked: "Picked up",
+      lookup_chip_deleted: "Deleted from the board",
       window_thisweek: "This week",
       window_week: "Last week",
       window_month: "Last month",
@@ -5308,6 +5554,52 @@
       stat_total_value: "Tổng giá trị",
       stat_weekly_portions: "Phần ăn trong tuần",
       stat_next_pickup: "Ngày lấy hàng kế tiếp",
+      lookup_btn: "Tra cứu đơn hàng",
+      lookup_title: "Tra cứu đơn hàng",
+      lookup_sub: "Tên, Instagram, số điện thoại, email hay mã đơn — hoặc kết hợp. Mọi thứ bạn gõ đều phải khớp.",
+      lookup_clear: "Xóa",
+      lookup_start: "Gõ tên, Instagram, số điện thoại, email hay mã đơn để bắt đầu.",
+      lookup_one_found: "Tìm thấy 1 đơn",
+      lookup_n_found: "đơn được tìm thấy",
+      lookup_none: "Không có đơn nào khớp tất cả. Hãy thử một chi tiết thôi — tên, hoặc chỉ các số trong điện thoại của họ.",
+      lookup_mark_deleted: "đã xoá",
+      lookup_mark_picked: "đã lấy hàng",
+      lookup_mark_declined: "đã từ chối",
+      lookup_mark_confirmed: "đã xác nhận",
+      lookup_empty_val: "(trống)",
+      lookup_trail_dm: "Đơn từ tin nhắn hoặc nhập tay không có lịch sử sửa — chúng chỉ đổi khi có ngưỡi nhập lại ở đây.",
+      lookup_trail_none: "Không có lần sửa nào được ghi. Đơn này đúng như lúc đặt.",
+      lookup_by_customer: "khách",
+      lookup_by_staff: "ngưỡi của mình",
+      lookup_by_unknown: "không rõ",
+      lookup_back: "Quay lại kết quả",
+      lookup_h_order: "Đơn hàng",
+      lookup_h_pickup: "Lấy hàng",
+      lookup_h_customer: "Khách hàng",
+      lookup_h_record: "Hồ sơ",
+      lookup_h_kitchen: "Ghi chú bếp",
+      lookup_h_trail: "Lịch sử sửa",
+      lookup_total: "Tổng",
+      lookup_k_day: "Ngày",
+      lookup_k_time: "Giờ",
+      lookup_k_payment: "Thanh toán",
+      lookup_k_name: "Tên",
+      lookup_k_ig: "Instagram",
+      lookup_k_email: "Email",
+      lookup_k_phone: "Điện thoại",
+      lookup_k_contact: "Liên lạc",
+      lookup_no_contact: "không lưu với đơn từ tin nhắn",
+      lookup_k_ref: "Mã đơn",
+      lookup_k_placed: "Đặt lúc",
+      lookup_k_source: "Nguồn",
+      lookup_k_reason: "Lý do của bạn",
+      lookup_jump: "Mở đơn này trên bảng",
+      lookup_copy: "Chép liên kết sửa đơn",
+      lookup_copied: "Đã chép",
+      lookup_chip_confirmed: "Đã xác nhận qua email",
+      lookup_chip_declined: "Đã từ chối qua email",
+      lookup_chip_picked: "Đã lấy hàng",
+      lookup_chip_deleted: "Đã xoá khỏi bảng",
       window_thisweek: "Tuần này",
       window_week: "Tuần trước",
       window_month: "Tháng trước",
@@ -6384,7 +6676,7 @@
     const expOpen = openExpPanels.has(orderIdentity(o));
     const histOpen = openHistoryBadges.has(orderIdentity(o));
     return `
-      <article class="ticket ${gcls || ""} ${completed ? "is-complete" : ""} ${flag ? "is-flagged" : ""} ${deletedMode ? "is-deleted" : ""}">
+      <article class="ticket ${gcls || ""} ${completed ? "is-complete" : ""} ${flag ? "is-flagged" : ""} ${deletedMode ? "is-deleted" : ""}" data-oid="${escapeHtml(orderIdentity(o))}">
         ${!deletedMode ? `
           <button type="button" class="delete-btn" data-idx="${idx}" title="${t("delete_btn_title")}" aria-label="${t("delete_btn_title")}">×</button>
         ` : ""}
@@ -7799,6 +8091,7 @@
   function renderAll() {
     applyStaticI18n();
     renderStats();
+    if (window.riceShineLookupRefresh) window.riceShineLookupRefresh();
     renderOrders();
     renderPrep();
     renderPrepByTime();
@@ -7806,6 +8099,309 @@
     renderExperienceLog();
     renderPaletteList();
   }
+
+
+  // ---- Order lookup -------------------------------------------------------
+  // Someone rings up unhappy and all you have is what they can tell you: a
+  // first name, a handle, the last digits of a phone number, the reference
+  // off their email. So the search takes any of those, in any combination,
+  // and requires every word typed to match somewhere in the order — that is
+  // what makes "maya 0134" narrow to one ticket instead of widening to two.
+  //
+  // It searches ORDERS, which is every order the board knows: the batch baked
+  // into this file, the historical set above it, and every live website order
+  // merged in from Firestore. Deleted orders are included on purpose — a
+  // complaint about an order you deleted is exactly when you need to find it.
+  (function () {
+    const toggleBtn = document.getElementById("lookupToggle");
+    const panel = document.getElementById("lookupPanel");
+    const closeBtn = document.getElementById("lookupClose");
+    const input = document.getElementById("lookupInput");
+    const clearBtn = document.getElementById("lookupClear");
+    const countEl = document.getElementById("lookupCount");
+    const resultsEl = document.getElementById("lookupResults");
+    const detailEl = document.getElementById("lookupDetail");
+    if (!toggleBtn || !panel) return;
+
+    // Phone numbers get read out and written down every which way, so both
+    // sides collapse to digits before comparing: "555 0134", "(555) 0134"
+    // and "5550134" all have to find the same order.
+    const digits = (v) => String(v || "").replace(/\D+/g, "");
+
+    function haystack(o) {
+      const items = (o.items || []).map((i) => i.qty + "x " + i.name).join(" ");
+      return [
+        o.name, o.handle, o.email, o.contact, digits(o.contact), o.ref, o.webId,
+        o.pickupDate, o.pickupTime, o.orderDate, o.notes, items,
+        o.status, o.statusNote, o.payMethod,
+      ].filter(Boolean).join("  ").toLowerCase();
+    }
+
+    function search(q) {
+      const words = q.trim().toLowerCase().split(/\s+/).filter(Boolean);
+      if (!words.length) return [];
+      return ORDERS.filter((o) => {
+        const hay = haystack(o);
+        // A word made only of digits also matches the digits-only form of
+        // the order, so "5550134" finds "555 0134".
+        return words.every((w) => {
+          if (hay.includes(w)) return true;
+          const d = digits(w);
+          return d.length >= 3 && digits(hay).includes(d);
+        });
+      }).sort((a, b) => String(b.pickupDate).localeCompare(String(a.pickupDate)));
+    }
+
+    const money = (n) => fmtMoney(Number(n) || 0);
+
+    function tsText(v) {
+      if (!v) return "";
+      const d = v && v.toDate ? v.toDate()
+        : (v && v.__ts ? new Date(v.__ts) : new Date(v));
+      return isNaN(d.getTime()) ? "" : d.toLocaleString("en-US", {
+        month: "short", day: "numeric", year: "numeric",
+        hour: "numeric", minute: "2-digit",
+      });
+    }
+
+    function sourceOf(o) {
+      return o.webId ? "Website" : (o.source === "manual" ? "Logged by hand" : "Instagram DM");
+    }
+
+    function renderResults(list, q) {
+      detailEl.hidden = true;
+      resultsEl.hidden = false;
+      if (!q.trim()) {
+        countEl.textContent = "";
+        resultsEl.innerHTML = '<div class="lookup-empty">' + t("lookup_start") + "</div>";
+        return;
+      }
+      countEl.textContent = list.length === 1
+        ? t("lookup_one_found") : list.length + " " + t("lookup_n_found");
+      if (!list.length) {
+        resultsEl.innerHTML = '<div class="lookup-empty">' + t("lookup_none") + "</div>";
+        return;
+      }
+      resultsEl.innerHTML = list.slice(0, 40).map((o, i) => {
+        const marks = [
+          isDeleted(o) ? t("lookup_mark_deleted") : "",
+          isCompleted(o) ? t("lookup_mark_picked") : "",
+          o.status === "declined" ? t("lookup_mark_declined") : "",
+          o.status === "confirmed" ? t("lookup_mark_confirmed") : "",
+        ].filter(Boolean).join(" · ");
+        return '<button type="button" class="lookup-hit" data-i="' + i + '">'
+          + '<span class="who">' + escapeHtml(o.name)
+          + ' <span class="ld-handle">@' + escapeHtml(o.handle) + "</span></span>"
+          + '<span class="amt">' + money(o.total) + "</span>"
+          + '<span class="meta">' + escapeHtml(fmtShortDate(o.pickupDate))
+          + " · " + escapeHtml(o.pickupTime || "") + " · " + sourceOf(o)
+          + (marks ? " · " + marks : "") + "</span></button>";
+      }).join("");
+      resultsEl.querySelectorAll(".lookup-hit").forEach((b) => {
+        b.addEventListener("click", () => renderDetail(list[Number(b.dataset.i)]));
+      });
+    }
+
+    const FIELD_LABELS = {
+      items: "Items", total: "Total", pickupDate: "Pickup day",
+      pickupTime: "Pickup time", notes: "Notes", status: "Accept / decline",
+      statusNote: "Your reason", paid: "Paid",
+    };
+    const fieldLabel = (f) => FIELD_LABELS[f] || f;
+
+    function valText(f, v) {
+      if (v === null || v === undefined || v === "") return t("lookup_empty_val");
+      if (f === "total") return money(v);
+      if (f === "paid") return v ? "paid" : "unpaid";
+      if (f === "pickupDate") return fmtShortDate(v);
+      return String(v);
+    }
+
+    function renderTrail(o) {
+      // The trail is recorded server-side the moment an order changes.
+      // Nothing here is reconstructed: an order with no entries either never
+      // changed, or changed before the recorder existed — and saying which
+      // of those it is matters more than filling the space.
+      if (!o.webId) {
+        return '<p class="trail-none">' + t("lookup_trail_dm") + "</p>";
+      }
+      const h = o.editHistory || [];
+      if (!h.length) {
+        return '<p class="trail-none">' + t("lookup_trail_none") + "</p>";
+      }
+      return '<div class="trail">' + h.slice().reverse().map((e) => {
+        const who = (e.by === "customer" || e.by === "staff") ? e.by : "unknown";
+        const label = who === "customer" ? t("lookup_by_customer")
+          : who === "staff" ? t("lookup_by_staff") : t("lookup_by_unknown");
+        const changes = (e.changes || []).map((c) =>
+          '<div class="trail-change"><span class="f">' + escapeHtml(fieldLabel(c.field))
+          + '</span> <span class="trail-from">' + escapeHtml(valText(c.field, c.from))
+          + '</span><span class="trail-arrow">→</span><span class="trail-to">'
+          + escapeHtml(valText(c.field, c.to)) + "</span></div>").join("");
+        return '<div class="trail-entry"><span class="pip" aria-hidden="true"></span><div>'
+          + '<span class="trail-when">' + escapeHtml(tsText(e.at)) + "</span>"
+          + '<span class="trail-who ' + who + '">' + label + "</span>"
+          + changes + "</div></div>";
+      }).join("") + "</div>";
+    }
+
+    function rowsHtml(arr) {
+      return arr.filter(Boolean).map((r) =>
+        '<div class="ld-row"><span class="k">' + r[0] + '</span>'
+        + '<span class="v' + (r[2] ? " mono" : "") + '">' + r[1] + "</span></div>"
+      ).join("");
+    }
+
+    function renderDetail(o) {
+      resultsEl.hidden = true;
+      detailEl.hidden = false;
+      countEl.textContent = "";
+
+      const chips = [
+        '<span class="ld-chip ' + (o.webId ? "web" : "") + '">' + sourceOf(o) + "</span>",
+        '<span class="ld-chip ' + (o.paid ? "paid" : "unpaid") + '">'
+          + (o.paid ? t("badge_paid") : t("badge_unpaid")) + "</span>",
+        o.status === "confirmed" ? '<span class="ld-chip confirmed">' + t("lookup_chip_confirmed") + "</span>" : "",
+        o.status === "declined" ? '<span class="ld-chip declined">' + t("lookup_chip_declined") + "</span>" : "",
+        isCompleted(o) ? '<span class="ld-chip">' + t("lookup_chip_picked") + "</span>" : "",
+        isDeleted(o) ? '<span class="ld-chip deleted">' + t("lookup_chip_deleted") + "</span>" : "",
+      ].filter(Boolean).join("");
+
+      const itemsHtml = (o.items || []).map((i) =>
+        '<div class="ld-item"><span class="q">' + i.qty + "×</span><span>"
+        + escapeHtml(i.name) + (i.comp ? " (comp)" : "") + "</span>"
+        + '<span class="p">' + (i.comp ? "comp" : money((i.price || 0) * (i.qty || 0)))
+        + "</span></div>").join("");
+
+      const noContact = !o.email && !o.contact && !o.webId;
+
+      detailEl.innerHTML =
+        '<button type="button" class="lookup-back" id="lookupBack">← '
+          + t("lookup_back") + "</button>"
+        + '<div class="ld-top"><h4>' + escapeHtml(o.name) + "</h4>"
+        + '<span class="ld-handle">@' + escapeHtml(o.handle) + "</span></div>"
+        + '<div class="ld-chips">' + chips + "</div>"
+
+        + '<div class="ld-grid">'
+        + '<div class="ld-block"><h5>' + t("lookup_h_order") + "</h5>"
+        + '<div class="ld-items">' + itemsHtml
+        + '<div class="ld-total"><span>' + t("lookup_total") + '</span><span class="p">'
+        + money(o.total) + "</span></div></div></div>"
+
+        + '<div class="ld-block"><h5>' + t("lookup_h_pickup") + "</h5>"
+        + '<div class="ld-rows">' + rowsHtml([
+            [t("lookup_k_day"), escapeHtml(fmtShortDate(o.pickupDate)), true],
+            [t("lookup_k_time"), escapeHtml(o.pickupTime || "—"), true],
+            [t("lookup_k_payment"), escapeHtml(o.payMethod || "—")],
+          ]) + "</div></div>"
+
+        + '<div class="ld-block"><h5>' + t("lookup_h_customer") + "</h5>"
+        + '<div class="ld-rows">' + rowsHtml([
+            [t("lookup_k_name"), escapeHtml(o.name)],
+            [t("lookup_k_ig"), "@" + escapeHtml(o.handle), true],
+            o.email ? [t("lookup_k_email"), escapeHtml(o.email), true] : null,
+            o.contact ? [t("lookup_k_phone"), escapeHtml(o.contact), true] : null,
+            noContact ? [t("lookup_k_contact"), '<span class="ld-none">'
+              + t("lookup_no_contact") + "</span>"] : null,
+          ]) + "</div></div>"
+
+        + '<div class="ld-block"><h5>' + t("lookup_h_record") + "</h5>"
+        + '<div class="ld-rows">' + rowsHtml([
+            o.ref ? [t("lookup_k_ref"), "#" + escapeHtml(o.ref), true] : null,
+            [t("lookup_k_placed"), escapeHtml(o.submittedAt ? tsText(o.submittedAt)
+              : [o.orderDate, o.orderTime].filter(Boolean).join(" ") || "—"), true],
+            [t("lookup_k_source"), sourceOf(o)],
+            o.statusNote ? [t("lookup_k_reason"), escapeHtml(o.statusNote)] : null,
+          ]) + "</div></div>"
+        + "</div>"
+
+        + (o.notes ? '<div class="ld-block" style="margin-top:16px"><h5>'
+            + t("lookup_h_kitchen") + '</h5><div style="font-size:14.5px">'
+            + escapeHtml(o.notes) + "</div></div>" : "")
+
+        + '<div class="ld-trail"><h5 class="ld-trail-h">' + t("lookup_h_trail") + "</h5>"
+        + renderTrail(o) + "</div>"
+
+        + '<div class="ld-actions">'
+        + '<button type="button" class="ld-btn" id="ldJump">' + t("lookup_jump") + "</button>"
+        + (o.webId ? '<button type="button" class="ld-btn sec" id="ldCopy">'
+            + t("lookup_copy") + "</button>" : "")
+        + "</div>";
+
+      detailEl.querySelector("#lookupBack").addEventListener("click", () => {
+        renderResults(search(input.value), input.value);
+      });
+      detailEl.querySelector("#ldJump").addEventListener("click", () => jumpTo(o));
+      const copyBtn = detailEl.querySelector("#ldCopy");
+      if (copyBtn) {
+        copyBtn.addEventListener("click", () => {
+          const link = editLinkFor(o.webId);
+          navigator.clipboard.writeText(link).then(() => {
+            copyBtn.textContent = t("lookup_copied");
+            setTimeout(() => { copyBtn.textContent = t("lookup_copy"); }, 1800);
+          }).catch(() => { copyBtn.textContent = link; });
+        });
+      }
+      detailEl.scrollIntoView({ block: "nearest" });
+    }
+
+    // Switching to the right tab is not enough: an order can be sitting in
+    // Completed or Deleted, and landing on Orders with the wrong subtab
+    // showing looks exactly like the order has gone missing.
+    function jumpTo(o) {
+      const key = orderIdentity(o);
+      document.getElementById("tab-orders").click();
+      document.getElementById(
+        isDeleted(o) ? "subtab-deleted"
+          : isCompleted(o) ? "subtab-completed" : "subtab-active"
+      ).click();
+      requestAnimationFrame(() => {
+        const card = document.querySelector('.ticket[data-oid="' + CSS.escape(key) + '"]');
+        if (!card) return;
+        card.scrollIntoView({ behavior: "smooth", block: "center" });
+        card.classList.remove("is-jumped");
+        void card.offsetWidth;
+        card.classList.add("is-jumped");
+        setTimeout(() => card.classList.remove("is-jumped"), 3200);
+      });
+    }
+
+    function openPanel(open) {
+      toggleBtn.setAttribute("aria-expanded", String(open));
+      panel.hidden = !open;
+      if (open) { renderResults([], ""); input.focus(); }
+    }
+    toggleBtn.addEventListener("click", () => openPanel(panel.hidden));
+    closeBtn.addEventListener("click", () => openPanel(false));
+    clearBtn.addEventListener("click", () => {
+      input.value = "";
+      renderResults([], "");
+      input.focus();
+    });
+
+    let debounce = null;
+    input.addEventListener("input", () => {
+      clearTimeout(debounce);
+      debounce = setTimeout(() => renderResults(search(input.value), input.value), 120);
+    });
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") { input.value = ""; renderResults([], ""); }
+    });
+
+    // Re-render whatever is on screen when the order data or the language
+    // changes underneath it, so a live website edit shows up in an open
+    // panel instead of going stale.
+    window.riceShineLookupRefresh = function () {
+      if (panel.hidden) return;
+      if (!detailEl.hidden) {
+        const shown = detailEl.querySelector(".ld-top h4");
+        const name = shown ? shown.textContent : "";
+        const again = ORDERS.find((x) => x.name === name);
+        if (again) { renderDetail(again); return; }
+      }
+      renderResults(search(input.value), input.value);
+    };
+  })();
 
   // ---- Website orders → the board ----
   // Orders placed on the public order form arrive here from the sync module
@@ -7835,6 +8431,14 @@
       .join(" · ");
     return {
       webId: d.id,
+      // Kept as real fields, not only folded into the notes line above, so
+      // Lookup can match on an email or a phone number a customer reads out
+      // and show the edit trail the Cloud Function records.
+      ref,
+      email: d.email || "",
+      contact: d.contact || "",
+      submittedAt: d.submittedAt || null,
+      editHistory: Array.isArray(d.editHistory) ? d.editHistory : [],
       name: d.name || "(no name given)",
       handle: d.handle || d.name || "website",
       items: items,
