@@ -14,7 +14,7 @@
     --ink: #251a38;
     --ink-soft: #6f6280;
     --line: #e6dcef;
-    --tea: #7a58ad;
+    --tea: #7a58ad; --pulse: rgba(122, 88, 173, .55);
     --tea-ink: #ffffff;
     --salmon: #d97a63;
     --salmon-soft: #f6e3dc;
@@ -51,7 +51,7 @@
       --ink: #f1e9da;
       --ink-soft: #ada0be;
       --line: #3b3049;
-      --tea: #c9a9ee;
+      --tea: #c9a9ee; --pulse: rgba(201, 169, 238, .5);
       --tea-ink: #241635;
       --salmon: #eda08e;
       --salmon-soft: #3a2a27;
@@ -2184,13 +2184,20 @@
   .ld-btn.sec:hover { border-color: var(--tea); color: var(--tea); }
   .ld-btn:hover { filter: brightness(1.07); }
 
-  /* Flash the card Lookup sent you to, so it is obvious which one it meant. */
-  @keyframes jumpFlash {
-    0%, 100% { box-shadow: var(--shadow); }
-    30%      { box-shadow: 0 0 0 4px var(--tea); }
+  /* The card Lookup sent you to keeps a slow glow until you touch it.
+     A flash that times out is easy to miss on a long board — you scroll,
+     look away to the phone, look back, and the cue is gone. Holding it until
+     the card is actually tapped means the answer to "which one did it mean"
+     is still on screen whenever you get back to it. */
+  @keyframes jumpPulse {
+    0%, 100% { box-shadow: var(--shadow), 0 0 0 0 var(--pulse); }
+    50%      { box-shadow: var(--shadow), 0 0 16px 4px var(--pulse); }
   }
-  .ticket.is-jumped { animation: jumpFlash 1.5s ease-in-out 2; }
-  @media (prefers-reduced-motion: reduce) { .ticket.is-jumped { animation: none; outline: 3px solid var(--tea); } }
+  .ticket.is-jumped { animation: jumpPulse 2.6s ease-in-out infinite; }
+  /* Without motion, the same job is done by a ring that simply stays put. */
+  @media (prefers-reduced-motion: reduce) {
+    .ticket.is-jumped { animation: none; outline: 3px solid var(--tea); outline-offset: 2px; }
+  }
 
 
   /* ---- History view ---- */
@@ -8091,13 +8098,16 @@
   function renderAll() {
     applyStaticI18n();
     renderStats();
-    if (window.riceShineLookupRefresh) window.riceShineLookupRefresh();
     renderOrders();
     renderPrep();
     renderPrepByTime();
     renderHistory();
     renderExperienceLog();
     renderPaletteList();
+    // Last, not first: renderOrders rebuilds every card, so anything that
+    // re-decorates a card — the Lookup glow — has to run after the cards it
+    // decorates exist.
+    if (window.riceShineLookupRefresh) window.riceShineLookupRefresh();
   }
 
 
@@ -8345,24 +8355,55 @@
       detailEl.scrollIntoView({ block: "nearest" });
     }
 
+    // The card Lookup sends you to keeps glowing until you touch it.
+    //
+    // Held rather than timed out because the board is long and the phone is
+    // in your other hand: a cue that expires after a few seconds is gone by
+    // the time you look back. Tapping the card is the signal that you have
+    // found it, so that is what ends it.
+    let pulseKey = null;
+
+    function clearPulse() {
+      pulseKey = null;
+      document.querySelectorAll(".ticket.is-jumped")
+        .forEach((c) => c.classList.remove("is-jumped"));
+    }
+
+    // Re-applied after every board render, because renderOrders rebuilds the
+    // cards from scratch — without this, a website order arriving mid-search
+    // would silently take the glow away.
+    function applyPulse() {
+      if (!pulseKey) return;
+      const card = document.querySelector('.ticket[data-oid="' + CSS.escape(pulseKey) + '"]');
+      document.querySelectorAll(".ticket.is-jumped").forEach((c) => {
+        if (c !== card) c.classList.remove("is-jumped");
+      });
+      if (card) card.classList.add("is-jumped");
+    }
+
+    // Any press inside the card counts, including on its own controls — you
+    // have plainly found it either way. pointerdown rather than click so a
+    // tap that turns into a scroll still stops the glow.
+    document.addEventListener("pointerdown", (e) => {
+      if (!pulseKey) return;
+      const card = e.target.closest(".ticket.is-jumped");
+      if (card) clearPulse();
+    });
+
     // Switching to the right tab is not enough: an order can be sitting in
     // Completed or Deleted, and landing on Orders with the wrong subtab
     // showing looks exactly like the order has gone missing.
     function jumpTo(o) {
-      const key = orderIdentity(o);
+      pulseKey = orderIdentity(o);
       document.getElementById("tab-orders").click();
       document.getElementById(
         isDeleted(o) ? "subtab-deleted"
           : isCompleted(o) ? "subtab-completed" : "subtab-active"
       ).click();
       requestAnimationFrame(() => {
-        const card = document.querySelector('.ticket[data-oid="' + CSS.escape(key) + '"]');
-        if (!card) return;
-        card.scrollIntoView({ behavior: "smooth", block: "center" });
-        card.classList.remove("is-jumped");
-        void card.offsetWidth;
-        card.classList.add("is-jumped");
-        setTimeout(() => card.classList.remove("is-jumped"), 3200);
+        applyPulse();
+        const card = document.querySelector('.ticket[data-oid="' + CSS.escape(pulseKey) + '"]');
+        if (card) card.scrollIntoView({ behavior: "smooth", block: "center" });
       });
     }
 
@@ -8392,6 +8433,7 @@
     // changes underneath it, so a live website edit shows up in an open
     // panel instead of going stale.
     window.riceShineLookupRefresh = function () {
+      applyPulse();
       if (panel.hidden) return;
       if (!detailEl.hidden) {
         const shown = detailEl.querySelector(".ld-top h4");
