@@ -8925,12 +8925,29 @@
   // the customer tapping "Place order", with no refresh and no DM reading.
   let unsubscribeOrders = null;
 
+  // Orders placed while building and testing the website form. They are real
+  // documents in Firestore, so soft-deleting them on the board only moved
+  // them to the Deleted tab — they still turned up there and in Lookup.
+  // Listed by document id rather than by matching "test" in the name, so a
+  // real customer whose name happens to contain the word can never vanish.
+  const SUPPRESSED_ORDERS = new Set([
+    "n7JzyVjGOZGTkBYKsMOd", // tony test
+    "CcUAwAeThl2fQRcb1o96", // APPCHECK TEST - delete me
+    "S1YwOPYdCRdrMrU5h7tF", // CAPACITY TEST - delete me
+    "9frGyCraCjqETCKoJ2tE", // EMAIL TEST - delete me
+    "tgZbK4CmxgUU9dw5qKmC", // RULE CHECK - delete me
+    "FA0xupK5p8yWMCy0tsRa", // END TO END TEST - delete me
+  ]);
+
   function attachOnlineOrdersListener() {
     if (unsubscribeOrders) return;
     const ordersQuery = query(collection(db, "onlineOrders"), orderBy("submittedAt", "asc"));
     unsubscribeOrders = onSnapshot(ordersQuery, (snap) => {
       const orders = [];
-      snap.forEach((d) => orders.push(Object.assign({ id: d.id }, d.data())));
+      snap.forEach((d) => {
+        if (SUPPRESSED_ORDERS.has(d.id)) return;
+        orders.push(Object.assign({ id: d.id }, d.data()));
+      });
       document.dispatchEvent(new CustomEvent("riceshine-online-orders", {
         detail: { orders },
       }));
