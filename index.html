@@ -8500,6 +8500,14 @@
 
       const noContact = !o.email && !o.contact && !o.webId;
 
+      // Stamped on the panel so a later silent refresh (riceShineLookupRefresh,
+      // fired by every live sync update) can find this exact order again —
+      // matching by name alone was wrong whenever a customer had more than
+      // one order on file (e.g. three "Coconut milk" orders): it always
+      // grabbed the first same-named order in ORDERS, so the detail view
+      // could flip to a different date than the one just clicked.
+      detailEl.dataset.oid = orderIdentity(o);
+
       detailEl.innerHTML =
         '<button type="button" class="lookup-back" id="lookupBack">← '
           + t("lookup_back") + "</button>"
@@ -8677,9 +8685,8 @@
       applyPulse();
       if (panel.hidden) return;
       if (!detailEl.hidden) {
-        const shown = detailEl.querySelector(".ld-top h4");
-        const name = shown ? shown.textContent : "";
-        const again = ORDERS.find((x) => x.name === name);
+        const oid = detailEl.dataset.oid;
+        const again = oid ? ORDERS.find((x) => orderIdentity(x) === oid) : null;
         if (again) { renderDetail(again, { scroll: false }); return; }
       }
       renderResults(search(input.value), input.value);
