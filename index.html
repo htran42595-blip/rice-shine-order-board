@@ -8476,7 +8476,8 @@
       ).join("");
     }
 
-    function renderDetail(o) {
+    function renderDetail(o, opts) {
+      const scrollToPanel = !opts || opts.scroll !== false;
       resultsEl.hidden = true;
       detailEl.hidden = false;
       countEl.textContent = "";
@@ -8566,7 +8567,14 @@
           }).catch(() => { copyBtn.textContent = link; });
         });
       }
-      detailEl.scrollIntoView({ block: "nearest" });
+      // Only when the detail view is being freshly opened (a search-result
+      // tap, or "back" then re-selecting) — not when this same order's
+      // detail is silently being re-rendered in place (riceShineLookupRefresh,
+      // fired by every live sync update). Without this guard, a Firestore
+      // snapshot landing a moment after "Go to this order on the board" was
+      // clicked would redraw this panel and yank the page back up to it,
+      // undoing the jump the customer-service person just made.
+      if (scrollToPanel) detailEl.scrollIntoView({ block: "nearest" });
     }
 
     // The card Lookup sends you to keeps glowing until you touch it.
@@ -8672,7 +8680,7 @@
         const shown = detailEl.querySelector(".ld-top h4");
         const name = shown ? shown.textContent : "";
         const again = ORDERS.find((x) => x.name === name);
-        if (again) { renderDetail(again); return; }
+        if (again) { renderDetail(again, { scroll: false }); return; }
       }
       renderResults(search(input.value), input.value);
     };
