@@ -7272,8 +7272,12 @@
     const groups = computeTimeGroups(sorted);
     const visible = sorted.filter(o => !isDeleted(o));
     const active = visible.filter(o => !isCompleted(o));
-    const completed = visible.filter(o => isCompleted(o));
-    const deleted = sorted.filter(o => isDeleted(o));
+    // Active stays soonest-pickup-first (that's what "what do I prep next"
+    // needs), but Completed and Deleted are look-back lists — reversed to
+    // most-recent-pickup-first so the order you just picked up or deleted
+    // shows up at the top instead of buried under weeks of older ones.
+    const completed = visible.filter(o => isCompleted(o)).reverse();
+    const deleted = sorted.filter(o => isDeleted(o)).reverse();
 
     const gridActive = document.getElementById("orderGridActive");
     const gridCompleted = document.getElementById("orderGridCompleted");
