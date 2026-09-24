@@ -6184,6 +6184,7 @@
       badge_unpaid: "Unpaid",
       label_kitchen_note: "Kitchen note",
       label_payment: "Payment:",
+      label_reference_code: "Reference code:",
       comp_label: "comp",
       toggle_completed: "Completed",
       toggle_mark_complete: "Mark complete",
@@ -6392,6 +6393,7 @@
       badge_unpaid: "Chưa trả",
       label_kitchen_note: "Ghi chú bếp",
       label_payment: "Thanh toán:",
+      label_reference_code: "Mã tham chiếu:",
       comp_label: "Ưu đãi",
       toggle_completed: "Đã hoàn tất",
       toggle_mark_complete: "Đánh dấu hoàn tất",
@@ -7330,6 +7332,11 @@
     `;
   }
 
+  function renderReferenceCode(ref) {
+    if (!ref) return "";
+    return `<div class="pay-row"><span>${t("label_reference_code")}</span> <b style="color:var(--ink)">${escapeHtml(ref)}</b></div>`;
+  }
+
   // ---- Stat bar ----
   // Based on active (not-yet-completed) orders only, so the numbers always
   // reflect what's actually still outstanding.
@@ -7462,7 +7469,7 @@
           <div class="total">${fmtMoney(o.total)}</div>
         </div>
         ${gcls ? `<div class="group-tag ${gcls}">${strGroupTag(gcount - 1)}</div>` : ""}
-        ${renderPayMethod(o.payMethod)}
+        ${o.webId ? renderReferenceCode(o.ref) : renderPayMethod(o.payMethod)}
         ${o.notes ? `<div class="note"><b>${t("label_kitchen_note")}</b>${translateOrderNote(o.notes)}</div>` : ""}
         <div class="ticket-foot">
           <button type="button" class="exp-toggle-btn ${expEntries.length ? "has-entries" : ""}" data-idx="${idx}" aria-expanded="${expOpen}" title="${t("exp_log_btn_title")}">
