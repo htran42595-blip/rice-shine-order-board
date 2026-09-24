@@ -2633,7 +2633,7 @@
     </div>
   </section>
 
-  <footer class="foot" data-i18n="footer">Rice &amp; Shine · Instagram DM order log · orders received Aug 23–Sep 23, 2026 · updated manually until the live bot goes live</footer>
+  <footer class="foot" data-i18n="footer">Rice &amp; Shine · Instagram DM order log · orders received Aug 23–Sep 24, 2026 · updated manually until the live bot goes live</footer>
 </div>
 
 <script>
@@ -4683,6 +4683,80 @@
       pickupDate: "2026-09-26", pickupTime: "1:00 PM",
       paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
       notes: "Repeat customer."
+    },
+    {
+      name: "Jordanna Howard", handle: "wakemeupb4ujojo",
+      items: [
+        { qty: 1, name: "Personal Tray", price: 0, comp: true, note: "2,000th follower giveaway" },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true }
+      ],
+      total: 0,
+      orderDate: "2026-09-24", orderTime: null,
+      pickupDate: "2026-09-26", pickupTime: "12:00 PM",
+      paid: true, payMethod: "N/A — complimentary (2,000th follower giveaway)",
+      notes: ""
+    },
+    {
+      name: "Mabey Leonardo", handle: "mabey24",
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15, note: "no sriracha/spicy mayo — just regular" },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
+        { qty: 1, name: "Vietnamese Coffee", price: 4 }
+      ],
+      total: 19,
+      orderDate: "2026-09-24", orderTime: null,
+      pickupDate: "2026-09-26", pickupTime: "4:30 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: "First order — complimentary drink."
+    },
+    {
+      name: "Vanessa Nicholson", handle: "bahnessa_nic",
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Surprise Drink", price: 0, comp: true, note: "business's choice" }
+      ],
+      total: 15,
+      orderDate: "2026-09-24", orderTime: null,
+      pickupDate: "2026-09-29", pickupTime: "5:45 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: "First order — complimentary drink."
+    },
+    {
+      name: "Noemi Hernandez", handle: "life_with_alex_n_liam_",
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Green Thai Tea", price: 0, comp: true },
+        { qty: 1, name: "Vietnamese Coffee", price: 4 }
+      ],
+      total: 19,
+      orderDate: "2026-09-24", orderTime: null,
+      pickupDate: "2026-09-26", pickupTime: "12:00 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: "First order — complimentary drink."
+    },
+    {
+      name: "Mauna Jobe Bradford", handle: "mommajo2117",
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Vietnamese Coffee", price: 0, comp: true }
+      ],
+      total: 15,
+      orderDate: "2026-09-24", orderTime: null,
+      pickupDate: "2026-09-27", pickupTime: "9:45 AM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: "First order — complimentary drink. Order revised mid-conversation from coffee-only to coffee + tray."
+    },
+    {
+      name: "v33.solo", handle: "v33.solo",
+      items: [
+        { qty: 2, name: "Personal Tray", price: 30 },
+        { qty: 2, name: "Vietnamese Coffee", price: 8 }
+      ],
+      total: 38,
+      orderDate: "2026-09-24", orderTime: null,
+      pickupDate: "2026-09-25", pickupTime: "5:50 PM",
+      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+      notes: "Repeat customer."
     }
 
   ];
@@ -6096,7 +6170,7 @@
       btn_export_csv: "Export CSV",
       th_issues: "Issues",
       th_logged: "Logged",
-      footer: "Rice & Shine · Instagram DM order log · orders received Aug 23–Sep 23, 2026 · updated manually until the live bot goes live",
+      footer: "Rice & Shine · Instagram DM order log · orders received Aug 23–Sep 24, 2026 · updated manually until the live bot goes live",
       empty_no_active: "All caught up — no active orders right now.",
       empty_no_completed: "No completed orders yet.",
       empty_prep_done: "Nothing left to prep — every order's been completed.",
@@ -6304,7 +6378,7 @@
       btn_export_csv: "Xuất file CSV",
       th_issues: "Sự cố",
       th_logged: "Thời gian ghi",
-      footer: "Rice & Shine · Nhật ký đơn hàng qua tin nhắn Instagram · đơn nhận từ 23/8–23/9/2026 · cập nhật thủ công cho đến khi có bot tự động",
+      footer: "Rice & Shine · Nhật ký đơn hàng qua tin nhắn Instagram · đơn nhận từ 23/8–24/9/2026 · cập nhật thủ công cho đến khi có bot tự động",
       empty_no_active: "Đã xử lý hết — hiện không có đơn nào đang chờ.",
       empty_no_completed: "Chưa có đơn nào hoàn tất.",
       empty_prep_done: "Không còn gì cần chuẩn bị — mọi đơn đã hoàn tất.",
@@ -9160,13 +9234,11 @@
   // the one thing you'd want on hand when an order needs a call, and it
   // avoids changing the order-card markup for a first version.
   function websiteDocToOrder(d) {
-    // The same code the customer sees on their confirmation screen: the
-    // site's sequential "Rn" reference (R1, R2, R3…) when the order carries
-    // one, falling back to the last 6 of the record id for any order placed
-    // before that field existed. Shown here so that when someone messages
-    // "can I change order R4", that code can actually be matched to a
+    // The same short code the customer sees on their confirmation screen
+    // (last 6 of the record id). Shown here so that when someone messages
+    // "can I change order T0EGHQ", that code can actually be matched to a
     // ticket on this board instead of being a number only they can see.
-    const ref = d.refCode || String(d.id || "").slice(-6).toUpperCase();
+    const ref = String(d.id || "").slice(-6).toUpperCase();
     const items = Array.isArray(d.items) ? d.items : [];
     const notes = [
       ref ? `🌐 Website order #${ref}` : "🌐 Website order",
