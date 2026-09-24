@@ -9244,13 +9244,13 @@
     // The same code the customer sees on their confirmation screen: the
     // site's sequential "Rn" reference (R1, R2, R3…) when the order carries
     // one, falling back to the last 6 of the record id for any order placed
-    // before that field existed. Shown here so that when someone messages
-    // "can I change order R4", that code can actually be matched to a
-    // ticket on this board instead of being a number only they can see.
+    // before that field existed. Already shown on its own row on the card
+    // (see renderReferenceCode), so it's left out of the kitchen note below
+    // to avoid repeating it.
     const ref = d.refCode || String(d.id || "").slice(-6).toUpperCase();
     const items = Array.isArray(d.items) ? d.items : [];
     const notes = [
-      ref ? `🌐 Website order #${ref}` : "🌐 Website order",
+      "🌐 Website order",
       d.email ? `✉️ ${d.email}` : "",
       d.contact ? `📞 ${d.contact}` : "",
       d.notes || "",
