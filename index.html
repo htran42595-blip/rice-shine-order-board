@@ -9246,11 +9246,12 @@
     // one, falling back to the last 6 of the record id for any order placed
     // before that field existed. Already shown on its own row on the card
     // (see renderReferenceCode), so it's left out of the kitchen note below
-    // to avoid repeating it.
+    // to avoid repeating it. The "website order" label itself is also
+    // dropped from the note — a reference-code row only ever appears on
+    // website orders, so it already says that.
     const ref = d.refCode || String(d.id || "").slice(-6).toUpperCase();
     const items = Array.isArray(d.items) ? d.items : [];
     const notes = [
-      "🌐 Website order",
       d.email ? `✉️ ${d.email}` : "",
       d.contact ? `📞 ${d.contact}` : "",
       d.notes || "",
