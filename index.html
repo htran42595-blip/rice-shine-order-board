@@ -9160,11 +9160,13 @@
   // the one thing you'd want on hand when an order needs a call, and it
   // avoids changing the order-card markup for a first version.
   function websiteDocToOrder(d) {
-    // The same short code the customer sees on their confirmation screen
-    // (last 6 of the record id). Shown here so that when someone messages
-    // "can I change order T0EGHQ", that code can actually be matched to a
+    // The same code the customer sees on their confirmation screen: the
+    // site's sequential "Rn" reference (R1, R2, R3…) when the order carries
+    // one, falling back to the last 6 of the record id for any order placed
+    // before that field existed. Shown here so that when someone messages
+    // "can I change order R4", that code can actually be matched to a
     // ticket on this board instead of being a number only they can see.
-    const ref = String(d.id || "").slice(-6).toUpperCase();
+    const ref = d.refCode || String(d.id || "").slice(-6).toUpperCase();
     const items = Array.isArray(d.items) ? d.items : [];
     const notes = [
       ref ? `🌐 Website order #${ref}` : "🌐 Website order",
