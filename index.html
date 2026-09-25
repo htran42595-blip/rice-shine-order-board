@@ -9964,12 +9964,17 @@
 
   function dispatchDataChange(data) {
     lastRemoteData = data;
+    // Reverse the "__"-escape here, at the single point data comes back from
+    // Firestore, so every consumer downstream (the merge listener in the
+    // main script, buyerHistory lookups, etc.) only ever sees the raw
+    // identity strings it already expects — none of it needs to know
+    // Firestore's field-name restriction exists.
     document.dispatchEvent(new CustomEvent("riceshine-sync-change", {
       detail: {
-        completed: data.completed || {},
-        deleted: data.deleted || {},
-        seen: data.seen || {},
-        buyerHistory: data.buyerHistory || {},
+        completed: decodeFirestoreKeyedMap(data.completed || {}),
+        deleted: decodeFirestoreKeyedMap(data.deleted || {}),
+        seen: decodeFirestoreKeyedMap(data.seen || {}),
+        buyerHistory: decodeFirestoreKeyedMap(data.buyerHistory || {}),
         experienceLog: data.experienceLog || [],
       },
     }));
@@ -9984,12 +9989,12 @@
     const seed = {
       completed: {},
       deleted: {},
-      seen: readLocalJSON(LS.seen, {}),
-      buyerHistory: readLocalJSON(LS.buyerHistory, {}),
+      seen: encodeFirestoreKeyedMap(readLocalJSON(LS.seen, {})),
+      buyerHistory: encodeFirestoreKeyedMap(readLocalJSON(LS.buyerHistory, {})),
       experienceLog: readLocalJSON(LS.experience, []),
     };
-    readLocalJSON(LS.completed, []).forEach((k) => { seed.completed[k] = true; });
-    readLocalJSON(LS.deleted, []).forEach((k) => { seed.deleted[k] = true; });
+    readLocalJSON(LS.completed, []).forEach((k) => { seed.completed[encodeFirestoreKey(k)] = true; });
+    readLocalJSON(LS.deleted, []).forEach((k) => { seed.deleted[encodeFirestoreKey(k)] = true; });
     try {
       await setDoc(stateDocRef, seed);
     } catch (e) {
@@ -10178,6 +10183,44 @@
     }
   }
 
+  // ---- Firestore field-name escaping ----
+  // Firestore silently rejects any updateDoc/setDoc write whose field name
+  // both STARTS and ENDS with "__" (reserved for internal/system use) — this
+  // is a genuine Firestore restriction, not a bug in this board's own logic.
+  // It bit real orders here: identity keys are built as
+  // "<handle>__<orderDate>__<orderTime>", so a handle that itself starts and
+  // ends with underscores (e.g. "_____vs25") or ends with them combined with
+  // an empty orderTime (e.g. "__tatiannaaa__" with no orderTime -> trailing
+  // "__") produces a key that both starts and ends with "__", and every
+  // write for that specific order fails silently forever (only a
+  // console.warn, no visible error) — the underlying cause of orders that
+  // never sync no matter how many times they're tapped "reviewed" on any
+  // device. Fix: escape any such key with a harmless prefix before it's ever
+  // used in a FieldPath, and reverse that escape the moment data comes back
+  // from Firestore (in dispatchDataChange, below), so the raw identity
+  // string used everywhere else in the app (localStorage, orderIdentity(),
+  // buyerHistory lookups, etc.) is completely unaffected — only the bytes
+  // actually sent to/read from Firestore are ever touched.
+  function needsFirestoreKeyEscape(key) {
+    return typeof key === "string" && key.startsWith("__") && key.endsWith("__");
+  }
+  function encodeFirestoreKey(key) {
+    return needsFirestoreKeyEscape(key) ? "esc__" + key : key;
+  }
+  function decodeFirestoreKey(key) {
+    return typeof key === "string" && key.startsWith("esc__") ? key.slice(5) : key;
+  }
+  function decodeFirestoreKeyedMap(obj) {
+    const out = {};
+    Object.keys(obj || {}).forEach((k) => { out[decodeFirestoreKey(k)] = obj[k]; });
+    return out;
+  }
+  function encodeFirestoreKeyedMap(obj) {
+    const out = {};
+    Object.keys(obj || {}).forEach((k) => { out[encodeFirestoreKey(k)] = obj[k]; });
+    return out;
+  }
+
   // ---- Write helpers ----
   // FieldPath (not dot-notation strings) is required for every nested map
   // write below: real Instagram handles contain periods (e.g.
@@ -10186,11 +10229,12 @@
   // map key.
   async function writeField(topField, key, value) {
     if (!sharedMode) return;
+    const safeKey = encodeFirestoreKey(key);
     try {
       if (value === undefined || value === null) {
-        await updateDoc(stateDocRef, new FieldPath(topField, key), deleteField());
+        await updateDoc(stateDocRef, new FieldPath(topField, safeKey), deleteField());
       } else {
-        await updateDoc(stateDocRef, new FieldPath(topField, key), value);
+        await updateDoc(stateDocRef, new FieldPath(topField, safeKey), value);
       }
     } catch (e) {
       console.warn(`Rice & Shine sync: failed to write ${topField}.${key}`, e);
@@ -10229,9 +10273,9 @@
     if (!sharedMode) { pendingCompleted.clear(); pendingDeleted.clear(); pendingSeen.clear(); return; }
     try {
       const args = [];
-      completedPairs.forEach(([k, v]) => args.push(new FieldPath("completed", k), v ? true : deleteField()));
-      deletedPairs.forEach(([k, v]) => args.push(new FieldPath("deleted", k), v ? true : deleteField()));
-      seenPairs.forEach(([k, v]) => args.push(new FieldPath("seen", k), v));
+      completedPairs.forEach(([k, v]) => args.push(new FieldPath("completed", encodeFirestoreKey(k)), v ? true : deleteField()));
+      deletedPairs.forEach(([k, v]) => args.push(new FieldPath("deleted", encodeFirestoreKey(k)), v ? true : deleteField()));
+      seenPairs.forEach(([k, v]) => args.push(new FieldPath("seen", encodeFirestoreKey(k)), v));
       await updateDoc(stateDocRef, ...args);
       completedPairs.forEach(([k]) => pendingCompleted.delete(k));
       deletedPairs.forEach(([k]) => pendingDeleted.delete(k));
@@ -10290,7 +10334,7 @@
     try {
       const args = [];
       pairs.forEach(([identity, value]) => {
-        args.push(new FieldPath("buyerHistory", identity), value === null ? deleteField() : value);
+        args.push(new FieldPath("buyerHistory", encodeFirestoreKey(identity)), value === null ? deleteField() : value);
       });
       await updateDoc(stateDocRef, ...args);
     } catch (e) {
@@ -10309,7 +10353,7 @@
     try {
       const args = [];
       pairs.forEach(([key, value]) => {
-        args.push(new FieldPath(topField, key), value === null || value === undefined ? deleteField() : value);
+        args.push(new FieldPath(topField, encodeFirestoreKey(key)), value === null || value === undefined ? deleteField() : value);
       });
       await updateDoc(stateDocRef, ...args);
     } catch (e) {
