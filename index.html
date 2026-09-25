@@ -7047,19 +7047,36 @@
   // Device B (which had an older/stale local seen entry for that same
   // order) then reconnects, "wins" the merge with its stale value, and
   // pushes it back to Firestore — undoing Device A's ack for everyone.
-  const LAST_SYNCED_SEEN_KEY = "riceShineLastSyncedSeen";
+  // V2: the very first version of this key got written today with the
+  // flawed default above already baked in, so any browser that already
+  // loaded that version has a baseline on disk that's itself the product
+  // of the bug (a snapshot of the sparse remote data that caused the data
+  // loss in the first place). Renaming the key makes every browser treat
+  // this as a first run again under the corrected logic above, rather than
+  // reading back a baseline that would just re-trigger the same problem.
+  const LAST_SYNCED_SEEN_KEY = "riceShineLastSyncedSeenV2";
 
   function readLastSyncedMap(storageKey, currentLocalMap) {
     try {
       const raw = localStorage.getItem(storageKey);
-      // No baseline yet on this browser (first sync ever, or pre-existing
-      // local seen data from before this baseline existed) — treat current
-      // local state as already reconciled rather than "unsynced", same
-      // reasoning as readLastSynced above.
-      if (raw === null) return { ...(currentLocalMap || {}) };
+      // No baseline yet on this browser. Unlike completed/deleted (which
+      // start empty and accumulate only going forward), "seen" already
+      // carries a browser's entire pre-existing review history from before
+      // this baseline ever existed — treating that whole history as
+      // "already reconciled" the first time this runs means any of it that
+      // was never actually pushed to the shared doc yet gets silently
+      // dropped in favor of a sparser remote copy the moment remote
+      // disagrees, instead of being pushed out like it always was before
+      // this baseline existed. Defaulting to an empty baseline instead
+      // makes every local/remote mismatch look "not yet synced" on this
+      // first run, which is exactly the old (safe) behavior: local wins and
+      // gets pushed. The smarter 3-way distinction (told apart from "remote
+      // moved on") only needs to kick in from the second run onward, once
+      // an actual baseline has been recorded below.
+      if (raw === null) return {};
       return JSON.parse(raw) || {};
     } catch (e) {
-      return { ...(currentLocalMap || {}) };
+      return {};
     }
   }
 
