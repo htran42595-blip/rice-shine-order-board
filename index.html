@@ -7035,6 +7035,40 @@
     } catch (e) {}
   }
 
+  // Same 3-way-diff idea as above, but shaped for "seen" — its values are
+  // per-order fingerprint strings, not simple boolean set membership, so it
+  // needs its own map-shaped baseline instead of readLastSynced's
+  // Set-of-keys shape. Without this, the seen-merge below had no way to
+  // tell "my local ack hasn't synced out yet" apart from "remote already
+  // moved past what I have locally" (e.g. acknowledged fresh on another
+  // device after this browser's own copy went stale) — and always guessed
+  // the first case, silently overwriting a newer remote ack with a stale
+  // local one. That's the exact bug: Device A acknowledges an order,
+  // Device B (which had an older/stale local seen entry for that same
+  // order) then reconnects, "wins" the merge with its stale value, and
+  // pushes it back to Firestore — undoing Device A's ack for everyone.
+  const LAST_SYNCED_SEEN_KEY = "riceShineLastSyncedSeen";
+
+  function readLastSyncedMap(storageKey, currentLocalMap) {
+    try {
+      const raw = localStorage.getItem(storageKey);
+      // No baseline yet on this browser (first sync ever, or pre-existing
+      // local seen data from before this baseline existed) — treat current
+      // local state as already reconciled rather than "unsynced", same
+      // reasoning as readLastSynced above.
+      if (raw === null) return { ...(currentLocalMap || {}) };
+      return JSON.parse(raw) || {};
+    } catch (e) {
+      return { ...(currentLocalMap || {}) };
+    }
+  }
+
+  function persistLastSyncedMap(storageKey, map) {
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(map || {}));
+    } catch (e) {}
+  }
+
   function toggleCompleted(o) {
     const key = orderIdentity(o);
     let nowDone;
@@ -9760,15 +9794,24 @@
     persistLastSynced(LAST_SYNCED_DELETED_KEY, remoteDeleted);
 
     const remoteSeen = remote.seen || {};
+    // Same 3-way diff as completed/deleted above, adapted for seen's
+    // map-of-fingerprints shape: a local entry that differs from remote is
+    // only "not yet synced" if this browser's last confirmed-synced
+    // snapshot ALSO didn't already match remote's current value — otherwise
+    // remote has simply moved on (re-acknowledged on another device, e.g.
+    // after the order changed) and keeping the local value would silently
+    // undo that newer ack.
+    const priorSyncedSeen = readLastSyncedMap(LAST_SYNCED_SEEN_KEY, seenMap || {});
     const mergedSeen = { ...remoteSeen };
     const localOnlySeenPairs = [];
     Object.keys(seenMap || {}).forEach((k) => {
-      if (seenMap[k] !== remoteSeen[k]) {
-        mergedSeen[k] = seenMap[k];
-        localOnlySeenPairs.push([k, seenMap[k]]);
-      }
+      if (seenMap[k] === remoteSeen[k]) return; // already in sync
+      if (seenMap[k] === priorSyncedSeen[k]) return; // remote moved on — trust it, don't fight it
+      mergedSeen[k] = seenMap[k];
+      localOnlySeenPairs.push([k, seenMap[k]]);
     });
     seenMap = mergedSeen;
+    persistLastSyncedMap(LAST_SYNCED_SEEN_KEY, remoteSeen);
 
     buyerHistory = remote.buyerHistory || {};
     experienceLog = remote.experienceLog || [];
