@@ -1032,6 +1032,16 @@
   .badge.paid { background: var(--matcha-soft); color: var(--matcha); }
   .badge.unpaid { background: var(--warn-soft); color: var(--warn); }
 
+  .badge.paid-toggle-btn {
+    cursor: pointer;
+    border: none;
+    font: inherit;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .badge.paid-toggle-btn:hover, .badge.paid-toggle-btn:focus-visible { filter: brightness(1.08); outline: none; }
+  .badge.paid-toggle-btn:active { transform: scale(0.95); }
+
   /* ---- Copy edit link (website orders only) ---- */
   /* Sits under the paid/unpaid badge on the right of the card. Only website
      orders have one, because only they have a customer-facing edit page —
@@ -1129,23 +1139,24 @@
      pattern as completed-order tracking), so it's always reversible. */
   .delete-btn {
     position: absolute;
-    top: -10px;
-    right: 14px;
-    width: 24px;
-    height: 24px;
+    top: -7px;
+    right: 10px;
+    width: 16px;
+    height: 16px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     background: var(--card);
     color: var(--warn);
-    border: 1.5px solid var(--warn);
+    border: 1px solid var(--warn);
     border-radius: 999px;
     padding: 0;
-    font-size: 0.95rem;
+    font-size: 0.68rem;
     font-weight: 700;
     line-height: 1;
     cursor: pointer;
     box-shadow: 0 2px 6px rgba(37, 26, 56, 0.25);
+    opacity: 0.7;
   }
   .delete-btn:hover, .delete-btn:focus-visible { background: var(--warn); color: var(--card); outline: none; }
   .delete-btn:active { transform: scale(0.92); }
@@ -1217,52 +1228,12 @@
     font-weight: 700;
   }
 
-  /* ---- Buyer experience log ---- */
-  /* Deliberately a different hue from the --warn "new/updated" flag above —
-     this isn't an alert about the order, it's Tony's own optional note
-     about how a customer behaved, so it shouldn't visually compete with
-     the thing that's telling him to look at the card right now. Reuses
-     --salmon, the same color already used for kitchen notes. */
-  /* A button, not a hover tooltip — tooltips don't work on tap (iPad/phone),
-     and even on desktop a wall of text on hover forces you to read it every
-     time you pass over a card. Tap to expand a short summary, tap again to
-     collapse; nothing shows until you ask for it. */
-  .history-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-    margin-left: 6px;
-    background: var(--salmon-soft);
-    color: var(--salmon);
-    border: none;
-    border-radius: 999px;
-    padding: 1px 7px;
-    font-family: inherit;
-    font-size: 0.68rem;
-    font-weight: 700;
-    cursor: pointer;
-  }
-
-  .history-badge:hover, .history-badge:focus-visible { box-shadow: 0 0 0 2px var(--salmon-soft); outline: none; }
-
-  .history-summary {
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
-    background: var(--rice-2);
-    border-radius: 10px;
-    padding: 9px 11px;
-  }
-
-  .history-summary-row {
-    font-size: 0.78rem;
-    padding-bottom: 7px;
-    border-bottom: 1px dashed var(--line);
-  }
-
-  .history-summary-row:last-child { padding-bottom: 0; border-bottom: none; }
-
-  .exp-toggle-btn {
+  /* ---- Manual notes ---- */
+  /* A private, free-text note Tony can jot down on any order for anything
+     he doesn't have time to ask for a DM sweep about. Reuses --salmon, the
+     same accent already used for kitchen notes. Replaces the old
+     tag-based "buyer experience" log entirely. */
+  .note-toggle-btn {
     display: inline-flex;
     align-items: center;
     gap: 5px;
@@ -1278,10 +1249,10 @@
     white-space: nowrap;
   }
 
-  .exp-toggle-btn:hover, .exp-toggle-btn:focus-visible { border-color: var(--salmon); color: var(--salmon); }
-  .exp-toggle-btn.has-entries { border-color: var(--salmon); color: var(--salmon); background: var(--salmon-soft); }
+  .note-toggle-btn:hover, .note-toggle-btn:focus-visible { border-color: var(--salmon); color: var(--salmon); }
+  .note-toggle-btn.has-note { border-color: var(--salmon); color: var(--salmon); background: var(--salmon-soft); }
 
-  .exp-panel {
+  .note-panel {
     border-top: 1px dashed var(--line);
     padding-top: 10px;
     display: flex;
@@ -1373,28 +1344,7 @@
   .badge.status-confirmed { background: var(--matcha-soft); color: var(--matcha); }
   .badge.status-declined { background: var(--warn-soft); color: var(--warn); }
 
-  .exp-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-
-  .exp-tag-check {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 0.78rem;
-    background: var(--rice-2);
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    padding: 5px 11px;
-    cursor: pointer;
-  }
-
-  .exp-tag-check input { margin: 0; accent-color: var(--salmon); }
-  .exp-tag-check:has(input:checked) { background: var(--salmon-soft); border-color: var(--salmon); color: var(--salmon); font-weight: 700; }
-
-  .exp-note-input {
+  .note-input {
     width: 100%;
     border: 1px solid var(--line);
     border-radius: 10px;
@@ -1407,9 +1357,11 @@
     min-height: 44px;
   }
 
-  .exp-note-input:focus-visible { outline: 2px solid var(--tea); outline-offset: 1px; }
+  .note-input:focus-visible { outline: 2px solid var(--tea); outline-offset: 1px; }
 
-  .exp-save-btn {
+  .note-actions { display: flex; gap: 8px; align-items: center; }
+
+  .note-save-btn {
     align-self: flex-start;
     background: var(--tea);
     color: var(--tea-ink);
@@ -1422,123 +1374,22 @@
     cursor: pointer;
   }
 
-  .exp-save-btn:hover { filter: brightness(1.15); }
+  .note-save-btn:hover { filter: brightness(1.15); }
 
-  .exp-entries {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    max-height: 180px;
-    overflow-y: auto;
-  }
-
-  .exp-entry {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 8px;
-    font-size: 0.78rem;
-    background: var(--rice-2);
-    border-radius: 10px;
-    padding: 7px 9px;
-  }
-
-  .exp-entry .exp-date {
-    color: var(--ink-soft);
-    font-family: "Space Mono", ui-monospace, monospace;
-    font-size: 0.7rem;
-  }
-
-  .exp-entry-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; }
-
-  .exp-pill {
-    background: var(--salmon-soft);
-    color: var(--salmon);
-    border-radius: 999px;
-    padding: 1px 8px;
-    font-size: 0.68rem;
-    font-weight: 700;
-  }
-
-  .exp-count-pill {
-    display: inline-block;
-    background: var(--salmon-soft);
-    color: var(--salmon);
-    border-radius: 999px;
-    padding: 3px 12px;
-    font-size: 0.82rem;
-    font-weight: 700;
-    white-space: nowrap;
-  }
-
-  .exp-log-buyer-entries {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .exp-entry-note { margin-top: 4px; color: var(--ink); }
-
-  .exp-entry-del {
+  .note-clear-btn {
+    align-self: flex-start;
     background: none;
-    border: none;
-    color: var(--ink-soft);
-    cursor: pointer;
-    font-size: 1rem;
-    line-height: 1;
-    padding: 2px 5px;
-    flex: none;
-  }
-
-  .exp-entry-del:hover { color: var(--warn); }
-
-  .exp-empty { font-size: 0.78rem; color: var(--ink-soft); }
-
-  .hist-card-head.with-action {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
-  .exp-export-btn {
-    flex: none;
-    background: var(--rice-2);
     border: 1px solid var(--line);
     border-radius: 999px;
-    padding: 7px 14px;
+    padding: 7px 16px;
     font-family: inherit;
     font-size: 0.78rem;
-    font-weight: 700;
-    color: var(--ink);
+    font-weight: 600;
+    color: var(--ink-soft);
     cursor: pointer;
   }
 
-  .exp-export-btn:hover { border-color: var(--salmon); color: var(--salmon); }
-
-  .exp-log-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.82rem;
-  }
-
-  .exp-log-table th {
-    text-align: left;
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--ink-soft);
-    padding: 6px 10px;
-    border-bottom: 1px solid var(--line);
-  }
-
-  .exp-log-table td {
-    padding: 8px 10px;
-    border-bottom: 1px solid var(--line);
-    vertical-align: top;
-  }
-
-  .exp-log-table tr:last-child td { border-bottom: none; }
+  .note-clear-btn:hover { border-color: var(--warn); color: var(--warn); }
 
   .items {
     list-style: none;
@@ -2621,16 +2472,6 @@
       </div>
     </div>
 
-    <div class="hist-card">
-      <div class="hist-card-head with-action">
-        <div>
-          <div class="title" data-i18n="hist_explog_title">Buyer experience log</div>
-          <div class="sub" data-i18n="hist_explog_sub">No-shows, late payments, last-minute changes, late pickups — logged from order cards, shown here regardless of the time window above</div>
-        </div>
-        <button type="button" class="exp-export-btn" id="expExportBtn" data-i18n="btn_export_csv">Export CSV</button>
-      </div>
-      <div class="hist-card-body" id="expLogBody"></div>
-    </div>
   </section>
 
   <footer class="foot" data-i18n="footer">Rice &amp; Shine · Instagram DM order log · orders received Aug 23–Sep 24, 2026 · updated manually until the live bot goes live</footer>
@@ -6519,11 +6360,6 @@
       th_total_spent: "Total spent",
       hist_biggest_title: "Biggest buyers",
       hist_biggest_sub: "Total spent, all-time — highest first",
-      hist_explog_title: "Buyer experience log",
-      hist_explog_sub: "No-shows, late payments, last-minute changes, late pickups — logged from order cards, shown here regardless of the time window above",
-      btn_export_csv: "Export CSV",
-      th_issues: "Issues",
-      th_logged: "Logged",
       footer: "Rice & Shine · Instagram DM order log · orders received Aug 23–Sep 24, 2026 · updated manually until the live bot goes live",
       empty_no_active: "All caught up — no active orders right now.",
       empty_no_completed: "No completed orders yet.",
@@ -6532,7 +6368,6 @@
       empty_no_repeat_buyers: "No repeat buyers yet — this fills in once the same handle orders more than once, across any week.",
       empty_no_orders_logged: "No orders logged yet.",
       empty_no_orders_logged_window: "No orders logged in this window yet.",
-      empty_explog: "Nothing logged yet — tap \"📝 Log experience\" on any order card to start building this out.",
       btn_show_less: "Show less",
       badge_paid: "Paid",
       badge_unpaid: "Unpaid",
@@ -6569,12 +6404,13 @@
       empty_no_deleted: "No deleted orders.",
       undo_toast_text: "Order deleted.",
       undo_toast_btn: "Undo",
-      exp_log_btn: "📝 Log experience",
-      exp_log_btn_title: "Optional — log a no-show, late payment, last-minute change, or late pickup",
-      exp_save_btn: "Save entry",
-      exp_note_placeholder: "Optional note — what happened, any context worth remembering",
-      exp_del_title: "Delete this entry",
-      exp_empty_customer: "No past entries for this customer yet.",
+      notes_btn: "🗒️ Notes",
+      notes_btn_title: "Private note — for anything you don't have time to look into right now",
+      notes_placeholder: "Type a note…",
+      notes_save_btn: "Save note",
+      notes_clear_btn: "Clear note",
+      paid_toggle_title: "Tap to toggle paid / unpaid",
+      delete_confirm_msg: "Delete this order? You'll get a few seconds to undo, or restore it later from the Deleted tab.",
       flag_new: "New",
       flag_updated: "Updated",
       flag_new_title: "New order — tap to mark reviewed",
@@ -6593,16 +6429,6 @@
       tod_midday: "Midday (11am–2pm)",
       tod_afternoon: "Afternoon (2–5pm)",
       tod_evening: "Evening (5pm+)",
-      exp_tag_no_show: "No-show",
-      exp_tag_late_payment: "Late payment",
-      exp_tag_last_minute_change: "Last-minute change",
-      exp_tag_late_pickup: "Late pickup",
-      csv_handle: "Handle",
-      csv_total_issues: "Total issues for buyer",
-      csv_date: "Date",
-      csv_tags: "Tags",
-      csv_note: "Note",
-      csv_pickup_date: "Order pickup date",
       switch_to_vietnamese: "Switch to Vietnamese",
       switch_to_english: "Switch to English",
     },
@@ -6728,11 +6554,6 @@
       th_total_spent: "Tổng chi tiêu",
       hist_biggest_title: "Khách chi tiêu nhiều nhất",
       hist_biggest_sub: "Tổng chi tiêu, tính từ trước đến nay — cao nhất lên đầu",
-      hist_explog_title: "Nhật ký trải nghiệm khách hàng",
-      hist_explog_sub: "Khách không đến lấy, trả tiền trễ, đổi ý phút chót, lấy hàng trễ — được ghi từ các thẻ đơn hàng, hiển thị ở đây bất kể khoảng thời gian đã chọn ở trên",
-      btn_export_csv: "Xuất file CSV",
-      th_issues: "Sự cố",
-      th_logged: "Thời gian ghi",
       footer: "Rice & Shine · Nhật ký đơn hàng qua tin nhắn Instagram · đơn nhận từ 23/8–24/9/2026 · cập nhật thủ công cho đến khi có bot tự động",
       empty_no_active: "Đã xử lý hết — hiện không có đơn nào đang chờ.",
       empty_no_completed: "Chưa có đơn nào hoàn tất.",
@@ -6741,7 +6562,6 @@
       empty_no_repeat_buyers: "Chưa có khách quay lại — mục này sẽ có dữ liệu khi cùng một tài khoản đặt hàng hơn một lần, ở bất kỳ tuần nào.",
       empty_no_orders_logged: "Chưa có đơn nào được ghi nhận.",
       empty_no_orders_logged_window: "Chưa có đơn nào được ghi nhận trong khoảng thời gian này.",
-      empty_explog: "Chưa có ghi chú nào — bấm \"📝 Ghi trải nghiệm\" trên bất kỳ thẻ đơn hàng nào để bắt đầu.",
       btn_show_less: "Thu gọn",
       badge_paid: "Đã trả",
       badge_unpaid: "Chưa trả",
@@ -6778,12 +6598,13 @@
       empty_no_deleted: "Không có đơn nào đã xóa.",
       undo_toast_text: "Đã xóa đơn hàng.",
       undo_toast_btn: "Hoàn tác",
-      exp_log_btn: "📝 Ghi trải nghiệm",
-      exp_log_btn_title: "Không bắt buộc — ghi lại việc khách không đến, trả tiền trễ, đổi ý phút chót, hoặc lấy hàng trễ",
-      exp_save_btn: "Lưu ghi chú",
-      exp_note_placeholder: "Ghi chú thêm (không bắt buộc) — chuyện gì đã xảy ra, điều gì đáng nhớ",
-      exp_del_title: "Xóa ghi chú này",
-      exp_empty_customer: "Chưa có ghi chú nào cho khách này.",
+      notes_btn: "🗒️ Ghi chú",
+      notes_btn_title: "Ghi chú riêng — cho việc gì bạn chưa kịp nhờ kiểm tra",
+      notes_placeholder: "Nhập ghi chú…",
+      notes_save_btn: "Lưu ghi chú",
+      notes_clear_btn: "Xóa ghi chú",
+      paid_toggle_title: "Bấm để chuyển đã trả / chưa trả",
+      delete_confirm_msg: "Xóa đơn này? Bạn sẽ có vài giây để hoàn tác, hoặc khôi phục sau ở tab Đã xóa.",
       flag_new: "Mới",
       flag_updated: "Đã sửa",
       flag_new_title: "Đơn mới — bấm để đánh dấu đã xem",
@@ -6802,16 +6623,6 @@
       tod_midday: "Trưa (11 giờ sáng–2 giờ chiều)",
       tod_afternoon: "Chiều (2–5 giờ chiều)",
       tod_evening: "Tối (sau 5 giờ chiều)",
-      exp_tag_no_show: "Không đến lấy",
-      exp_tag_late_payment: "Trả tiền trễ",
-      exp_tag_last_minute_change: "Đổi ý phút chót",
-      exp_tag_late_pickup: "Lấy hàng trễ",
-      csv_handle: "Tài khoản",
-      csv_total_issues: "Tổng số sự cố của khách",
-      csv_date: "Ngày",
-      csv_tags: "Nhãn",
-      csv_note: "Ghi chú",
-      csv_pickup_date: "Ngày lấy hàng của đơn",
       switch_to_vietnamese: "Chuyển sang tiếng Việt",
       switch_to_english: "Chuyển sang tiếng Anh",
     },
@@ -6834,11 +6645,6 @@
   function strGroupTag(n) {
     return currentLang === "vi" ? `⏰ Trùng giờ với ${n} đơn khác` : `⏰ Same time as ${n} other order${n === 1 ? "" : "s"}`;
   }
-  function strHistoryBadgeAria(n) {
-    return currentLang === "vi"
-      ? `${n} sự cố đã ghi nhận trước đây với khách này — bấm để xem chi tiết`
-      : `${n} past logged issue${n === 1 ? "" : "s"} for this customer — tap for details`;
-  }
   function strOrderCount(n) {
     return currentLang === "vi" ? `${n} đơn` : `${n} order${n === 1 ? "" : "s"}`;
   }
@@ -6856,9 +6662,6 @@
   }
   function strHistRangeAll(n) {
     return currentLang === "vi" ? `${n} đơn được ghi nhận, tính từ trước đến nay` : `${n} order${n === 1 ? "" : "s"} logged, all time`;
-  }
-  function strIssueCount(n) {
-    return currentLang === "vi" ? `${n} sự cố` : `${n} issue${n === 1 ? "" : "s"}`;
   }
   // windowKey is "thisweek" | "week" | "month" | "custom" — the pill's
   // fixed Mon-anchored period (see WINDOW_WEEKS/windowRange), not a rolling
@@ -7116,6 +6919,8 @@
   // this as a first run again under the corrected logic above, rather than
   // reading back a baseline that would just re-trigger the same problem.
   const LAST_SYNCED_SEEN_KEY = "riceShineLastSyncedSeenV2";
+  const LAST_SYNCED_PAID_OVERRIDE_KEY = "riceShineLastSyncedPaidOverride";
+  const LAST_SYNCED_NOTES_KEY = "riceShineLastSyncedNotes";
 
   function readLastSyncedMap(storageKey, currentLocalMap) {
     try {
@@ -7486,8 +7291,7 @@
 
   // One row per buyer (by handle), summed across every order ever recorded
   // for them in this browser — not just whatever's in this week's ORDERS.
-  // Picks the most recent order's spelling of their name, same idea as
-  // groupExperienceByBuyer below.
+  // Picks the most recent order's spelling of their name.
   // Has the website-orders snapshot arrived yet this session? Until it has,
   // ORDERS holds no website orders, so "this buyer-history entry has no
   // matching order" would be true of every website order and would wrongly
@@ -7543,132 +7347,85 @@
     });
   }
 
-  // ---- Buyer experience log ----
-  // An optional, append-only paper trail on how a pickup actually went —
-  // no-show, late payment, last-minute change, late pickup — kept per
-  // customer (by handle) so a pattern across multiple orders is visible,
-  // not just a note on one order. Entirely opt-in: nothing here is wired
-  // into "Mark complete," so completing an order never requires touching
-  // this. Lives in the viewer's own browser (localStorage), same as
-  // completed-order and new/updated tracking, which is why the log view
-  // below ships with a CSV export — it's the only copy that exists.
-  const EXPERIENCE_STORAGE_KEY = "riceShineBuyerExperience";
+  // ---- Manual paid/unpaid override ----
+  // The DM-parsed `paid` flag on each order is just a best guess from the
+  // conversation; Tony taps the badge to correct it by hand once a payment
+  // actually comes in (or doesn't). Same per-viewer-then-synced pattern as
+  // completed/deleted/seen — keyed by orderIdentity so it survives a
+  // redeploy as long as the order's identity doesn't change.
+  const PAID_OVERRIDE_STORAGE_KEY = "riceShinePaidOverride";
 
-  const EXPERIENCE_TAGS = [
-    { key: "no-show", i18n: "exp_tag_no_show" },
-    { key: "late-payment", i18n: "exp_tag_late_payment" },
-    { key: "last-minute-change", i18n: "exp_tag_last_minute_change" },
-    { key: "late-pickup", i18n: "exp_tag_late_pickup" },
-  ];
-
-  // The tag KEY (e.g. "no-show") is what's stored in localStorage entries —
-  // that never changes with language. Only the displayed label does.
-  function experienceTagLabel(key) {
-    const found = EXPERIENCE_TAGS.find((tag) => tag.key === key);
-    return found ? t(found.i18n) : key;
-  }
-
-  let experienceLog = [];
+  let paidOverrideMap = {};
   try {
-    experienceLog = JSON.parse(localStorage.getItem(EXPERIENCE_STORAGE_KEY) || "[]");
+    paidOverrideMap = JSON.parse(localStorage.getItem(PAID_OVERRIDE_STORAGE_KEY) || "{}");
   } catch (e) {
-    experienceLog = [];
+    paidOverrideMap = {};
   }
 
-  function persistExperienceLog() {
+  function persistPaidOverride() {
     try {
-      localStorage.setItem(EXPERIENCE_STORAGE_KEY, JSON.stringify(experienceLog));
+      localStorage.setItem(PAID_OVERRIDE_STORAGE_KEY, JSON.stringify(paidOverrideMap));
     } catch (e) {}
   }
 
-  // Newest first, so both the per-card panel and the full log read as a
-  // timeline of what happened most recently.
-  function experienceForHandle(handle) {
-    return experienceLog
-      .filter((e) => e.handle === handle)
-      .sort((a, b) => b.date.localeCompare(a.date));
+  function isPaid(o) {
+    const id = orderIdentity(o);
+    return id in paidOverrideMap ? paidOverrideMap[id] : !!o.paid;
   }
 
-  function addExperienceEntry(o, tags, note) {
-    const entry = {
-      id: `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-      handle: o.handle,
-      name: o.name,
-      date: new Date().toISOString(),
-      pickupDate: o.pickupDate,
-      orderRef: orderIdentity(o),
-      tags: tags.slice(),
-      note: note || "",
-    };
-    experienceLog.push(entry);
-    persistExperienceLog();
-    if (window.RiceShineSync?.isSharedMode?.()) window.RiceShineSync.addExperienceEntry(entry);
+  function togglePaid(o) {
+    const id = orderIdentity(o);
+    const next = !isPaid(o);
+    paidOverrideMap[id] = next;
+    persistPaidOverride();
+    if (window.RiceShineSync?.isSharedMode?.()) window.RiceShineSync.setPaidOverride(id, next);
   }
 
-  function deleteExperienceEntry(id) {
-    experienceLog = experienceLog.filter((e) => e.id !== id);
-    persistExperienceLog();
-    if (window.RiceShineSync?.isSharedMode?.()) window.RiceShineSync.deleteExperienceEntry(id);
+  // ---- Manual notes ----
+  // A private, free-text note Tony can drop on any order for anything he
+  // doesn't have time to ask for a DM sweep about — replaces the old
+  // tag-based "buyer experience" log entirely. Just one string per order,
+  // no tags, no per-buyer history view. Lives in the viewer's own browser
+  // (localStorage) and syncs across devices the same way completed/
+  // deleted/seen/paidOverride do.
+  const NOTES_STORAGE_KEY = "riceShineOrderNotes";
+
+  let notesMap = {};
+  try {
+    notesMap = JSON.parse(localStorage.getItem(NOTES_STORAGE_KEY) || "{}");
+  } catch (e) {
+    notesMap = {};
   }
 
-  // Which orders currently have their log panel expanded — purely
+  function persistNotes() {
+    try {
+      localStorage.setItem(NOTES_STORAGE_KEY, JSON.stringify(notesMap));
+    } catch (e) {}
+  }
+
+  function getNote(o) {
+    return notesMap[orderIdentity(o)] || "";
+  }
+
+  function setNote(o, text) {
+    const id = orderIdentity(o);
+    const val = (text || "").trim();
+    if (val) notesMap[id] = val;
+    else delete notesMap[id];
+    persistNotes();
+    if (window.RiceShineSync?.isSharedMode?.()) window.RiceShineSync.setNote(id, val || null);
+  }
+
+  // Which orders currently have their note panel expanded — purely
   // in-memory UI state (keyed by the same stable order identity used
   // elsewhere), so it survives a re-render but resets on page reload,
   // which is fine since it's just "is this panel open," not data.
-  const openExpPanels = new Set();
-
-  // Same idea, for the small ⚠ N badge's collapsed summary — separate from
-  // openExpPanels since tapping the badge (quick glance at history) and
-  // tapping "Log experience" (opens the full form) are different actions
-  // that can be open independently of each other.
-  const openHistoryBadges = new Set();
+  const openNotePanels = new Set();
 
   // And again for the accept/decline panel. Same in-memory-only reasoning:
   // whether the panel is open is not something worth syncing to the other
   // staff devices, and a reload closing it is the right behaviour.
   const openStatusPanels = new Set();
-
-  function fmtDateTime(iso) {
-    const dt = new Date(iso);
-    return dt.toLocaleString(localeCode(), {
-      month: "short", day: "numeric", year: "numeric",
-      hour: "numeric", minute: "2-digit",
-    });
-  }
-
-  function csvField(v) {
-    const s = String(v ?? "");
-    return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-  }
-
-  function downloadExperienceCsv() {
-    // Same order as the on-screen log: buyers with the most issues first,
-    // so a skim of the CSV top-to-bottom reads the same as the dashboard.
-    const rows = [[t("th_buyer"), t("csv_handle"), t("csv_total_issues"), t("csv_date"), t("csv_tags"), t("csv_note"), t("csv_pickup_date")]];
-    groupExperienceByBuyer().forEach((g) => {
-      g.entries.forEach((e) => {
-        rows.push([
-          g.name,
-          g.handle,
-          g.count,
-          fmtDateTime(e.date),
-          e.tags.map(experienceTagLabel).join("; "),
-          e.note,
-          e.pickupDate || "",
-        ]);
-      });
-    });
-    const csv = rows.map((r) => r.map(csvField).join(",")).join("\r\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `rice-shine-buyer-experience-log-${new Date().toISOString().slice(0, 10)}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  }
 
   // ---- Same-time grouping ----
   // Orders sharing an exact pickup date + time are the ones being handed
@@ -7750,7 +7507,7 @@
   // a small progress bar on the stat bar in place of "Awaiting payment"
   // (he doesn't check payment status from the top bar much; this is the
   // number he actually wants to see at a glance).
-  const WEEKLY_PORTIONS_TARGET = 40;
+  const WEEKLY_PORTIONS_TARGET = 50;
 
   // Portions already on the books for the current week, counting every
   // non-deleted order with a pickup date anywhere in this Mon–Sun week —
@@ -7823,9 +7580,9 @@
     const gcount = groups.counts[gk];
     const completed = isCompleted(o);
     const flag = orderFlag(o);
-    const expEntries = experienceForHandle(o.handle);
-    const expOpen = openExpPanels.has(orderIdentity(o));
-    const histOpen = openHistoryBadges.has(orderIdentity(o));
+    const paid = isPaid(o);
+    const noteOpen = openNotePanels.has(orderIdentity(o));
+    const hasNote = !!getNote(o);
     return `
       <article class="ticket ${gcls || ""} ${completed ? "is-complete" : ""} ${flag ? "is-flagged" : ""} ${deletedMode ? "is-deleted" : ""}" data-oid="${escapeHtml(orderIdentity(o))}">
         ${!deletedMode ? `
@@ -7838,11 +7595,11 @@
         ` : ""}
         <div class="who">
           <div>
-            <div class="name">${o.name}${expEntries.length ? `<button type="button" class="history-badge" data-idx="${idx}" aria-expanded="${histOpen}" aria-label="${strHistoryBadgeAria(expEntries.length)}">⚠ ${expEntries.length}</button>` : ""}</div>
+            <div class="name">${o.name}</div>
             <span class="handle">@${o.handle}</span>
           </div>
           <div class="who-right">
-            <span class="badge ${o.paid ? "paid" : "unpaid"}">${o.paid ? t("badge_paid") : t("badge_unpaid")}</span>
+            <button type="button" class="badge paid-toggle-btn ${paid ? "paid" : "unpaid"}" data-idx="${idx}" title="${t("paid_toggle_title")}" aria-label="${t("paid_toggle_title")}">${paid ? t("badge_paid") : t("badge_unpaid")}</button>
             ${o.status === "confirmed" ? `<span class="badge status-confirmed">${t("status_confirmed")}</span>` : ""}
             ${o.status === "declined" ? `<span class="badge status-declined">${t("status_declined")}</span>` : ""}
             ${o.webId ? `
@@ -7850,17 +7607,6 @@
             ` : ""}
           </div>
         </div>
-        ${histOpen && expEntries.length ? `
-          <div class="history-summary">
-            ${expEntries.map(e => `
-              <div class="history-summary-row">
-                <div class="exp-date">${fmtDateTime(e.date)}</div>
-                ${e.tags.length ? `<div class="exp-entry-tags">${e.tags.map(tk => `<span class="exp-pill">${experienceTagLabel(tk)}</span>`).join("")}</div>` : ""}
-                ${e.note ? `<div class="exp-entry-note">${escapeHtml(e.note)}</div>` : ""}
-              </div>
-            `).join("")}
-          </div>
-        ` : ""}
         <ul class="items">
           ${o.items.map(i => `
             <li>
@@ -7877,8 +7623,8 @@
         ${o.webId ? renderReferenceCode(o.ref) : renderPayMethod(o.payMethod)}
         ${o.notes ? `<div class="note"><b>${t("label_kitchen_note")}</b>${translateOrderNote(o.notes)}</div>` : ""}
         <div class="ticket-foot">
-          <button type="button" class="exp-toggle-btn ${expEntries.length ? "has-entries" : ""}" data-idx="${idx}" aria-expanded="${expOpen}" title="${t("exp_log_btn_title")}">
-            ${t("exp_log_btn")}${expEntries.length ? ` (${expEntries.length})` : ""}
+          <button type="button" class="note-toggle-btn ${hasNote ? "has-note" : ""}" data-idx="${idx}" aria-expanded="${noteOpen}" title="${t("notes_btn_title")}">
+            ${t("notes_btn")}${hasNote ? " •" : ""}
           </button>
           ${deletedMode ? `
             <button type="button" class="restore-btn" data-idx="${idx}" title="${t("restore_btn_title")}">${t("restore_btn")}</button>
@@ -7890,7 +7636,7 @@
             </label>
           `}
         </div>
-        ${expOpen ? renderExpPanel(o, idx, expEntries) : ""}
+        ${noteOpen ? renderNotePanel(o, idx) : ""}
         ${o.webId && !deletedMode ? renderStatusRow(o, idx) : ""}
       </article>
     `;
@@ -7939,33 +7685,15 @@
       </div>`;
   }
 
-  function renderExpPanel(o, idx, entries) {
+  function renderNotePanel(o, idx) {
+    const val = getNote(o);
     return `
-      <div class="exp-panel" data-idx="${idx}">
-        <div class="exp-tags">
-          ${EXPERIENCE_TAGS.map(tag => `
-            <label class="exp-tag-check">
-              <input type="checkbox" class="exp-tag-input" value="${tag.key}">
-              ${experienceTagLabel(tag.key)}
-            </label>
-          `).join("")}
+      <div class="note-panel" data-idx="${idx}">
+        <textarea class="note-input" placeholder="${t("notes_placeholder")}">${escapeHtml(val)}</textarea>
+        <div class="note-actions">
+          <button type="button" class="note-save-btn" data-idx="${idx}">${t("notes_save_btn")}</button>
+          ${val ? `<button type="button" class="note-clear-btn" data-idx="${idx}">${t("notes_clear_btn")}</button>` : ""}
         </div>
-        <textarea class="exp-note-input" placeholder="${t("exp_note_placeholder")}"></textarea>
-        <button type="button" class="exp-save-btn" data-idx="${idx}">${t("exp_save_btn")}</button>
-        ${entries.length ? `
-          <div class="exp-entries">
-            ${entries.map(e => `
-              <div class="exp-entry" data-id="${e.id}">
-                <div>
-                  <div class="exp-date">${fmtDateTime(e.date)}</div>
-                  ${e.tags.length ? `<div class="exp-entry-tags">${e.tags.map(tk => `<span class="exp-pill">${experienceTagLabel(tk)}</span>`).join("")}</div>` : ""}
-                  ${e.note ? `<div class="exp-entry-note">${escapeHtml(e.note)}</div>` : ""}
-                </div>
-                <button type="button" class="exp-entry-del" data-id="${e.id}" title="${t("exp_del_title")}" aria-label="${t("exp_del_title")}">×</button>
-              </div>
-            `).join("")}
-          </div>
-        ` : `<div class="exp-empty">${t("exp_empty_customer")}</div>`}
       </div>
     `;
   }
@@ -8003,44 +7731,42 @@
     });
   }
 
-  function wireExperience(gridEl, list) {
-    gridEl.querySelectorAll(".history-badge").forEach(btn => {
+  function wirePaidToggle(gridEl, list) {
+    gridEl.querySelectorAll(".paid-toggle-btn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        togglePaid(list[Number(btn.dataset.idx)]);
+        renderOrders();
+      });
+    });
+  }
+
+  function wireNotes(gridEl, list) {
+    gridEl.querySelectorAll(".note-toggle-btn").forEach(btn => {
       btn.addEventListener("click", () => {
         const id = orderIdentity(list[Number(btn.dataset.idx)]);
-        if (openHistoryBadges.has(id)) openHistoryBadges.delete(id);
-        else openHistoryBadges.add(id);
+        if (openNotePanels.has(id)) openNotePanels.delete(id);
+        else openNotePanels.add(id);
         renderOrders();
       });
     });
 
-    gridEl.querySelectorAll(".exp-toggle-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const id = orderIdentity(list[Number(btn.dataset.idx)]);
-        if (openExpPanels.has(id)) openExpPanels.delete(id);
-        else openExpPanels.add(id);
-        renderOrders();
-      });
-    });
-
-    gridEl.querySelectorAll(".exp-save-btn").forEach(btn => {
+    gridEl.querySelectorAll(".note-save-btn").forEach(btn => {
       btn.addEventListener("click", () => {
         const o = list[Number(btn.dataset.idx)];
-        const panel = btn.closest(".exp-panel");
-        const tags = [...panel.querySelectorAll(".exp-tag-input:checked")].map(i => i.value);
-        const note = panel.querySelector(".exp-note-input").value.trim();
-        if (!tags.length && !note) return; // nothing entered — don't log an empty row
-        addExperienceEntry(o, tags, note);
+        const panel = btn.closest(".note-panel");
+        const text = panel.querySelector(".note-input").value;
+        setNote(o, text);
         renderOrders();
-        renderExperienceLog();
       });
     });
 
-    gridEl.querySelectorAll(".exp-entry-del").forEach(btn => {
-      btn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        deleteExperienceEntry(btn.dataset.id);
+    gridEl.querySelectorAll(".note-clear-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const o = list[Number(btn.dataset.idx)];
+        setNote(o, "");
         renderOrders();
-        renderExperienceLog();
       });
     });
   }
@@ -8111,6 +7837,7 @@
         e.preventDefault();
         e.stopPropagation();
         const o = list[Number(btn.dataset.idx)];
+        if (!window.confirm(t("delete_confirm_msg"))) return;
         deleteOrder(o);
         renderOrders();
         renderStats();
@@ -8236,9 +7963,12 @@
     wireToggles(gridCompleted, completed);
     wireFlags(gridActive, active);
     wireFlags(gridCompleted, completed);
-    wireExperience(gridActive, active);
-    wireExperience(gridCompleted, completed);
-    wireExperience(gridDeleted, deleted);
+    wirePaidToggle(gridActive, active);
+    wirePaidToggle(gridCompleted, completed);
+    wirePaidToggle(gridDeleted, deleted);
+    wireNotes(gridActive, active);
+    wireNotes(gridCompleted, completed);
+    wireNotes(gridDeleted, deleted);
     wireDelete(gridActive, active);
     wireDelete(gridCompleted, completed);
     wireRestore(gridDeleted, deleted);
@@ -8839,84 +8569,6 @@
   }
 
   let currentWindow = "all";
-  // Deliberately NOT filtered by the "This week / Last week / month / All
-  // time / Custom range" window pills above — it's a paper trail, not a
-  // stat, so an entry
-  // should never look like it "disappeared" just because the window
-  // changed. Always the full log, newest first.
-  // One row per buyer, not per incident — the point of this view is
-  // spotting who's a repeat problem, so their whole record needs to be
-  // together, ranked by how many times something's been logged (most
-  // first). Within a buyer's own entries, newest still leads since that's
-  // the most actionable one to remember.
-  function groupExperienceByBuyer() {
-    const byHandle = {};
-    experienceLog.forEach((e) => {
-      (byHandle[e.handle] ||= []).push(e);
-    });
-    const groups = Object.values(byHandle).map((entries) => {
-      const sorted = entries.slice().sort((a, b) => b.date.localeCompare(a.date));
-      return { handle: sorted[0].handle, name: sorted[0].name, entries: sorted, count: sorted.length };
-    });
-    groups.sort((a, b) => b.count - a.count || b.entries[0].date.localeCompare(a.entries[0].date));
-    return groups;
-  }
-
-  let expLogExpanded = false;
-
-  function renderExperienceLog() {
-    const body = document.getElementById("expLogBody");
-    if (!body) return;
-    if (!experienceLog.length) {
-      body.innerHTML = `<div class="exp-empty">${t("empty_explog")}</div>`;
-      return;
-    }
-    const groups = groupExperienceByBuyer();
-    const shown = expLogExpanded ? groups : groups.slice(0, TOP_N);
-    body.innerHTML = `
-      <table class="exp-log-table">
-        <thead>
-          <tr><th>${t("th_buyer")}</th><th>${t("th_issues")}</th><th>${t("th_logged")}</th></tr>
-        </thead>
-        <tbody>
-          ${shown.map((g) => `
-            <tr>
-              <td>${escapeHtml(g.name)}<br><span class="handle">@${escapeHtml(g.handle)}</span></td>
-              <td><span class="exp-count-pill">${strIssueCount(g.count)}</span></td>
-              <td>
-                <div class="exp-log-buyer-entries">
-                  ${g.entries.map((e) => `
-                    <div class="exp-entry" data-id="${e.id}">
-                      <div>
-                        <div class="exp-date">${fmtDateTime(e.date)}</div>
-                        ${e.tags.length ? `<div class="exp-entry-tags">${e.tags.map((tk) => `<span class="exp-pill">${experienceTagLabel(tk)}</span>`).join("")}</div>` : ""}
-                        ${e.note ? `<div class="exp-entry-note">${escapeHtml(e.note)}</div>` : ""}
-                      </div>
-                      <button type="button" class="exp-entry-del" data-id="${e.id}" title="${t("exp_del_title")}" aria-label="${t("exp_del_title")}">×</button>
-                    </div>
-                  `).join("")}
-                </div>
-              </td>
-            </tr>
-          `).join("")}
-          ${renderShowMoreRow(groups.length, expLogExpanded, 3, "explog-show-more")}
-        </tbody>
-      </table>
-    `;
-    body.querySelectorAll(".exp-entry-del").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        deleteExperienceEntry(btn.dataset.id);
-        renderExperienceLog();
-        renderOrders(); // a history badge on a card may need to update too
-      });
-    });
-    body.querySelector(".explog-show-more")?.addEventListener("click", () => {
-      expLogExpanded = !expLogExpanded;
-      renderExperienceLog();
-    });
-  }
-
-  document.getElementById("expExportBtn")?.addEventListener("click", downloadExperienceCsv);
 
   function renderHistory() {
     const list = ordersInWindow(currentWindow);
@@ -9257,7 +8909,6 @@
     renderPrep();
     renderPrepByTime();
     renderHistory();
-    renderExperienceLog();
     renderPaletteList();
     // Last, not first: renderOrders rebuilds every card, so anything that
     // re-decorates a card — the Lookup glow — has to run after the cards it
@@ -9425,8 +9076,8 @@
 
       const chips = [
         '<span class="ld-chip ' + (o.webId ? "web" : "") + '">' + sourceOf(o) + "</span>",
-        '<span class="ld-chip ' + (o.paid ? "paid" : "unpaid") + '">'
-          + (o.paid ? t("badge_paid") : t("badge_unpaid")) + "</span>",
+        '<span class="ld-chip ' + (isPaid(o) ? "paid" : "unpaid") + '">'
+          + (isPaid(o) ? t("badge_paid") : t("badge_unpaid")) + "</span>",
         o.status === "confirmed" ? '<span class="ld-chip confirmed">' + t("lookup_chip_confirmed") + "</span>" : "",
         o.status === "declined" ? '<span class="ld-chip declined">' + t("lookup_chip_declined") + "</span>" : "",
         isCompleted(o) ? '<span class="ld-chip">' + t("lookup_chip_picked") + "</span>" : "",
@@ -9891,8 +9542,33 @@
     seenMap = mergedSeen;
     persistLastSyncedMap(LAST_SYNCED_SEEN_KEY, remoteSeen);
 
+    const remotePaidOverride = remote.paidOverride || {};
+    const priorSyncedPaidOverride = readLastSyncedMap(LAST_SYNCED_PAID_OVERRIDE_KEY, paidOverrideMap || {});
+    const mergedPaidOverride = { ...remotePaidOverride };
+    const localOnlyPaidOverridePairs = [];
+    Object.keys(paidOverrideMap || {}).forEach((k) => {
+      if (paidOverrideMap[k] === remotePaidOverride[k]) return;
+      if (paidOverrideMap[k] === priorSyncedPaidOverride[k]) return;
+      mergedPaidOverride[k] = paidOverrideMap[k];
+      localOnlyPaidOverridePairs.push([k, paidOverrideMap[k]]);
+    });
+    paidOverrideMap = mergedPaidOverride;
+    persistLastSyncedMap(LAST_SYNCED_PAID_OVERRIDE_KEY, remotePaidOverride);
+
+    const remoteNotes = remote.notes || {};
+    const priorSyncedNotes = readLastSyncedMap(LAST_SYNCED_NOTES_KEY, notesMap || {});
+    const mergedNotes = { ...remoteNotes };
+    const localOnlyNotesPairs = [];
+    Object.keys(notesMap || {}).forEach((k) => {
+      if (notesMap[k] === remoteNotes[k]) return;
+      if (notesMap[k] === priorSyncedNotes[k]) return;
+      mergedNotes[k] = notesMap[k];
+      localOnlyNotesPairs.push([k, notesMap[k]]);
+    });
+    notesMap = mergedNotes;
+    persistLastSyncedMap(LAST_SYNCED_NOTES_KEY, remoteNotes);
+
     buyerHistory = remote.buyerHistory || {};
-    experienceLog = remote.experienceLog || [];
     // The shared doc may still carry entries under the old content-based
     // key from before the completed/deleted key fix — convert those to the
     // stable identity key here too, and push the fix back up so every
@@ -9902,7 +9578,8 @@
     persistDeleted();
     persistSeen();
     persistBuyerHistory();
-    persistExperienceLog();
+    persistPaidOverride();
+    persistNotes();
     // This week's ORDERS may include orders the remote snapshot doesn't
     // know about yet (e.g. added locally before this device ever signed
     // in) — reconcile and push any diffs back up.
@@ -9911,6 +9588,8 @@
       if (localOnlyCompleted.length) window.RiceShineSync.setCompletedBatch(localOnlyCompleted.map((k) => [k, true]));
       if (localOnlyDeleted.length) window.RiceShineSync.setDeletedBatch(localOnlyDeleted.map((k) => [k, true]));
       if (localOnlySeenPairs.length && window.RiceShineSync.setSeenBatch) window.RiceShineSync.setSeenBatch(localOnlySeenPairs);
+      if (localOnlyPaidOverridePairs.length && window.RiceShineSync.setPaidOverrideBatch) window.RiceShineSync.setPaidOverrideBatch(localOnlyPaidOverridePairs);
+      if (localOnlyNotesPairs.length && window.RiceShineSync.setNotesBatch) window.RiceShineSync.setNotesBatch(localOnlyNotesPairs);
     }
     // The board state that just landed is what says which orders are
     // deleted, and it can arrive after the orders themselves. Re-running the
@@ -9974,7 +9653,8 @@
     deleted: "riceShineDeletedOrders",
     seen: "riceShineSeenOrders",
     buyerHistory: "riceShineBuyerOrderHistory",
-    experience: "riceShineBuyerExperience",
+    paidOverride: "riceShinePaidOverride",
+    notes: "riceShineOrderNotes",
   };
 
   function readLocalJSON(key, fallback) {
@@ -10010,7 +9690,7 @@
   let authorized = false;
   let sharedMode = false;
   let unsubscribeSnapshot = null;
-  let lastRemoteData = null; // most recent doc data — needed for delete-by-id ops on experienceLog
+  let lastRemoteData = null; // most recent doc data from Firestore
 
   function dispatchAuthChange() {
     document.dispatchEvent(new CustomEvent("riceshine-sync-auth-change", {
@@ -10036,7 +9716,8 @@
         deleted: decodeFirestoreKeyedMap(data.deleted || {}),
         seen: decodeFirestoreKeyedMap(data.seen || {}),
         buyerHistory: decodeFirestoreKeyedMap(data.buyerHistory || {}),
-        experienceLog: data.experienceLog || [],
+        paidOverride: decodeFirestoreKeyedMap(data.paidOverride || {}),
+        notes: decodeFirestoreKeyedMap(data.notes || {}),
       },
     }));
   }
@@ -10052,7 +9733,8 @@
       deleted: {},
       seen: encodeFirestoreKeyedMap(readLocalJSON(LS.seen, {})),
       buyerHistory: encodeFirestoreKeyedMap(readLocalJSON(LS.buyerHistory, {})),
-      experienceLog: readLocalJSON(LS.experience, []),
+      paidOverride: encodeFirestoreKeyedMap(readLocalJSON(LS.paidOverride, {})),
+      notes: encodeFirestoreKeyedMap(readLocalJSON(LS.notes, {})),
     };
     readLocalJSON(LS.completed, []).forEach((k) => { seed.completed[encodeFirestoreKey(k)] = true; });
     readLocalJSON(LS.deleted, []).forEach((k) => { seed.deleted[encodeFirestoreKey(k)] = true; });
@@ -10318,6 +10000,8 @@
   const pendingCompleted = new Map();
   const pendingDeleted = new Map();
   const pendingSeen = new Map();
+  const pendingPaidOverride = new Map();
+  const pendingNotes = new Map();
   let flushTimer = null;
 
   function scheduleFlush() {
@@ -10330,17 +10014,23 @@
     const completedPairs = [...pendingCompleted.entries()];
     const deletedPairs = [...pendingDeleted.entries()];
     const seenPairs = [...pendingSeen.entries()];
-    if (!completedPairs.length && !deletedPairs.length && !seenPairs.length) return;
-    if (!sharedMode) { pendingCompleted.clear(); pendingDeleted.clear(); pendingSeen.clear(); return; }
+    const paidOverridePairs = [...pendingPaidOverride.entries()];
+    const notesPairs = [...pendingNotes.entries()];
+    if (!completedPairs.length && !deletedPairs.length && !seenPairs.length && !paidOverridePairs.length && !notesPairs.length) return;
+    if (!sharedMode) { pendingCompleted.clear(); pendingDeleted.clear(); pendingSeen.clear(); pendingPaidOverride.clear(); pendingNotes.clear(); return; }
     try {
       const args = [];
       completedPairs.forEach(([k, v]) => args.push(new FieldPath("completed", encodeFirestoreKey(k)), v ? true : deleteField()));
       deletedPairs.forEach(([k, v]) => args.push(new FieldPath("deleted", encodeFirestoreKey(k)), v ? true : deleteField()));
       seenPairs.forEach(([k, v]) => args.push(new FieldPath("seen", encodeFirestoreKey(k)), v));
+      paidOverridePairs.forEach(([k, v]) => args.push(new FieldPath("paidOverride", encodeFirestoreKey(k)), v));
+      notesPairs.forEach(([k, v]) => args.push(new FieldPath("notes", encodeFirestoreKey(k)), v === "" || v === null || v === undefined ? deleteField() : v));
       await updateDoc(stateDocRef, ...args);
       completedPairs.forEach(([k]) => pendingCompleted.delete(k));
       deletedPairs.forEach(([k]) => pendingDeleted.delete(k));
       seenPairs.forEach(([k]) => pendingSeen.delete(k));
+      paidOverridePairs.forEach(([k]) => pendingPaidOverride.delete(k));
+      notesPairs.forEach(([k]) => pendingNotes.delete(k));
     } catch (e) {
       console.warn("Rice & Shine sync: batched write failed, will retry on next flush", e);
       scheduleFlush();
@@ -10388,6 +10078,26 @@
     await writeFieldBatch("seen", pairs);
   }
 
+  function setPaidOverride(identity, isPaidVal) {
+    if (!sharedMode) return;
+    pendingPaidOverride.set(identity, !!isPaidVal);
+    scheduleFlush();
+  }
+
+  async function setPaidOverrideBatch(pairs) {
+    await writeFieldBatch("paidOverride", pairs);
+  }
+
+  function setNote(identity, text) {
+    if (!sharedMode) return;
+    pendingNotes.set(identity, text === null || text === undefined ? "" : text);
+    scheduleFlush();
+  }
+
+  async function setNotesBatch(pairs) {
+    await writeFieldBatch("notes", pairs);
+  }
+
   // Batched so updating buyerHistory for the whole board on load costs one
   // Firestore write, not one per order.
   async function setBuyerHistoryBatch(pairs) {
@@ -10432,25 +10142,6 @@
 
   async function deleteBuyerHistoryEntry(identity) {
     await writeField("buyerHistory", identity, null);
-  }
-
-  async function addExperienceEntryRemote(entry) {
-    if (!sharedMode) return;
-    try {
-      await updateDoc(stateDocRef, "experienceLog", arrayUnion(entry));
-    } catch (e) {
-      console.warn("Rice & Shine sync: failed to append experience entry", e);
-    }
-  }
-
-  async function deleteExperienceEntryRemote(id) {
-    if (!sharedMode) return;
-    try {
-      const current = (lastRemoteData && lastRemoteData.experienceLog) || [];
-      await updateDoc(stateDocRef, "experienceLog", current.filter((e) => e.id !== id));
-    } catch (e) {
-      console.warn("Rice & Shine sync: failed to remove experience entry", e);
-    }
   }
 
   // ---- Sync button UI ----
@@ -10507,8 +10198,10 @@
     flushPending: flushPendingWrites,
     setBuyerHistoryBatch,
     deleteBuyerHistoryEntry,
-    addExperienceEntry: addExperienceEntryRemote,
-    deleteExperienceEntry: deleteExperienceEntryRemote,
+    setPaidOverride,
+    setPaidOverrideBatch,
+    setNote,
+    setNotesBatch,
   };
 
   updateSyncStatusUI();
