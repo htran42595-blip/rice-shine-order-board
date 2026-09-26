@@ -1506,6 +1506,9 @@
 
   .note b { color: var(--salmon); text-transform: uppercase; font-size: 0.68rem; letter-spacing: 0.05em; display: block; margin-bottom: 2px; }
 
+  .note.manual-note { background: var(--tea-soft, var(--rice-2)); border-left-color: var(--tea); }
+  .note.manual-note b { color: var(--tea); }
+
   .subtabs {
     display: inline-flex;
     background: var(--rice-2);
@@ -6396,6 +6399,7 @@
       badge_paid: "Paid",
       badge_unpaid: "Unpaid",
       label_kitchen_note: "Kitchen note",
+      label_manual_note: "Note:",
       label_payment: "Payment:",
       label_reference_code: "Reference code:",
       comp_label: "comp",
@@ -6590,6 +6594,7 @@
       badge_paid: "Đã trả",
       badge_unpaid: "Chưa trả",
       label_kitchen_note: "Ghi chú bếp",
+      label_manual_note: "Ghi chú:",
       label_payment: "Thanh toán:",
       label_reference_code: "Mã tham chiếu:",
       comp_label: "Ưu đãi",
@@ -7646,6 +7651,7 @@
         ${gcls ? `<div class="group-tag ${gcls}">${strGroupTag(gcount - 1)}</div>` : ""}
         ${o.webId ? renderReferenceCode(o.ref) : renderPayMethod(o.payMethod)}
         ${o.notes ? `<div class="note"><b>${t("label_kitchen_note")}</b>${translateOrderNote(o.notes)}</div>` : ""}
+        ${hasNote ? `<div class="note manual-note"><b>${t("label_manual_note")}</b>${escapeHtml(getNote(o)).replace(/\n/g, "<br>")}</div>` : ""}
         <div class="ticket-foot">
           <button type="button" class="note-toggle-btn ${hasNote ? "has-note" : ""}" data-idx="${idx}" aria-expanded="${noteOpen}" title="${t("notes_btn_title")}">
             ${t("notes_btn")}${hasNote ? " •" : ""}
