@@ -6732,9 +6732,30 @@
     "Drink (flavor TBD)": "Thức uống (chưa chọn vị)",
   };
 
+  // Canonical, consistently-cased form of a menu item's name. Order entries
+  // have accumulated inconsistent capitalization across many logging
+  // sessions (e.g. "green Thai Tea" vs "Green Thai Tea") — every place
+  // below that groups or counts items by name used to key on the raw
+  // i.name string, so two differently-cased spellings of the exact same
+  // item silently became two separate rows (Prep by Day showing both
+  // "14 green Thai Tea" and "5 Green Thai Tea") or, worse, dropped a
+  // count entirely where the code checked for an exact-cased match
+  // (Drink preference undercounting anything not spelled exactly like
+  // DRINK_NAMES). Built from ITEM_NAME_VI's keys since that dictionary
+  // already has to enumerate every real menu item with its proper casing.
+  const ITEM_NAME_CANONICAL = {};
+  Object.keys(ITEM_NAME_VI).forEach((n) => { ITEM_NAME_CANONICAL[n.toLowerCase()] = n; });
+  ["Surprise Drink"].forEach((n) => { ITEM_NAME_CANONICAL[n.toLowerCase()] = n; });
+
+  function canonicalItemName(name) {
+    const trimmed = (name || "").trim();
+    return ITEM_NAME_CANONICAL[trimmed.toLowerCase()] || trimmed;
+  }
+
   function translateItemName(name) {
-    if (currentLang !== "vi") return name;
-    return ITEM_NAME_VI[name] || name;
+    const canonical = canonicalItemName(name);
+    if (currentLang !== "vi") return canonical;
+    return ITEM_NAME_VI[canonical] || canonical;
   }
 
   // Item-level notes (e.g. "1 complimentary") are a small fixed vocabulary
@@ -8044,7 +8065,8 @@
       const tally = {};
       for (const o of orders) {
         for (const i of o.items) {
-          tally[i.name] = (tally[i.name] || 0) + i.qty;
+          const key = canonicalItemName(i.name);
+          tally[key] = (tally[key] || 0) + i.qty;
         }
       }
       const tallyEntries = Object.entries(tally).sort((a, b) => b[1] - a[1]);
@@ -8222,9 +8244,10 @@
     const tally = {}; // item name -> { total, notes: { noteText -> qty } }
     for (const o of included) {
       for (const i of o.items) {
-        tally[i.name] ||= { total: 0, notes: {} };
-        tally[i.name].total += i.qty;
-        if (i.note) tally[i.name].notes[i.note] = (tally[i.name].notes[i.note] || 0) + i.qty;
+        const key = canonicalItemName(i.name);
+        tally[key] ||= { total: 0, notes: {} };
+        tally[key].total += i.qty;
+        if (i.note) tally[key].notes[i.note] = (tally[key].notes[i.note] || 0) + i.qty;
       }
     }
     const tallyEntries = Object.entries(tally).sort((a, b) => b[1].total - a[1].total);
@@ -8464,10 +8487,11 @@
     const byItem = new Map();
     list.forEach((o) => {
       o.items.forEach((it) => {
-        const cur = byItem.get(it.name) || { qty: 0, revenue: 0 };
+        const key = canonicalItemName(it.name);
+        const cur = byItem.get(key) || { qty: 0, revenue: 0 };
         cur.qty += it.qty;
         cur.revenue += it.price || 0;
-        byItem.set(it.name, cur);
+        byItem.set(key, cur);
       });
     });
     const rows = [...byItem.entries()].sort((a, b) => b[1].revenue - a[1].revenue);
@@ -8530,7 +8554,8 @@
     const counts = {};
     DRINK_NAMES.forEach((n) => { counts[n] = 0; });
     list.forEach((o) => o.items.forEach((it) => {
-      if (Object.prototype.hasOwnProperty.call(counts, it.name)) counts[it.name] += it.qty;
+      const key = canonicalItemName(it.name);
+      if (Object.prototype.hasOwnProperty.call(counts, key)) counts[key] += it.qty;
     }));
     const rows = DRINK_NAMES.map((n) => ({ label: translateItemName(n), value: counts[n], color: DRINK_COLORS[n] }));
     document.getElementById("histDrinks").innerHTML = hbarChart(rows);
