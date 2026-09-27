@@ -1438,6 +1438,303 @@
 
   .pickup .d { font-weight: 700; }
 
+  /* ---- Live pickup date/time edit ---- */
+  /* On-the-fly reschedule straight from the card — see setPickupOverride().
+     Reuses the note-panel's visual language (dashed top rule, pill buttons)
+     so it reads as part of the same family of inline editors. */
+  .pickup-edit-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    margin-left: 4px;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: none;
+    color: var(--ink-soft);
+    font-size: 0.72rem;
+    line-height: 1;
+    cursor: pointer;
+    vertical-align: middle;
+  }
+
+  .pickup-edit-btn:hover, .pickup-edit-btn:focus-visible,
+  .pickup-edit-btn[aria-expanded="true"] {
+    border-color: var(--tea);
+    color: var(--tea);
+  }
+
+  .pickup-edited-tag {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--matcha-soft);
+    color: var(--matcha);
+    font-size: 0.68rem;
+    font-weight: 700;
+    vertical-align: middle;
+  }
+
+  .pickup-edit-panel {
+    border-top: 1px dashed var(--line);
+    margin-top: 8px;
+    padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .pickup-edit-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .pickup-edit-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+    flex: 1 1 120px;
+  }
+
+  .pickup-edit-field input {
+    font-family: inherit;
+    font-size: 0.85rem;
+    padding: 7px 9px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--card);
+    color: var(--ink);
+  }
+
+  .pickup-edit-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .pickup-save-btn {
+    background: var(--tea);
+    color: var(--tea-ink);
+    border: none;
+    border-radius: 999px;
+    padding: 7px 16px;
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .pickup-save-btn:hover { filter: brightness(1.15); }
+
+  .pickup-cancel-btn {
+    background: none;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 7px 16px;
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+
+  .pickup-cancel-btn:hover { border-color: var(--warn); color: var(--warn); }
+
+  /* ---- Live items/quantity edit ---- */
+  /* Same family as the pickup editor above: a pill toggle button under the
+     items list, a dashed-rule panel, pill save/cancel actions. Prices are
+     never typed in directly — they're always the read-only result of
+     MENU_PRICES × qty, shown next to each row and totalled live. */
+  .items-edit-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 2px;
+    background: none;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 5px 11px;
+    font-family: inherit;
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .items-edit-btn:hover, .items-edit-btn:focus-visible,
+  .items-edit-btn[aria-expanded="true"] {
+    border-color: var(--tea);
+    color: var(--tea);
+  }
+
+  .items-edited-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--matcha-soft);
+    color: var(--matcha);
+    font-size: 0.68rem;
+    font-weight: 700;
+    vertical-align: middle;
+  }
+
+  .items-edit-panel {
+    border-top: 1px dashed var(--line);
+    margin-top: 8px;
+    padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .items-edit-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .items-edit-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .items-edit-name {
+    flex: 1 1 150px;
+    min-width: 0;
+    font-family: inherit;
+    font-size: 0.82rem;
+    padding: 7px 9px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--card);
+    color: var(--ink);
+  }
+
+  .items-edit-qty {
+    width: 56px;
+    flex: none;
+    font-family: inherit;
+    font-size: 0.82rem;
+    padding: 7px 6px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--card);
+    color: var(--ink);
+    text-align: center;
+  }
+
+  .items-edit-comp-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+    white-space: nowrap;
+    flex: none;
+  }
+
+  .items-edit-line-price {
+    font-family: "Space Mono", monospace;
+    font-variant-numeric: tabular-nums;
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+    flex: none;
+    min-width: 46px;
+    text-align: right;
+  }
+
+  .items-edit-remove-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    flex: none;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: none;
+    color: var(--ink-soft);
+    font-size: 0.9rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .items-edit-remove-btn:hover, .items-edit-remove-btn:focus-visible {
+    border-color: var(--warn);
+    color: var(--warn);
+  }
+
+  .items-edit-add-btn {
+    align-self: flex-start;
+    background: none;
+    border: 1px dashed var(--line);
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-family: inherit;
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+
+  .items-edit-add-btn:hover, .items-edit-add-btn:focus-visible {
+    border-color: var(--tea);
+    color: var(--tea);
+  }
+
+  .items-edit-total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.84rem;
+    font-weight: 700;
+    padding-top: 4px;
+    border-top: 1px dashed var(--line);
+  }
+
+  .items-edit-total-value {
+    font-family: "Space Mono", monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .items-edit-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .items-save-btn {
+    background: var(--tea);
+    color: var(--tea-ink);
+    border: none;
+    border-radius: 999px;
+    padding: 7px 16px;
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .items-save-btn:hover { filter: brightness(1.15); }
+
+  .items-cancel-btn {
+    background: none;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 7px 16px;
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+
+  .items-cancel-btn:hover { border-color: var(--warn); color: var(--warn); }
+
   .total {
     font-family: "Space Mono", monospace;
     font-weight: 700;
@@ -6474,6 +6771,23 @@
       notes_placeholder: "Type a note…",
       notes_save_btn: "Save note",
       notes_clear_btn: "Clear note",
+      pickup_edit_title: "Change pickup date/time",
+      pickup_edit_date_label: "Date",
+      pickup_edit_time_label: "Time",
+      pickup_edit_save_btn: "Save",
+      pickup_edit_cancel_btn: "Cancel",
+      pickup_edited_tag: "Rescheduled",
+      pickup_edited_title: "Pickup date/time was changed from the card",
+      items_edit_btn: "Edit items",
+      items_edit_title: "Change items/quantity — prices are calculated automatically",
+      items_edited_tag: "Edited",
+      items_edited_title: "Items were changed from the card",
+      items_edit_comp_label: "Comp",
+      items_edit_remove_title: "Remove item",
+      items_edit_add_btn: "+ Add item",
+      items_edit_total_label: "New total",
+      items_edit_save_btn: "Save",
+      items_edit_cancel_btn: "Cancel",
       paid_toggle_title: "Tap to toggle paid / unpaid",
       delete_confirm_msg: "Delete this order? You'll get a few seconds to undo, or restore it later from the Deleted tab.",
       flag_new: "New",
@@ -6669,6 +6983,23 @@
       notes_placeholder: "Nhập ghi chú…",
       notes_save_btn: "Lưu ghi chú",
       notes_clear_btn: "Xóa ghi chú",
+      pickup_edit_title: "Đổi ngày/giờ lấy hàng",
+      pickup_edit_date_label: "Ngày",
+      pickup_edit_time_label: "Giờ",
+      pickup_edit_save_btn: "Lưu",
+      pickup_edit_cancel_btn: "Hủy",
+      pickup_edited_tag: "Đã đổi lịch",
+      pickup_edited_title: "Ngày/giờ lấy hàng đã được đổi trực tiếp trên thẻ đơn",
+      items_edit_btn: "Sửa món",
+      items_edit_title: "Đổi món/số lượng — giá được tự động tính lại",
+      items_edited_tag: "Đã sửa",
+      items_edited_title: "Món đã được đổi trực tiếp trên thẻ đơn",
+      items_edit_comp_label: "Tặng",
+      items_edit_remove_title: "Xóa món",
+      items_edit_add_btn: "+ Thêm món",
+      items_edit_total_label: "Tổng mới",
+      items_edit_save_btn: "Lưu",
+      items_edit_cancel_btn: "Hủy",
       paid_toggle_title: "Bấm để chuyển đã trả / chưa trả",
       delete_confirm_msg: "Xóa đơn này? Bạn sẽ có vài giây để hoàn tác, hoặc khôi phục sau ở tab Đã xóa.",
       flag_new: "Mới",
@@ -6889,8 +7220,9 @@
 
   function ordersByPickup(list) {
     return list.slice().sort((a, b) => {
-      if (a.pickupDate !== b.pickupDate) return a.pickupDate.localeCompare(b.pickupDate);
-      return timeToMinutes(a.pickupTime) - timeToMinutes(b.pickupTime);
+      const da = effectivePickupDate(a), db = effectivePickupDate(b);
+      if (da !== db) return da.localeCompare(db);
+      return timeToMinutes(effectivePickupTime(a)) - timeToMinutes(effectivePickupTime(b));
     });
   }
 
@@ -7008,6 +7340,8 @@
   const LAST_SYNCED_SEEN_KEY = "riceShineLastSyncedSeenV2";
   const LAST_SYNCED_PAID_OVERRIDE_KEY = "riceShineLastSyncedPaidOverride";
   const LAST_SYNCED_NOTES_KEY = "riceShineLastSyncedNotes";
+  const LAST_SYNCED_PICKUP_OVERRIDE_KEY = "riceShineLastSyncedPickupOverride";
+  const LAST_SYNCED_ITEMS_OVERRIDE_KEY = "riceShineLastSyncedItemsOverride";
 
   function readLastSyncedMap(storageKey, currentLocalMap) {
     try {
@@ -7098,7 +7432,7 @@
     const historyEntry = {
       handle: o.handle,
       name: o.name,
-      total: o.total,
+      total: effectiveTotal(o),
       orderDate: o.orderDate || "",
       orderTime: o.orderTime || "",
     };
@@ -7315,6 +7649,98 @@
     if (window.RiceShineSync?.isSharedMode?.()) window.RiceShineSync.setSeen(id, fp);
   }
 
+  // ---- Items/quantity overrides (live "on the fly" order edit) ----
+  // Same idea and same per-viewer-then-synced pattern as pickupOverride
+  // below, for the item list instead of the pickup date/time: Tony can add,
+  // remove, or change the quantity of any line item straight from the
+  // card, and the price is always computed from the fixed menu below —
+  // never typed in by hand — so a total can't drift from what's actually
+  // on the order. Also deliberately excluded from orderFingerprint, same
+  // reasoning as pickupOverride/paidOverride/notes.
+  //
+  // Declared up here (rather than alongside pickupOverride further down)
+  // because effectiveTotal() below is used by rebuildBuyerHistoryFromOrders,
+  // which runs once at plain page load — it has to exist before that first
+  // call or the `itemsOverrideMap` `let` below would still be in its
+  // temporal dead zone.
+  //
+  // Only these 5 items have a confirmed, unchanging price. Anything else
+  // that shows up on an old order (a one-off comp add-on, say) is left
+  // exactly as it was — see renderItemsEditRow — rather than guessed at.
+  const MENU_ITEMS = ["Personal Tray", "Shareable Tray", "Vietnamese Coffee", "Green Thai Tea", "Orange Thai Tea"];
+  const MENU_PRICES = {
+    "Personal Tray": 15,
+    "Shareable Tray": 45,
+    "Vietnamese Coffee": 4,
+    "Green Thai Tea": 4,
+    "Orange Thai Tea": 4,
+  };
+
+  const ITEMS_OVERRIDE_STORAGE_KEY = "riceShineItemsOverride";
+
+  let itemsOverrideMap = {};
+  try {
+    itemsOverrideMap = JSON.parse(localStorage.getItem(ITEMS_OVERRIDE_STORAGE_KEY) || "{}");
+  } catch (e) {
+    itemsOverrideMap = {};
+  }
+
+  function persistItemsOverride() {
+    try {
+      localStorage.setItem(ITEMS_OVERRIDE_STORAGE_KEY, JSON.stringify(itemsOverrideMap));
+    } catch (e) {}
+  }
+
+  // Sum of every non-comp line's qty × price. Used both for a saved order's
+  // effective total and, during editing, is mirrored by draftItemsTotal()
+  // below (draft rows don't carry a .price yet — it's always looked up from
+  // MENU_PRICES so it can't go stale).
+  function computeItemsTotal(items) {
+    return (items || []).reduce((s, i) => s + (i.comp ? 0 : (Number(i.price) || 0) * (Number(i.qty) || 0)), 0);
+  }
+
+  function effectiveItems(o) {
+    const ov = itemsOverrideMap[orderIdentity(o)];
+    return (ov && ov.items) || o.items || [];
+  }
+
+  // Unedited orders keep whatever total was originally logged (which can
+  // reflect a one-off discount that doesn't strictly equal qty × price) —
+  // only an order Tony has actually edited here gets its total recomputed
+  // from the menu price table, per his ask to auto-calculate it.
+  function effectiveTotal(o) {
+    const ov = itemsOverrideMap[orderIdentity(o)];
+    return ov && ov.items ? computeItemsTotal(ov.items) : o.total;
+  }
+
+  function hasItemsOverride(o) {
+    return !!itemsOverrideMap[orderIdentity(o)];
+  }
+
+  function setItemsOverride(o, items) {
+    const id = orderIdentity(o);
+    itemsOverrideMap[id] = { items };
+    persistItemsOverride();
+    // Returning/Biggest buyers reads buyerHistory, not ORDERS, so the
+    // corrected total has to be pushed in there too or the leaderboards
+    // would keep citing the pre-edit amount forever.
+    rebuildBuyerHistoryFromOrders();
+    if (window.RiceShineSync?.isSharedMode?.()) {
+      window.RiceShineSync.setItemsOverride(id, { items });
+    }
+  }
+
+  // Draft-row price lookup — always from the menu table, by design (see the
+  // block comment above MENU_ITEMS): a draft row only ever has {name, qty,
+  // comp}, no editable price field.
+  function lineTotal(row) {
+    return (MENU_PRICES[row.name] || 0) * (Number(row.qty) || 0);
+  }
+
+  function draftItemsTotal(rows) {
+    return (rows || []).reduce((s, r) => s + (r.comp ? 0 : lineTotal(r)), 0);
+  }
+
   // ---- Buyer order history (Returning buyers / Biggest buyers) ----
   // The ORDERS array is replaced fresh every week (just that week's ~30-40
   // orders), so "returning" and "biggest" buyer status has to be remembered
@@ -7359,7 +7785,7 @@
       const entry = {
         handle: o.handle,
         name: o.name,
-        total: o.total,
+        total: effectiveTotal(o),
         orderDate: o.orderDate || "",
         orderTime: o.orderTime || "",
       };
@@ -7503,6 +7929,99 @@
     if (window.RiceShineSync?.isSharedMode?.()) window.RiceShineSync.setNote(id, val || null);
   }
 
+  // ---- Pickup date/time overrides (live "on the fly" reschedule) ----
+  // Lets Tony (or Vy) move an order's pickup date/time straight from the
+  // rendered card — no laptop, no new index.html, no .bat redeploy. Same
+  // per-viewer-then-synced pattern as paidOverride/notes above: an edit
+  // updates this browser's own localStorage immediately (so it renders
+  // right away even offline), then fires an async write to the shared
+  // Firestore doc so every other signed-in device picks it up within a
+  // few seconds. Keyed by orderIdentity so it survives a redeploy the same
+  // way completed/deleted/paidOverride/notes already do.
+  //
+  // Deliberately excluded from orderFingerprint (same as paidOverride and
+  // manual notes) — this is a live overlay on top of the DM-sourced pickup
+  // date, not a change to the source data itself, so it doesn't trip the
+  // new/updated flag the way a DM-sweep correction to the ORDERS array's
+  // own pickupDate/pickupTime does.
+  const PICKUP_OVERRIDE_STORAGE_KEY = "riceShinePickupOverride";
+
+  let pickupOverrideMap = {};
+  try {
+    pickupOverrideMap = JSON.parse(localStorage.getItem(PICKUP_OVERRIDE_STORAGE_KEY) || "{}");
+  } catch (e) {
+    pickupOverrideMap = {};
+  }
+
+  function persistPickupOverride() {
+    try {
+      localStorage.setItem(PICKUP_OVERRIDE_STORAGE_KEY, JSON.stringify(pickupOverrideMap));
+    } catch (e) {}
+  }
+
+  // Every place that displays or computes off an order's pickup date/time
+  // (sorting, day grouping, Prep by Day/Time, History, Lookup) reads it
+  // through these two accessors rather than o.pickupDate/o.pickupTime
+  // directly, so a live edit here is instantly reflected everywhere at
+  // once. orderFingerprint and the one-time legacy-key migration are the
+  // deliberate exceptions — they keep reading the raw fields (see comments
+  // above orderFingerprint).
+  function effectivePickupDate(o) {
+    const ov = pickupOverrideMap[orderIdentity(o)];
+    return (ov && ov.pickupDate) || o.pickupDate;
+  }
+
+  function effectivePickupTime(o) {
+    const ov = pickupOverrideMap[orderIdentity(o)];
+    return (ov && ov.pickupTime) || o.pickupTime;
+  }
+
+  function hasPickupOverride(o) {
+    return !!pickupOverrideMap[orderIdentity(o)];
+  }
+
+  function setPickupOverride(o, pickupDate, pickupTime) {
+    if (!pickupDate || !pickupTime) return;
+    const id = orderIdentity(o);
+    pickupOverrideMap[id] = { pickupDate, pickupTime };
+    persistPickupOverride();
+    if (window.RiceShineSync?.isSharedMode?.()) {
+      window.RiceShineSync.setPickupOverride(id, { pickupDate, pickupTime });
+    }
+  }
+
+  // "3:00 PM" -> "15:00", for prefilling a native <input type="time">.
+  function ampmTo24h(ampmStr) {
+    const m = /(\d+):(\d+)\s*(AM|PM)/i.exec(ampmStr || "");
+    if (!m) return "";
+    let h = Number(m[1]) % 12;
+    if (/pm/i.test(m[3])) h += 12;
+    return `${String(h).padStart(2, "0")}:${m[2]}`;
+  }
+
+  // "15:00" (native <input type="time"> value) -> "3:00 PM", the format
+  // every other pickupTime field on this board already uses.
+  function formatTimeAMPM(hhmm) {
+    const m = /^(\d{1,2}):(\d{2})$/.exec(hhmm || "");
+    if (!m) return "";
+    let h = Number(m[1]);
+    const ampm = h >= 12 ? "PM" : "AM";
+    h = h % 12; if (h === 0) h = 12;
+    return `${h}:${m[2]} ${ampm}`;
+  }
+
+  // Which orders currently have their pickup-edit panel expanded — same
+  // in-memory-only reasoning as openNotePanels below.
+  const openPickupPanels = new Set();
+
+  // Which orders currently have their items-edit panel expanded, and the
+  // in-progress edit state for each (an array of draft row objects, not
+  // committed to itemsOverrideMap until Save is clicked). Both purely
+  // in-memory — same reasoning as openPickupPanels/openNotePanels.
+  const openItemsPanels = new Set();
+  const itemsEditDraft = new Map();
+  let itemsRowIdCounter = 1;
+
   // Which orders currently have their note panel expanded — purely
   // in-memory UI state (keyed by the same stable order identity used
   // elsewhere), so it survives a re-render but resets on page reload,
@@ -7521,7 +8040,7 @@
   const GROUP_PALETTE = ["tg-1", "tg-2", "tg-3", "tg-4", "tg-5"];
 
   function timeGroupKey(o) {
-    return `${o.pickupDate}T${o.pickupTime}`;
+    return `${effectivePickupDate(o)}T${effectivePickupTime(o)}`;
   }
 
   function computeTimeGroups(list) {
@@ -7613,7 +8132,7 @@
       if (isDeleted(o)) return;
       const d = parsePickupDate(o);
       if (!d || d < monday || d > sunday) return;
-      portions += trayPortions(o.items).portions;
+      portions += trayPortions(effectiveItems(o)).portions;
     });
     return portions;
   }
@@ -7621,8 +8140,8 @@
   function renderStats() {
     const active = ORDERS.filter(o => !isCompleted(o) && !isDeleted(o) && !o.historical);
     const total = active.length;
-    const revenue = active.reduce((s, o) => s + o.total, 0);
-    const days = [...new Set(active.map(o => o.pickupDate))].sort();
+    const revenue = active.reduce((s, o) => s + effectiveTotal(o), 0);
+    const days = [...new Set(active.map(o => effectivePickupDate(o)))].sort();
     const nextDay = days[0];
     const weeklyPortions = weeklyPortionsProgress();
     // Bar visually caps at 100% once the target's hit, but the number
@@ -7650,11 +8169,12 @@
     let html = "";
     let lastDate = null;
     list.forEach((o, idx) => {
-      if (o.pickupDate !== lastDate) {
+      const pd = effectivePickupDate(o);
+      if (pd !== lastDate) {
         if (lastDate !== null) {
-          html += `<div class="day-divider"><span class="day-divider-label">${fmtShortDate(o.pickupDate)}</span></div>`;
+          html += `<div class="day-divider"><span class="day-divider-label">${fmtShortDate(pd)}</span></div>`;
         }
-        lastDate = o.pickupDate;
+        lastDate = pd;
       }
       html += renderTicket(o, idx, groups, deletedMode);
     });
@@ -7670,6 +8190,11 @@
     const paid = isPaid(o);
     const noteOpen = openNotePanels.has(orderIdentity(o));
     const hasNote = !!getNote(o);
+    const pickupOpen = openPickupPanels.has(orderIdentity(o));
+    const wasRescheduled = hasPickupOverride(o);
+    const itemsOpen = openItemsPanels.has(orderIdentity(o));
+    const wasItemsEdited = hasItemsOverride(o);
+    const displayItems = effectiveItems(o);
     return `
       <article class="ticket ${gcls || ""} ${completed ? "is-complete" : ""} ${flag ? "is-flagged" : ""} ${deletedMode ? "is-deleted" : ""}" data-oid="${escapeHtml(orderIdentity(o))}">
         ${!deletedMode ? `
@@ -7695,17 +8220,30 @@
           </div>
         </div>
         <ul class="items">
-          ${o.items.map(i => `
+          ${displayItems.map(i => `
             <li>
               <span><span class="qty">${i.qty}×</span>${translateItemName(i.name)}${i.note ? ` <span style="color:var(--ink-soft)">(${translateItemNote(i.note)})</span>` : ""}</span>
               <span class="price ${i.comp ? "comp" : ""}">${i.comp ? t("comp_label") : fmtMoney(i.price)}</span>
             </li>
           `).join("")}
         </ul>
+        ${!deletedMode ? `
+          <button type="button" class="items-edit-btn" data-idx="${idx}" aria-expanded="${itemsOpen}" title="${t("items_edit_title")}">
+            ${t("items_edit_btn")}${wasItemsEdited ? ` <span class="items-edited-tag" title="${t("items_edited_title")}">${t("items_edited_tag")}</span>` : ""}
+          </button>
+        ` : ""}
+        ${itemsOpen ? renderItemsEditPanel(o, idx) : ""}
         <div class="meta-row">
-          <div class="pickup"><span class="d">${fmtShortDate(o.pickupDate)}</span> · ${o.pickupTime}</div>
-          <div class="total">${fmtMoney(o.total)}</div>
+          <div class="pickup">
+            <span class="d">${fmtShortDate(effectivePickupDate(o))}</span> · ${effectivePickupTime(o)}
+            ${!deletedMode ? `
+              <button type="button" class="pickup-edit-btn" data-idx="${idx}" aria-expanded="${pickupOpen}" title="${t("pickup_edit_title")}" aria-label="${t("pickup_edit_title")}">✎</button>
+            ` : ""}
+            ${wasRescheduled ? `<span class="pickup-edited-tag" title="${t("pickup_edited_title")}">${t("pickup_edited_tag")}</span>` : ""}
+          </div>
+          <div class="total">${fmtMoney(effectiveTotal(o))}</div>
         </div>
+        ${pickupOpen ? renderPickupEditPanel(o, idx) : ""}
         ${gcls ? `<div class="group-tag ${gcls}">${strGroupTag(gcount - 1)}</div>` : ""}
         ${o.webId ? renderReferenceCode(o.ref) : renderPayMethod(o.payMethod)}
         ${o.notes ? `<div class="note"><b>${t("label_kitchen_note")}</b>${translateOrderNote(o.notes)}</div>` : ""}
@@ -7786,6 +8324,74 @@
     `;
   }
 
+  // Native date/time inputs: phone-friendly (they open the OS's own picker)
+  // and need no extra library. Prefilled with the order's current effective
+  // pickup date/time so opening the panel doesn't show a blank field.
+  function renderPickupEditPanel(o, idx) {
+    const dateVal = effectivePickupDate(o);
+    const timeVal = ampmTo24h(effectivePickupTime(o));
+    return `
+      <div class="pickup-edit-panel" data-idx="${idx}">
+        <div class="pickup-edit-row">
+          <label class="pickup-edit-field">
+            <span>${t("pickup_edit_date_label")}</span>
+            <input type="date" class="pickup-edit-date" value="${escapeHtml(dateVal)}">
+          </label>
+          <label class="pickup-edit-field">
+            <span>${t("pickup_edit_time_label")}</span>
+            <input type="time" class="pickup-edit-time" value="${escapeHtml(timeVal)}">
+          </label>
+        </div>
+        <div class="pickup-edit-actions">
+          <button type="button" class="pickup-save-btn" data-idx="${idx}">${t("pickup_edit_save_btn")}</button>
+          <button type="button" class="pickup-cancel-btn" data-idx="${idx}">${t("pickup_edit_cancel_btn")}</button>
+        </div>
+      </div>
+    `;
+  }
+
+  // One row of the items editor. `r.name` is shown even if it isn't one of
+  // the 5 priced MENU_ITEMS (an old one-off comp add-on, say) — added as an
+  // extra option rather than silently swapped for the first real menu item,
+  // so opening the editor on an old order never changes what it says just
+  // by looking at it.
+  function renderItemsEditRow(r) {
+    const names = MENU_ITEMS.includes(r.name) ? MENU_ITEMS : [r.name, ...MENU_ITEMS];
+    return `
+      <div class="items-edit-row" data-rid="${r._rid}">
+        <select class="items-edit-name">
+          ${names.map(name => `<option value="${escapeHtml(name)}" ${name === r.name ? "selected" : ""}>${escapeHtml(translateItemName(name))}</option>`).join("")}
+        </select>
+        <input type="number" class="items-edit-qty" min="1" step="1" inputmode="numeric" value="${r.qty}">
+        <label class="items-edit-comp-label">
+          <input type="checkbox" class="items-edit-comp-cb" ${r.comp ? "checked" : ""}> ${t("items_edit_comp_label")}
+        </label>
+        <span class="items-edit-line-price">${r.comp ? t("comp_label") : fmtMoney(lineTotal(r))}</span>
+        <button type="button" class="items-edit-remove-btn" title="${t("items_edit_remove_title")}" aria-label="${t("items_edit_remove_title")}">×</button>
+      </div>
+    `;
+  }
+
+  function renderItemsEditPanel(o, idx) {
+    const rows = itemsEditDraft.get(orderIdentity(o)) || [];
+    return `
+      <div class="items-edit-panel" data-idx="${idx}">
+        <div class="items-edit-rows">
+          ${rows.map(renderItemsEditRow).join("")}
+        </div>
+        <button type="button" class="items-edit-add-btn" data-idx="${idx}">${t("items_edit_add_btn")}</button>
+        <div class="items-edit-total-row">
+          <span>${t("items_edit_total_label")}</span>
+          <span class="items-edit-total-value">${fmtMoney(draftItemsTotal(rows))}</span>
+        </div>
+        <div class="items-edit-actions">
+          <button type="button" class="items-save-btn" data-idx="${idx}">${t("items_edit_save_btn")}</button>
+          <button type="button" class="items-cancel-btn" data-idx="${idx}">${t("items_edit_cancel_btn")}</button>
+        </div>
+      </div>
+    `;
+  }
+
   function wireToggles(gridEl, list) {
     gridEl.querySelectorAll(".complete-toggle").forEach(input => {
       input.addEventListener("change", () => {
@@ -7854,6 +8460,155 @@
       btn.addEventListener("click", () => {
         const o = list[Number(btn.dataset.idx)];
         setNote(o, "");
+        renderOrders();
+      });
+    });
+  }
+
+  // Editing pickup date/time moves the order between days/times, which
+  // means Stats, Prep by Day, Prep by Time and History all need to
+  // recompute too — not just the card — so save calls renderAll() rather
+  // than the narrower renderOrders() the note/status panels use.
+  function wirePickupEdit(gridEl, list) {
+    gridEl.querySelectorAll(".pickup-edit-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const id = orderIdentity(list[Number(btn.dataset.idx)]);
+        if (openPickupPanels.has(id)) openPickupPanels.delete(id);
+        else openPickupPanels.add(id);
+        renderOrders();
+      });
+    });
+
+    gridEl.querySelectorAll(".pickup-save-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const o = list[Number(btn.dataset.idx)];
+        const panel = btn.closest(".pickup-edit-panel");
+        const dateVal = panel.querySelector(".pickup-edit-date").value;
+        const time24 = panel.querySelector(".pickup-edit-time").value;
+        if (!dateVal || !time24) return; // both fields required — leave the panel open
+        setPickupOverride(o, dateVal, formatTimeAMPM(time24));
+        openPickupPanels.delete(orderIdentity(o));
+        renderAll();
+      });
+    });
+
+    gridEl.querySelectorAll(".pickup-cancel-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const o = list[Number(btn.dataset.idx)];
+        openPickupPanels.delete(orderIdentity(o));
+        renderOrders();
+      });
+    });
+  }
+
+  // Wires one already-in-the-DOM items-edit row. Shared by the panel's
+  // initial render and by "+ Add item" (which appends a row without
+  // re-rendering the whole panel, so typing in an existing row's quantity
+  // never gets interrupted). `arr` is the draft rows array itself — rows
+  // are found/removed by identity (===), not by array index, since indexes
+  // shift as rows are added/removed.
+  function wireItemsEditRow(rowEl, row, arr, refreshTotal) {
+    function refreshRowPrice() {
+      rowEl.querySelector(".items-edit-line-price").textContent =
+        row.comp ? t("comp_label") : fmtMoney(lineTotal(row));
+    }
+    rowEl.querySelector(".items-edit-name").addEventListener("change", (e) => {
+      row.name = e.target.value;
+      refreshRowPrice();
+      refreshTotal();
+    });
+    rowEl.querySelector(".items-edit-qty").addEventListener("input", (e) => {
+      row.qty = Math.max(1, Math.floor(Number(e.target.value)) || 1);
+      refreshRowPrice();
+      refreshTotal();
+    });
+    rowEl.querySelector(".items-edit-comp-cb").addEventListener("change", (e) => {
+      row.comp = e.target.checked;
+      refreshRowPrice();
+      refreshTotal();
+    });
+    rowEl.querySelector(".items-edit-remove-btn").addEventListener("click", () => {
+      const i = arr.indexOf(row);
+      if (i >= 0) arr.splice(i, 1);
+      rowEl.remove();
+      refreshTotal();
+    });
+  }
+
+  // Editing items moves money and portions around, which touches Stats,
+  // Prep by Day/Time and History same as a pickup edit does — save calls
+  // renderAll(), same reasoning as wirePickupEdit above.
+  function wireItemsEdit(gridEl, list) {
+    gridEl.querySelectorAll(".items-edit-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const o = list[Number(btn.dataset.idx)];
+        const id = orderIdentity(o);
+        if (openItemsPanels.has(id)) {
+          openItemsPanels.delete(id);
+          itemsEditDraft.delete(id);
+        } else {
+          openItemsPanels.add(id);
+          // Seed the draft from the order's current effective items, so
+          // opening the editor twice in a row (without saving) doesn't
+          // lose whatever was typed the first time — each order gets one
+          // draft, cleared only on Save or Cancel.
+          itemsEditDraft.set(id, effectiveItems(o).map(i => ({
+            _rid: itemsRowIdCounter++,
+            name: canonicalItemName(i.name),
+            qty: i.qty,
+            comp: !!i.comp,
+            note: i.note,
+          })));
+        }
+        renderOrders();
+      });
+    });
+
+    gridEl.querySelectorAll(".items-edit-panel").forEach(panel => {
+      const idx = Number(panel.dataset.idx);
+      const o = list[idx];
+      const id = orderIdentity(o);
+      const arr = itemsEditDraft.get(id);
+      if (!arr) return;
+
+      const totalEl = panel.querySelector(".items-edit-total-value");
+      function refreshTotal() {
+        totalEl.textContent = fmtMoney(draftItemsTotal(arr));
+      }
+
+      panel.querySelectorAll(".items-edit-row").forEach(rowEl => {
+        const rid = Number(rowEl.dataset.rid);
+        const row = arr.find(x => x._rid === rid);
+        if (row) wireItemsEditRow(rowEl, row, arr, refreshTotal);
+      });
+
+      panel.querySelector(".items-edit-add-btn").addEventListener("click", () => {
+        const row = { _rid: itemsRowIdCounter++, name: MENU_ITEMS[0], qty: 1, comp: false };
+        arr.push(row);
+        const rowsEl = panel.querySelector(".items-edit-rows");
+        rowsEl.insertAdjacentHTML("beforeend", renderItemsEditRow(row));
+        wireItemsEditRow(rowsEl.lastElementChild, row, arr, refreshTotal);
+        refreshTotal();
+      });
+
+      panel.querySelector(".items-save-btn").addEventListener("click", () => {
+        const rows = arr.filter(r => r.qty > 0);
+        if (!rows.length) return; // at least one item required — leave the panel open
+        const items = rows.map(r => {
+          const item = { qty: r.qty, name: r.name, price: r.comp ? 0 : (MENU_PRICES[r.name] || 0) };
+          if (r.comp) item.comp = true;
+          if (r.note) item.note = r.note;
+          return item;
+        });
+        setItemsOverride(o, items);
+        openItemsPanels.delete(id);
+        itemsEditDraft.delete(id);
+        renderAll();
+      });
+
+      panel.querySelector(".items-cancel-btn").addEventListener("click", () => {
+        openItemsPanels.delete(id);
+        itemsEditDraft.delete(id);
         renderOrders();
       });
     });
@@ -8057,6 +8812,10 @@
     wireNotes(gridActive, active);
     wireNotes(gridCompleted, completed);
     wireNotes(gridDeleted, deleted);
+    wirePickupEdit(gridActive, active);
+    wirePickupEdit(gridCompleted, completed);
+    wireItemsEdit(gridActive, active);
+    wireItemsEdit(gridCompleted, completed);
     wireDelete(gridActive, active);
     wireDelete(gridCompleted, completed);
     wireRestore(gridDeleted, deleted);
@@ -8089,7 +8848,7 @@
   function renderPrep() {
     const byDay = {};
     for (const o of ORDERS.filter(o => !isCompleted(o) && !isDeleted(o) && !o.historical)) {
-      (byDay[o.pickupDate] ||= []).push(o);
+      (byDay[effectivePickupDate(o)] ||= []).push(o);
     }
     const days = Object.keys(byDay).sort();
     const el = document.getElementById("prepList");
@@ -8098,10 +8857,10 @@
       return;
     }
     el.innerHTML = days.map(day => {
-      const orders = byDay[day].slice().sort((a, b) => timeToMinutes(a.pickupTime) - timeToMinutes(b.pickupTime));
+      const orders = byDay[day].slice().sort((a, b) => timeToMinutes(effectivePickupTime(a)) - timeToMinutes(effectivePickupTime(b)));
       const tally = {};
       for (const o of orders) {
-        for (const i of o.items) {
+        for (const i of effectiveItems(o)) {
           const key = canonicalItemName(i.name);
           tally[key] = (tally[key] || 0) + i.qty;
         }
@@ -8110,7 +8869,7 @@
 
       let dayPersonal = 0, dayShareable = 0;
       for (const o of orders) {
-        const portions = trayPortions(o.items);
+        const portions = trayPortions(effectiveItems(o));
         dayPersonal += portions.personal;
         dayShareable += portions.shareable;
       }
@@ -8124,7 +8883,7 @@
           <div class="day-head">
             <div class="date">${fmtDate(day)}</div>
             <div class="right">
-              <div class="count">${strOrderCount(orders.length)} · ${fmtMoney(orders.reduce((s, o) => s + o.total, 0))}${trayBits.length ? ` · ${trayBits.join(", ")}` : ""}</div>
+              <div class="count">${strOrderCount(orders.length)} · ${fmtMoney(orders.reduce((s, o) => s + effectiveTotal(o), 0))}${trayBits.length ? ` · ${trayBits.join(", ")}` : ""}</div>
               <div class="portions-badge"><div class="n">${dayPortions}</div><div class="l">${t("prep_portions_label")}</div></div>
             </div>
           </div>
@@ -8137,8 +8896,8 @@
             ${orders.map(o => `
               <div class="roster-row">
                 <span class="who">${o.name}</span>
-                <span class="what">${o.items.map(i => `${i.qty}× ${translateItemName(i.name)}`).join(", ")}</span>
-                <span class="time">${o.pickupTime}</span>
+                <span class="what">${effectiveItems(o).map(i => `${i.qty}× ${translateItemName(i.name)}`).join(", ")}</span>
+                <span class="time">${effectivePickupTime(o)}</span>
               </div>
             `).join("")}
           </div>
@@ -8211,7 +8970,7 @@
     updatePrepTimeHint();
 
     const today = localTodayISO();
-    const activeToday = ORDERS.filter(o => !isCompleted(o) && !isDeleted(o) && !o.historical && o.pickupDate === today);
+    const activeToday = ORDERS.filter(o => !isCompleted(o) && !isDeleted(o) && !o.historical && effectivePickupDate(o) === today);
 
     if (!activeToday.length) {
       controlsEl.innerHTML = "";
@@ -8273,14 +9032,14 @@
     const cutoffMin = prepTimeCutoffMin;
 
     const included = activeToday.filter(o => {
-      const mins = prepTimeToMinutes(o.pickupTime);
+      const mins = prepTimeToMinutes(effectivePickupTime(o));
       return mins === null || mins <= cutoffMin;
     });
-    const flexIncluded = included.filter(o => prepTimeToMinutes(o.pickupTime) === null);
+    const flexIncluded = included.filter(o => prepTimeToMinutes(effectivePickupTime(o)) === null);
 
     const tally = {}; // item name -> { total, notes: { noteText -> qty } }
     for (const o of included) {
-      for (const i of o.items) {
+      for (const i of effectiveItems(o)) {
         const key = canonicalItemName(i.name);
         tally[key] ||= { total: 0, notes: {} };
         tally[key].total += i.qty;
@@ -8291,7 +9050,7 @@
 
     let personal = 0, shareable = 0;
     for (const o of included) {
-      const portions = trayPortions(o.items);
+      const portions = trayPortions(effectiveItems(o));
       personal += portions.personal;
       shareable += portions.shareable;
     }
@@ -8324,15 +9083,15 @@
     rosterEl.innerHTML = included.length ? `
       <div class="pt-roster-head">${t("prep_time_roster_head")}</div>
       ${included.slice().sort((a, b) => {
-        const ma = prepTimeToMinutes(a.pickupTime), mb = prepTimeToMinutes(b.pickupTime);
+        const ma = prepTimeToMinutes(effectivePickupTime(a)), mb = prepTimeToMinutes(effectivePickupTime(b));
         if (ma === null) return 1;
         if (mb === null) return -1;
         return ma - mb;
       }).map(o => `
         <div class="pt-roster-row">
           <span class="who">${o.name}</span>
-          <span class="what">${o.items.map(i => `${i.qty}× ${translateItemName(i.name)}${i.note ? ` <span class="item-note">(${translateItemNote(i.note)})</span>` : ""}`).join(", ")}</span>
-          <span class="time${prepTimeToMinutes(o.pickupTime) === null ? " flex-tag" : ""}">${o.pickupTime}</span>
+          <span class="what">${effectiveItems(o).map(i => `${i.qty}× ${translateItemName(i.name)}${i.note ? ` <span class="item-note">(${translateItemNote(i.note)})</span>` : ""}`).join(", ")}</span>
+          <span class="time${prepTimeToMinutes(effectivePickupTime(o)) === null ? " flex-tag" : ""}">${effectivePickupTime(o)}</span>
         </div>
       `).join("")}
     ` : "";
@@ -8361,8 +9120,9 @@
   // can be null for a manually-logged order with no known placement time),
   // so this doesn't need the same null-safety as parseOrderDate.
   function parsePickupDate(o) {
-    if (!o.pickupDate) return null;
-    const [y, m, d] = o.pickupDate.split("-").map(Number);
+    const pd = effectivePickupDate(o);
+    if (!pd) return null;
+    const [y, m, d] = pd.split("-").map(Number);
     return new Date(Date.UTC(y, m - 1, d));
   }
 
@@ -8511,7 +9271,7 @@
 
   function renderHistStats(list) {
     const totalOrders = list.length;
-    const totalIncome = list.reduce((s, o) => s + o.total, 0);
+    const totalIncome = list.reduce((s, o) => s + effectiveTotal(o), 0);
     const avg = totalOrders ? totalIncome / totalOrders : 0;
     document.getElementById("histStats").innerHTML = `
       <div class="stat accent"><div class="n">${totalOrders}</div><div class="l">${t("hist_stat_total_orders")}</div></div>
@@ -8523,7 +9283,7 @@
   function renderHistItemized(list) {
     const byItem = new Map();
     list.forEach((o) => {
-      o.items.forEach((it) => {
+      effectiveItems(o).forEach((it) => {
         const key = canonicalItemName(it.name);
         const cur = byItem.get(key) || { qty: 0, revenue: 0 };
         cur.qty += it.qty;
@@ -8573,7 +9333,7 @@
 
   function renderHistTraySize(list) {
     let personal = 0, shareable = 0;
-    list.forEach((o) => o.items.forEach((it) => {
+    list.forEach((o) => effectiveItems(o).forEach((it) => {
       if (/personal tray/i.test(it.name)) personal += it.qty;
       else if (/shareable tray/i.test(it.name)) shareable += it.qty;
     }));
@@ -8590,7 +9350,7 @@
   function renderHistDrinks(list) {
     const counts = {};
     DRINK_NAMES.forEach((n) => { counts[n] = 0; });
-    list.forEach((o) => o.items.forEach((it) => {
+    list.forEach((o) => effectiveItems(o).forEach((it) => {
       const key = canonicalItemName(it.name);
       if (Object.prototype.hasOwnProperty.call(counts, key)) counts[key] += it.qty;
     }));
@@ -8653,7 +9413,7 @@
     if (!list.length) { el.textContent = t("empty_no_orders_logged_window"); return; }
     // pickupDate, not orderDate — the window pills now bucket by pickup
     // week, so the displayed range should describe the same field.
-    const dates = list.map((o) => o.pickupDate).sort();
+    const dates = list.map((o) => effectivePickupDate(o)).sort();
     const label = windowKey === "all" ? strHistRangeAll(list.length) : strHistRangeWindow(list.length, windowKey);
     el.textContent = dates[0] === dates[dates.length - 1]
       ? `${label} · ${fmtShortDate(dates[0])}`
@@ -9037,10 +9797,10 @@
     const digits = (v) => String(v || "").replace(/\D+/g, "");
 
     function haystack(o) {
-      const items = (o.items || []).map((i) => i.qty + "x " + i.name).join(" ");
+      const items = effectiveItems(o).map((i) => i.qty + "x " + i.name).join(" ");
       return [
         o.name, o.handle, o.email, o.contact, digits(o.contact), o.ref, o.webId,
-        o.pickupDate, o.pickupTime, o.orderDate, o.notes, items,
+        effectivePickupDate(o), effectivePickupTime(o), o.orderDate, o.notes, items,
         o.status, o.statusNote, o.payMethod,
       ].filter(Boolean).join("  ").toLowerCase();
     }
@@ -9057,7 +9817,7 @@
           const d = digits(w);
           return d.length >= 3 && digits(hay).includes(d);
         });
-      }).sort((a, b) => String(b.pickupDate).localeCompare(String(a.pickupDate)));
+      }).sort((a, b) => String(effectivePickupDate(b)).localeCompare(String(effectivePickupDate(a))));
     }
 
     const money = (n) => fmtMoney(Number(n) || 0);
@@ -9100,9 +9860,9 @@
         return '<button type="button" class="lookup-hit" data-i="' + i + '">'
           + '<span class="who">' + escapeHtml(o.name)
           + ' <span class="ld-handle">@' + escapeHtml(o.handle) + "</span></span>"
-          + '<span class="amt">' + money(o.total) + "</span>"
-          + '<span class="meta">' + escapeHtml(fmtShortDate(o.pickupDate))
-          + " · " + escapeHtml(o.pickupTime || "") + " · " + sourceOf(o)
+          + '<span class="amt">' + money(effectiveTotal(o)) + "</span>"
+          + '<span class="meta">' + escapeHtml(fmtShortDate(effectivePickupDate(o)))
+          + " · " + escapeHtml(effectivePickupTime(o) || "") + " · " + sourceOf(o)
           + (marks ? " · " + marks : "") + "</span></button>";
       }).join("");
       resultsEl.querySelectorAll(".lookup-hit").forEach((b) => {
@@ -9176,7 +9936,7 @@
         isDeleted(o) ? '<span class="ld-chip deleted">' + t("lookup_chip_deleted") + "</span>" : "",
       ].filter(Boolean).join("");
 
-      const itemsHtml = (o.items || []).map((i) =>
+      const itemsHtml = effectiveItems(o).map((i) =>
         '<div class="ld-item"><span class="q">' + i.qty + "×</span><span>"
         + escapeHtml(i.name) + (i.comp ? " (comp)" : "") + "</span>"
         + '<span class="p">' + (i.comp ? "comp" : money((i.price || 0) * (i.qty || 0)))
@@ -9203,12 +9963,12 @@
         + '<div class="ld-block"><h5>' + t("lookup_h_order") + "</h5>"
         + '<div class="ld-items">' + itemsHtml
         + '<div class="ld-total"><span>' + t("lookup_total") + '</span><span class="p">'
-        + money(o.total) + "</span></div></div></div>"
+        + money(effectiveTotal(o)) + "</span></div></div></div>"
 
         + '<div class="ld-block"><h5>' + t("lookup_h_pickup") + "</h5>"
         + '<div class="ld-rows">' + rowsHtml([
-            [t("lookup_k_day"), escapeHtml(fmtShortDate(o.pickupDate)), true],
-            [t("lookup_k_time"), escapeHtml(o.pickupTime || "—"), true],
+            [t("lookup_k_day"), escapeHtml(fmtShortDate(effectivePickupDate(o))), true],
+            [t("lookup_k_time"), escapeHtml(effectivePickupTime(o) || "—"), true],
             [t("lookup_k_payment"), escapeHtml(o.payMethod || "—")],
           ]) + "</div></div>"
 
@@ -9515,7 +10275,11 @@
       if (d.status === "declined") return;
       const asOrder = ORDERS.find((o) => o.webId === d.id);
       if (asOrder && isDeleted(asOrder)) return;
-      truth[iso] = (truth[iso] || 0) + portionsOfItems(d.items);
+      // If Tony has live-edited this order's items, the kitchen's real
+      // portion count follows his edit, not what the customer originally
+      // submitted — otherwise a corrected order would quietly leave the
+      // public capacity tally wrong.
+      truth[iso] = (truth[iso] || 0) + portionsOfItems(asOrder ? effectiveItems(asOrder) : d.items);
     });
 
     window.riceShineWriteDayLoad(truth, todayIso);
@@ -9660,6 +10424,39 @@
     notesMap = mergedNotes;
     persistLastSyncedMap(LAST_SYNCED_NOTES_KEY, remoteNotes);
 
+    // pickupOverride values are {pickupDate, pickupTime} objects rather than
+    // primitives, so the 3-way diff compares them by JSON string instead of
+    // ===, same idea as the primitive-valued maps above.
+    const remotePickupOverride = remote.pickupOverride || {};
+    const priorSyncedPickupOverride = readLastSyncedMap(LAST_SYNCED_PICKUP_OVERRIDE_KEY, pickupOverrideMap || {});
+    const mergedPickupOverride = { ...remotePickupOverride };
+    const localOnlyPickupOverridePairs = [];
+    Object.keys(pickupOverrideMap || {}).forEach((k) => {
+      const local = JSON.stringify(pickupOverrideMap[k]);
+      if (local === JSON.stringify(remotePickupOverride[k])) return;
+      if (local === JSON.stringify(priorSyncedPickupOverride[k])) return;
+      mergedPickupOverride[k] = pickupOverrideMap[k];
+      localOnlyPickupOverridePairs.push([k, pickupOverrideMap[k]]);
+    });
+    pickupOverrideMap = mergedPickupOverride;
+    persistLastSyncedMap(LAST_SYNCED_PICKUP_OVERRIDE_KEY, remotePickupOverride);
+
+    // itemsOverride values are {items: [...]} objects, same JSON-string
+    // 3-way diff as pickupOverride above.
+    const remoteItemsOverride = remote.itemsOverride || {};
+    const priorSyncedItemsOverride = readLastSyncedMap(LAST_SYNCED_ITEMS_OVERRIDE_KEY, itemsOverrideMap || {});
+    const mergedItemsOverride = { ...remoteItemsOverride };
+    const localOnlyItemsOverridePairs = [];
+    Object.keys(itemsOverrideMap || {}).forEach((k) => {
+      const local = JSON.stringify(itemsOverrideMap[k]);
+      if (local === JSON.stringify(remoteItemsOverride[k])) return;
+      if (local === JSON.stringify(priorSyncedItemsOverride[k])) return;
+      mergedItemsOverride[k] = itemsOverrideMap[k];
+      localOnlyItemsOverridePairs.push([k, itemsOverrideMap[k]]);
+    });
+    itemsOverrideMap = mergedItemsOverride;
+    persistLastSyncedMap(LAST_SYNCED_ITEMS_OVERRIDE_KEY, remoteItemsOverride);
+
     buyerHistory = remote.buyerHistory || {};
     // The shared doc may still carry entries under the old content-based
     // key from before the completed/deleted key fix — convert those to the
@@ -9672,6 +10469,8 @@
     persistBuyerHistory();
     persistPaidOverride();
     persistNotes();
+    persistPickupOverride();
+    persistItemsOverride();
     // This week's ORDERS may include orders the remote snapshot doesn't
     // know about yet (e.g. added locally before this device ever signed
     // in) — reconcile and push any diffs back up.
@@ -9682,6 +10481,8 @@
       if (localOnlySeenPairs.length && window.RiceShineSync.setSeenBatch) window.RiceShineSync.setSeenBatch(localOnlySeenPairs);
       if (localOnlyPaidOverridePairs.length && window.RiceShineSync.setPaidOverrideBatch) window.RiceShineSync.setPaidOverrideBatch(localOnlyPaidOverridePairs);
       if (localOnlyNotesPairs.length && window.RiceShineSync.setNotesBatch) window.RiceShineSync.setNotesBatch(localOnlyNotesPairs);
+      if (localOnlyPickupOverridePairs.length && window.RiceShineSync.setPickupOverrideBatch) window.RiceShineSync.setPickupOverrideBatch(localOnlyPickupOverridePairs);
+      if (localOnlyItemsOverridePairs.length && window.RiceShineSync.setItemsOverrideBatch) window.RiceShineSync.setItemsOverrideBatch(localOnlyItemsOverridePairs);
     }
     // The board state that just landed is what says which orders are
     // deleted, and it can arrive after the orders themselves. Re-running the
@@ -9747,6 +10548,8 @@
     buyerHistory: "riceShineBuyerOrderHistory",
     paidOverride: "riceShinePaidOverride",
     notes: "riceShineOrderNotes",
+    pickupOverride: "riceShinePickupOverride",
+    itemsOverride: "riceShineItemsOverride",
   };
 
   function readLocalJSON(key, fallback) {
@@ -9810,6 +10613,8 @@
         buyerHistory: decodeFirestoreKeyedMap(data.buyerHistory || {}),
         paidOverride: decodeFirestoreKeyedMap(data.paidOverride || {}),
         notes: decodeFirestoreKeyedMap(data.notes || {}),
+        pickupOverride: decodeFirestoreKeyedMap(data.pickupOverride || {}),
+        itemsOverride: decodeFirestoreKeyedMap(data.itemsOverride || {}),
       },
     }));
   }
@@ -9827,6 +10632,8 @@
       buyerHistory: encodeFirestoreKeyedMap(readLocalJSON(LS.buyerHistory, {})),
       paidOverride: encodeFirestoreKeyedMap(readLocalJSON(LS.paidOverride, {})),
       notes: encodeFirestoreKeyedMap(readLocalJSON(LS.notes, {})),
+      pickupOverride: encodeFirestoreKeyedMap(readLocalJSON(LS.pickupOverride, {})),
+      itemsOverride: encodeFirestoreKeyedMap(readLocalJSON(LS.itemsOverride, {})),
     };
     readLocalJSON(LS.completed, []).forEach((k) => { seed.completed[encodeFirestoreKey(k)] = true; });
     readLocalJSON(LS.deleted, []).forEach((k) => { seed.deleted[encodeFirestoreKey(k)] = true; });
@@ -10094,6 +10901,8 @@
   const pendingSeen = new Map();
   const pendingPaidOverride = new Map();
   const pendingNotes = new Map();
+  const pendingPickupOverride = new Map();
+  const pendingItemsOverride = new Map();
   let flushTimer = null;
 
   function scheduleFlush() {
@@ -10108,8 +10917,10 @@
     const seenPairs = [...pendingSeen.entries()];
     const paidOverridePairs = [...pendingPaidOverride.entries()];
     const notesPairs = [...pendingNotes.entries()];
-    if (!completedPairs.length && !deletedPairs.length && !seenPairs.length && !paidOverridePairs.length && !notesPairs.length) return;
-    if (!sharedMode) { pendingCompleted.clear(); pendingDeleted.clear(); pendingSeen.clear(); pendingPaidOverride.clear(); pendingNotes.clear(); return; }
+    const pickupOverridePairs = [...pendingPickupOverride.entries()];
+    const itemsOverridePairs = [...pendingItemsOverride.entries()];
+    if (!completedPairs.length && !deletedPairs.length && !seenPairs.length && !paidOverridePairs.length && !notesPairs.length && !pickupOverridePairs.length && !itemsOverridePairs.length) return;
+    if (!sharedMode) { pendingCompleted.clear(); pendingDeleted.clear(); pendingSeen.clear(); pendingPaidOverride.clear(); pendingNotes.clear(); pendingPickupOverride.clear(); pendingItemsOverride.clear(); return; }
     try {
       const args = [];
       completedPairs.forEach(([k, v]) => args.push(new FieldPath("completed", encodeFirestoreKey(k)), v ? true : deleteField()));
@@ -10117,12 +10928,16 @@
       seenPairs.forEach(([k, v]) => args.push(new FieldPath("seen", encodeFirestoreKey(k)), v));
       paidOverridePairs.forEach(([k, v]) => args.push(new FieldPath("paidOverride", encodeFirestoreKey(k)), v));
       notesPairs.forEach(([k, v]) => args.push(new FieldPath("notes", encodeFirestoreKey(k)), v === "" || v === null || v === undefined ? deleteField() : v));
+      pickupOverridePairs.forEach(([k, v]) => args.push(new FieldPath("pickupOverride", encodeFirestoreKey(k)), v));
+      itemsOverridePairs.forEach(([k, v]) => args.push(new FieldPath("itemsOverride", encodeFirestoreKey(k)), v));
       await updateDoc(stateDocRef, ...args);
       completedPairs.forEach(([k]) => pendingCompleted.delete(k));
       deletedPairs.forEach(([k]) => pendingDeleted.delete(k));
       seenPairs.forEach(([k]) => pendingSeen.delete(k));
       paidOverridePairs.forEach(([k]) => pendingPaidOverride.delete(k));
       notesPairs.forEach(([k]) => pendingNotes.delete(k));
+      pickupOverridePairs.forEach(([k]) => pendingPickupOverride.delete(k));
+      itemsOverridePairs.forEach(([k]) => pendingItemsOverride.delete(k));
     } catch (e) {
       console.warn("Rice & Shine sync: batched write failed, will retry on next flush", e);
       scheduleFlush();
@@ -10188,6 +11003,26 @@
 
   async function setNotesBatch(pairs) {
     await writeFieldBatch("notes", pairs);
+  }
+
+  function setPickupOverride(identity, value) {
+    if (!sharedMode) return;
+    pendingPickupOverride.set(identity, value);
+    scheduleFlush();
+  }
+
+  async function setPickupOverrideBatch(pairs) {
+    await writeFieldBatch("pickupOverride", pairs);
+  }
+
+  function setItemsOverride(identity, value) {
+    if (!sharedMode) return;
+    pendingItemsOverride.set(identity, value);
+    scheduleFlush();
+  }
+
+  async function setItemsOverrideBatch(pairs) {
+    await writeFieldBatch("itemsOverride", pairs);
   }
 
   // Batched so updating buyerHistory for the whole board on load costs one
@@ -10294,6 +11129,10 @@
     setPaidOverrideBatch,
     setNote,
     setNotesBatch,
+    setPickupOverride,
+    setPickupOverrideBatch,
+    setItemsOverride,
+    setItemsOverrideBatch,
   };
 
   updateSyncStatusUI();
