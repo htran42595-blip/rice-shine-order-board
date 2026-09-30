@@ -6963,7 +6963,7 @@
       custom_range_end_label: "End date",
       custom_range_cancel: "Cancel",
       custom_range_apply: "Show orders",
-      hist_stat_total_orders: "Total orders",
+      hist_stat_total_orders: "Orders / portions",
       hist_stat_total_income: "Total income",
       hist_stat_avg_order: "Avg order value",
       hist_itemized_title: "Itemized breakdown",
@@ -7175,7 +7175,7 @@
       custom_range_end_label: "Ngày kết thúc",
       custom_range_cancel: "Hủy",
       custom_range_apply: "Xem đơn hàng",
-      hist_stat_total_orders: "Tổng số đơn",
+      hist_stat_total_orders: "Đơn / phần ăn",
       hist_stat_total_income: "Tổng doanh thu",
       hist_stat_avg_order: "Giá trị đơn trung bình",
       hist_itemized_title: "Chi tiết theo món",
@@ -9538,8 +9538,9 @@
     const totalOrders = list.length;
     const totalIncome = list.reduce((s, o) => s + effectiveTotal(o), 0);
     const avg = totalOrders ? totalIncome / totalOrders : 0;
+    const totalPortions = list.reduce((s, o) => s + trayPortions(effectiveItems(o)).portions, 0);
     document.getElementById("histStats").innerHTML = `
-      <div class="stat accent"><div class="n">${totalOrders}</div><div class="l">${t("hist_stat_total_orders")}</div></div>
+      <div class="stat accent"><div class="n">${totalOrders} <span class="stat-progress-target">/ ${totalPortions}</span></div><div class="l">${t("hist_stat_total_orders")}</div></div>
       <div class="stat"><div class="n">${fmtMoney(totalIncome)}</div><div class="l">${t("hist_stat_total_income")}</div></div>
       <div class="stat"><div class="n">${fmtMoney(avg)}</div><div class="l">${t("hist_stat_avg_order")}</div></div>
     `;
