@@ -2546,6 +2546,33 @@
 
   .hist-charts .hist-card { margin-bottom: 0; }
 
+  /* ---- History: Progress over time ---- */
+  .hp-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .hp-pills { display: inline-flex; background: var(--rice-2); border: 1px solid var(--line); border-radius: 999px; padding: 3px; gap: 3px; }
+  .hp-pills button { font-family: inherit; font-size: 0.76rem; font-weight: 700; color: var(--ink-soft); background: transparent; border: none; border-radius: 999px; padding: 6px 13px; cursor: pointer; }
+  .hp-pills button[aria-pressed="true"] { background: var(--tea); color: var(--tea-ink); }
+  .hp-pills button:focus-visible { outline: 2px solid var(--tea); outline-offset: 2px; }
+  .hp-chart-block { margin-bottom: 10px; }
+  .hp-chart-title { font-weight: 700; font-size: 0.9rem; margin: 6px 0 2px; }
+  .hp-chart-title span { font-weight: 500; font-size: 0.8rem; color: var(--ink-soft); margin-left: 6px; }
+  .hp-chart { position: relative; outline: none; border-radius: 8px; }
+  .hp-chart:focus-visible { box-shadow: 0 0 0 2px var(--tea); }
+  .hp-svg { display: block; max-width: 100%; height: auto; overflow: visible; touch-action: pan-y; }
+  .hp-grid { stroke: var(--line); stroke-width: 1; }
+  .hp-ytick, .hp-xtick { fill: var(--ink-soft); font-size: 11px; font-family: "Space Mono", monospace; }
+  .hp-endlabel { fill: var(--ink); font-size: 12px; font-weight: 700; }
+  .hp-cross { stroke: var(--ink-soft); stroke-width: 1; stroke-dasharray: 3 3; }
+  .hp-bar { transition: opacity .1s; }
+  .hp-chart:hover .hp-bar, .hp-chart:focus .hp-bar { opacity: .55; }
+  .hp-chart .hp-bar.hp-bar-on { opacity: 1; }
+  .hp-tip { position: absolute; z-index: 2; pointer-events: none; background: var(--card); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); padding: 8px 11px; font-size: 0.78rem; white-space: nowrap; }
+  .hp-tip-head { color: var(--ink-soft); margin-bottom: 3px; }
+  .hp-tip-row strong { font-size: 0.92rem; }
+  .hp-tip-row span { color: var(--ink-soft); }
+  .hp-table { margin-top: 6px; }
+  .hp-table summary { cursor: pointer; font-size: 0.8rem; font-weight: 700; color: var(--ink-soft); padding: 6px 0; }
+  .hp-table table { margin-top: 6px; }
+
   @media (max-width: 780px) {
     .hist-stats { grid-template-columns: 1fr; }
     .hist-charts { grid-template-columns: 1fr; }
@@ -2775,6 +2802,20 @@
           <tbody id="histBiggestBody"></tbody>
         </table>
       </div>
+    </div>
+
+    <div class="hist-card" id="histProgressCard" hidden>
+      <div class="hist-card-head hp-head">
+        <div>
+          <div class="title" data-i18n="hist_progress_title">Progress over time</div>
+          <div class="sub" data-i18n="hist_progress_sub">Portions and income by pickup week, all time</div>
+        </div>
+        <div class="hp-pills" role="group" aria-label="Chart mode">
+          <button type="button" data-mode="cum" aria-pressed="true" data-i18n="hist_progress_cum">Running total</button>
+          <button type="button" data-mode="week" aria-pressed="false" data-i18n="hist_progress_perweek">Per week</button>
+        </div>
+      </div>
+      <div class="hist-card-body" id="histProgressBody"></div>
     </div>
 
   </section>
@@ -7450,6 +7491,22 @@
       th_total_spent: "Total spent",
       hist_biggest_title: "Biggest buyers",
       hist_biggest_sub: "Total spent, all-time — highest first",
+      hist_progress_title: "Progress over time",
+      hist_progress_sub: "Portions and income by pickup week, all time",
+      hist_progress_cum: "Running total",
+      hist_progress_perweek: "Per week",
+      hist_progress_portions: "Portions",
+      hist_progress_income: "Income",
+      hist_progress_total: "total",
+      hist_progress_week_of: "Week of",
+      hist_progress_this_week: "this week",
+      hist_progress_running: "running total",
+      hist_progress_table: "View as table",
+      hist_progress_th_week: "Week",
+      hist_progress_th_portions: "Portions",
+      hist_progress_th_portions_total: "Portions (total)",
+      hist_progress_th_income: "Income",
+      hist_progress_th_income_total: "Income (total)",
       footer: "Rice & Shine · Instagram DM order log · orders received Aug 23–Oct 2, 2026 · updated manually until the live bot goes live",
       empty_no_active: "All caught up — no active orders right now.",
       empty_no_completed: "No completed orders yet.",
@@ -7662,7 +7719,23 @@
       th_total_spent: "Tổng chi tiêu",
       hist_biggest_title: "Khách chi tiêu nhiều nhất",
       hist_biggest_sub: "Tổng chi tiêu, tính từ trước đến nay — cao nhất lên đầu",
-      footer: "Rice & Shine · Nhật ký đơn hàng qua tin nhắn Instagram · đơn nhận từ 23/8–26/9/2026 · cập nhật thủ công cho đến khi có bot tự động",
+      hist_progress_title: "Tiến độ theo thời gian",
+      hist_progress_sub: "Số phần và doanh thu theo tuần lấy hàng, tính từ trước đến nay",
+      hist_progress_cum: "Cộng dồn",
+      hist_progress_perweek: "Theo tuần",
+      hist_progress_portions: "Số phần",
+      hist_progress_income: "Doanh thu",
+      hist_progress_total: "tổng",
+      hist_progress_week_of: "Tuần",
+      hist_progress_this_week: "trong tuần",
+      hist_progress_running: "cộng dồn",
+      hist_progress_table: "Xem dạng bảng",
+      hist_progress_th_week: "Tuần",
+      hist_progress_th_portions: "Số phần",
+      hist_progress_th_portions_total: "Số phần (cộng dồn)",
+      hist_progress_th_income: "Doanh thu",
+      hist_progress_th_income_total: "Doanh thu (cộng dồn)",
+      footer: "Rice & Shine · Nhật ký đơn hàng qua tin nhắn Instagram · đơn nhận từ 23/8–2/10/2026 · cập nhật thủ công cho đến khi có bot tự động",
       empty_no_active: "Đã xử lý hết — hiện không có đơn nào đang chờ.",
       empty_no_completed: "Chưa có đơn nào hoàn tất.",
       empty_prep_done: "Không còn gì cần chuẩn bị — mọi đơn đã hoàn tất.",
@@ -10182,6 +10255,214 @@
 
   let currentWindow = "all";
 
+  // ---- Progress over time (History tab, All time only) ----
+  // Two charts (never one dual-axis chart): portions and income by pickup
+  // week, each as a running total or per-week columns. Same pickup-date
+  // basis and same non-deleted order set as the stat tiles above, so the
+  // final running total here always matches the headline numbers.
+  let histProgressMode = "cum"; // "cum" | "week"
+  let histProgressRows = [];
+  const HP_DAY = 86400000;
+
+  function hpWeekStart(d) {
+    const dow = (d.getUTCDay() + 6) % 7; // Monday = 0
+    return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() - dow);
+  }
+
+  function histProgressSeries(list) {
+    const byWeek = new Map();
+    list.forEach((o) => {
+      const d = parsePickupDate(o);
+      if (!d) return;
+      const k = hpWeekStart(d);
+      const cur = byWeek.get(k) || { portions: 0, income: 0 };
+      cur.portions += trayPortions(effectiveItems(o)).portions;
+      cur.income += effectiveTotal(o);
+      byWeek.set(k, cur);
+    });
+    if (!byWeek.size) return [];
+    const keys = [...byWeek.keys()].sort((a, b) => a - b);
+    const rows = [];
+    let cp = 0, ci = 0;
+    for (let k = keys[0]; k <= keys[keys.length - 1]; k += 7 * HP_DAY) {
+      const v = byWeek.get(k) || { portions: 0, income: 0 };
+      cp += v.portions; ci += v.income;
+      rows.push({ start: k, portions: v.portions, income: v.income, cumPortions: cp, cumIncome: ci });
+    }
+    return rows;
+  }
+
+  function hpFmtDay(ms) {
+    return new Date(ms).toLocaleDateString(localeCode(), { month: "short", day: "numeric", timeZone: "UTC" });
+  }
+  function hpWeekLabel(ms) { return `${hpFmtDay(ms)} – ${hpFmtDay(ms + 6 * HP_DAY)}`; }
+  function hpFmtMoneyShort(n) {
+    return n >= 10000 ? "$" + (n / 1000).toFixed(0) + "k" : n >= 1000 ? "$" + (n / 1000).toFixed(1).replace(/\.0$/, "") + "k" : "$" + Math.round(n);
+  }
+  function hpNiceMax(v) {
+    if (v <= 0) return 1;
+    const p = Math.pow(10, Math.floor(Math.log10(v)));
+    const f = v / p;
+    return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * p;
+  }
+
+  function hpChartSvg(rows, cfg, W) {
+    const H = 210, L = 46, R = 58, T = 14, B = 26;
+    const innerW = Math.max(60, W - L - R), innerH = H - T - B;
+    const n = rows.length, band = innerW / n;
+    const vals = rows.map((r) => histProgressMode === "cum" ? r[cfg.cumKey] : r[cfg.key]);
+    const max = hpNiceMax(Math.max(...vals, 1));
+    const yOf = (v) => T + innerH - (v / max) * innerH;
+    const xOf = (i) => L + (i + 0.5) * band;
+    let g = "";
+    for (let k = 0; k <= 4; k++) {
+      const v = (max / 4) * k, y = yOf(v);
+      g += `<line class="hp-grid" x1="${L}" x2="${L + innerW}" y1="${y}" y2="${y}"/>`;
+      g += `<text class="hp-ytick" x="${L - 8}" y="${y + 4}" text-anchor="end">${cfg.axisFmt(v)}</text>`;
+    }
+    let prevMonth = -1;
+    rows.forEach((r, i) => {
+      const m = new Date(r.start).getUTCMonth();
+      if (m !== prevMonth) {
+        const lbl = new Date(r.start).toLocaleDateString(localeCode(), { month: "short", timeZone: "UTC" });
+        g += `<text class="hp-xtick" x="${xOf(i)}" y="${H - 8}" text-anchor="middle">${escapeHtml(lbl)}</text>`;
+        prevMonth = m;
+      }
+    });
+    let marks = "";
+    if (histProgressMode === "cum") {
+      const pts = vals.map((v, i) => `${xOf(i).toFixed(1)},${yOf(v).toFixed(1)}`);
+      const base = T + innerH;
+      marks += `<path d="M${xOf(0).toFixed(1)},${base} L${pts.join(" L")} L${xOf(n - 1).toFixed(1)},${base} Z" fill="${cfg.color}" fill-opacity="0.13"/>`;
+      marks += `<polyline points="${pts.join(" ")}" fill="none" stroke="${cfg.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+      const lx = xOf(n - 1), ly = yOf(vals[n - 1]);
+      marks += `<circle cx="${lx}" cy="${ly}" r="4.5" fill="${cfg.color}" stroke="var(--card)" stroke-width="2"/>`;
+      marks += `<text class="hp-endlabel" x="${Math.min(lx + 9, W - 4)}" y="${ly + 4}" text-anchor="start">${cfg.endFmt(vals[n - 1])}</text>`;
+    } else {
+      const bw = Math.max(3, Math.min(28, band * 0.72));
+      vals.forEach((v, i) => {
+        if (v <= 0) return;
+        const x = xOf(i) - bw / 2, y = yOf(v), h = T + innerH - y, r = Math.min(3, bw / 2, h);
+        marks += `<path class="hp-bar" data-i="${i}" fill="${cfg.color}" d="M${x},${T + innerH} V${y + r} Q${x},${y} ${x + r},${y} H${x + bw - r} Q${x + bw},${y} ${x + bw},${y + r} V${T + innerH} Z"/>`;
+      });
+    }
+    return `<svg class="hp-svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${escapeHtml(cfg.aria)}">
+      ${g}${marks}
+      <line class="hp-cross" x1="0" x2="0" y1="${T}" y2="${T + innerH}" style="display:none"/>
+      <circle class="hp-dot" r="5" fill="${cfg.color}" stroke="var(--card)" stroke-width="2" style="display:none"/>
+      <rect class="hp-hit" x="${L}" y="${T}" width="${innerW}" height="${innerH}" fill="transparent"/>
+    </svg>`;
+  }
+
+  function hpWireChart(wrap, rows, cfg, W) {
+    const svg = wrap.querySelector("svg");
+    const tip = wrap.querySelector(".hp-tip");
+    const cross = svg.querySelector(".hp-cross"), dot = svg.querySelector(".hp-dot");
+    const L = 46, R = 58, T = 14, B = 26, H = 210;
+    const innerW = Math.max(60, W - L - R), innerH = H - T - B, n = rows.length, band = innerW / n;
+    const vals = rows.map((r) => histProgressMode === "cum" ? r[cfg.cumKey] : r[cfg.key]);
+    const max = hpNiceMax(Math.max(...vals, 1));
+    let current = -1;
+    function show(i) {
+      i = Math.max(0, Math.min(n - 1, i));
+      current = i;
+      const r = rows[i];
+      const cx = L + (i + 0.5) * band, cy = T + innerH - (vals[i] / max) * innerH;
+      cross.setAttribute("x1", cx); cross.setAttribute("x2", cx); cross.style.display = "";
+      if (histProgressMode === "cum") { dot.setAttribute("cx", cx); dot.setAttribute("cy", cy); dot.style.display = ""; }
+      else dot.style.display = "none";
+      svg.querySelectorAll(".hp-bar").forEach((b) => b.classList.toggle("hp-bar-on", Number(b.dataset.i) === i));
+      tip.replaceChildren();
+      const head = document.createElement("div"); head.className = "hp-tip-head"; head.textContent = `${t("hist_progress_week_of")} ${hpWeekLabel(r.start)}`;
+      const row1 = document.createElement("div"); row1.className = "hp-tip-row";
+      const v1 = document.createElement("strong"); v1.textContent = cfg.fmt(r[cfg.key]);
+      const l1 = document.createElement("span"); l1.textContent = ` ${t("hist_progress_this_week")}`;
+      row1.append(v1, l1);
+      const row2 = document.createElement("div"); row2.className = "hp-tip-row";
+      const v2 = document.createElement("strong"); v2.textContent = cfg.fmt(r[cfg.cumKey]);
+      const l2 = document.createElement("span"); l2.textContent = ` ${t("hist_progress_running")}`;
+      row2.append(v2, l2);
+      tip.append(head, row1, row2);
+      tip.style.display = "block";
+      const tw = tip.offsetWidth;
+      let left = cx + 12;
+      if (left + tw > W - 4) left = cx - tw - 12;
+      tip.style.left = Math.max(4, left) + "px";
+      tip.style.top = "8px";
+    }
+    function hide() {
+      current = -1;
+      cross.style.display = "none"; dot.style.display = "none"; tip.style.display = "none";
+      svg.querySelectorAll(".hp-bar-on").forEach((b) => b.classList.remove("hp-bar-on"));
+    }
+    svg.querySelector(".hp-hit").addEventListener("pointermove", (e) => {
+      const box = svg.getBoundingClientRect();
+      const x = (e.clientX - box.left) * (W / box.width);
+      show(Math.floor((x - L) / band));
+    });
+    svg.querySelector(".hp-hit").addEventListener("pointerleave", hide);
+    wrap.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowLeft") { show(current < 0 ? n - 1 : current - 1); e.preventDefault(); }
+      else if (e.key === "ArrowRight") { show(current < 0 ? n - 1 : current + 1); e.preventDefault(); }
+      else if (e.key === "Escape") hide();
+    });
+    wrap.addEventListener("focus", () => { if (current < 0) show(n - 1); });
+    wrap.addEventListener("blur", hide);
+  }
+
+  function renderHistProgress(list) {
+    const body = document.getElementById("histProgressBody");
+    const rows = histProgressSeries(list);
+    histProgressRows = list;
+    if (!rows.length) { body.innerHTML = `<div class="empty-state">${t("empty_no_orders_window")}</div>`; return; }
+    const W = Math.max(300, Math.floor(body.clientWidth || 720));
+    const totalP = rows[rows.length - 1].cumPortions, totalI = rows[rows.length - 1].cumIncome;
+    const charts = [
+      { key: "portions", cumKey: "cumPortions", color: "var(--tea)", title: t("hist_progress_portions"),
+        headline: `${totalP.toLocaleString(localeCode())} ${t("hist_progress_total")}`,
+        fmt: (v) => `${Math.round(v).toLocaleString(localeCode())}`, axisFmt: (v) => String(Math.round(v)), endFmt: (v) => String(Math.round(v).toLocaleString(localeCode())),
+        aria: `${t("hist_progress_portions")}: ${totalP}` },
+      { key: "income", cumKey: "cumIncome", color: "var(--matcha)", title: t("hist_progress_income"),
+        headline: `${fmtMoney(totalI)} ${t("hist_progress_total")}`,
+        fmt: (v) => fmtMoney(v), axisFmt: hpFmtMoneyShort, endFmt: (v) => fmtMoney(v),
+        aria: `${t("hist_progress_income")}: ${fmtMoney(totalI)}` },
+    ];
+    const tableRows = rows.map((r) => `<tr><td>${escapeHtml(hpWeekLabel(r.start))}</td><td class="num">${r.portions}</td><td class="num">${r.cumPortions}</td><td class="num">${fmtMoney(r.income)}</td><td class="num">${fmtMoney(r.cumIncome)}</td></tr>`).join("");
+    body.innerHTML = charts.map((c, i) => `
+      <div class="hp-chart-block">
+        <div class="hp-chart-title">${escapeHtml(c.title)} <span>${escapeHtml(c.headline)}</span></div>
+        <div class="hp-chart" data-chart="${i}" tabindex="0">${hpChartSvg(rows, c, W)}<div class="hp-tip" style="display:none"></div></div>
+      </div>`).join("") + `
+      <details class="hp-table">
+        <summary>${t("hist_progress_table")}</summary>
+        <table class="hist-itemized">
+          <thead><tr><th>${t("hist_progress_th_week")}</th><th class="num">${t("hist_progress_th_portions")}</th><th class="num">${t("hist_progress_th_portions_total")}</th><th class="num">${t("hist_progress_th_income")}</th><th class="num">${t("hist_progress_th_income_total")}</th></tr></thead>
+          <tbody>${tableRows}</tbody>
+        </table>
+      </details>`;
+    body.querySelectorAll(".hp-chart").forEach((wrap) => hpWireChart(wrap, rows, charts[Number(wrap.dataset.chart)], W));
+  }
+
+  document.querySelectorAll(".hp-pills button").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      histProgressMode = btn.dataset.mode;
+      document.querySelectorAll(".hp-pills button").forEach((b) => b.setAttribute("aria-pressed", String(b === btn)));
+      if (currentWindow === "all") renderHistProgress(histProgressRows);
+    });
+  });
+
+  // The charts are drawn at the card's pixel width, so redraw when it changes
+  // (window resize, or the History tab being shown for the first time).
+  if (window.ResizeObserver) {
+    let hpLastW = 0;
+    new ResizeObserver(() => {
+      const el = document.getElementById("histProgressBody");
+      const w = el ? Math.floor(el.clientWidth) : 0;
+      if (w && w !== hpLastW) { hpLastW = w; if (currentWindow === "all" && histProgressRows.length) renderHistProgress(histProgressRows); }
+    }).observe(document.getElementById("histProgressBody"));
+  }
+
+
   function renderHistory() {
     const list = ordersInWindow(currentWindow);
     renderHistStats(list);
@@ -10193,6 +10474,9 @@
     renderReturningBuyers();
     renderBiggestBuyers();
     renderHistRangeNote(currentWindow, list);
+    const progressCard = document.getElementById("histProgressCard");
+    progressCard.hidden = currentWindow !== "all";
+    if (!progressCard.hidden) renderHistProgress(list);
   }
 
   const windowPillButtons = Array.from(document.querySelectorAll(".window-pills button"));
