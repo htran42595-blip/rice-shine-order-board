@@ -8882,6 +8882,11 @@
     if (/apple pay/i.test(mainPart)) found.push(PAY_ICONS.applepay);
     if (/\bcash\b/i.test(mainPart)) found.push(PAY_ICONS.cash);
 
+    // The generic "Venmo / Zelle / Apple Pay / cash — at pickup" default lists
+    // every option on every card and just takes up space — hide it. A row that
+    // names one specific method (or free text) is real info, so it stays.
+    if (found.length > 1) return "";
+
     if (!found.length) {
       // payStr itself is free-text order data (e.g. "Not discussed yet") — never translated.
       return `<div class="pay-row"><span>${t("label_payment")}</span> <b style="color:var(--ink)">${payStr}</b></div>`;
@@ -9047,7 +9052,6 @@
           <div class="total">${fmtMoney(effectiveTotal(o))}</div>
         </div>
         ${pickupOpen ? renderPickupEditPanel(o, idx) : ""}
-        ${gcls ? `<div class="group-tag ${gcls}">${strGroupTag(gcount - 1)}</div>` : ""}
         ${o.webId ? renderReferenceCode(o.ref) : renderPayMethod(o.payMethod)}
         ${o.notes ? `<div class="note"><b>${t("label_kitchen_note")}</b>${translateOrderNote(o.notes)}</div>` : ""}
         ${hasNote ? `<div class="note manual-note"><b>${t("label_manual_note")}</b>${escapeHtml(getNote(o)).replace(/\n/g, "<br>")}</div>` : ""}
