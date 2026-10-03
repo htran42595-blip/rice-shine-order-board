@@ -9566,6 +9566,18 @@
     if (window.riceShineRepaintCards) window.riceShineRepaintCards();
   }
 
+  // Fixed item order for the Prep by Day view (tally + roster rows).
+  function prepItemRank(name) {
+    const n = canonicalItemName(name).toLowerCase();
+    if (n === "personal tray") return 0;
+    if (n === "shareable tray") return 1;
+    if (n === "vietnamese coffee") return 2;
+    if (n === "green thai tea") return 3;
+    if (n === "orange thai tea") return 4;
+    if (n.startsWith("comp drink")) return 5;
+    return 6;
+  }
+
   // ---- Prep by day view ----
   // Only counts orders that haven't been marked complete yet — once
   // something's picked up, it should drop off the "still need to prep" list.
@@ -9589,7 +9601,10 @@
           tally[key] = (tally[key] || 0) + i.qty;
         }
       }
-      const tallyEntries = Object.entries(tally).sort((a, b) => b[1] - a[1]);
+      // Fixed display order (Tony's ask): Personal Tray, Shareable Tray,
+      // Vietnamese Coffee, Green Thai Tea, Orange Thai Tea, comp drink —
+      // anything else (generic "Thai Tea", extras) follows alphabetically.
+      const tallyEntries = Object.entries(tally).sort((a, b) => prepItemRank(a[0]) - prepItemRank(b[0]) || a[0].localeCompare(b[0]));
 
       let dayPersonal = 0, dayShareable = 0;
       for (const o of orders) {
@@ -9620,7 +9635,7 @@
             ${orders.map(o => `
               <div class="roster-row">
                 <span class="who">${o.name}</span>
-                <span class="what">${effectiveItems(o).map(i => `${i.qty}× ${translateItemName(i.name)}`).join(", ")}</span>
+                <span class="what">${effectiveItems(o).slice().sort((a, b) => prepItemRank(a.name) - prepItemRank(b.name)).map(i => `${i.qty}× ${translateItemName(i.name)}`).join(", ")}</span>
                 <span class="time">${effectivePickupTime(o)}</span>
               </div>
             `).join("")}
