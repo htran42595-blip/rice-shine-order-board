@@ -2164,7 +2164,21 @@
   .pt-roster-row:last-child { border-bottom: none; }
   .pt-roster-row .who { font-weight: 700; flex: 0 0 140px; }
   .pt-roster-row .what { flex: 1; color: var(--ink-soft); margin: 0 12px; }
-  .pt-roster-row .what .item-note { color: var(--salmon); }
+  .pt-roster-row .what .item-note { color: var(--warn); font-weight: 800; text-decoration: underline; text-underline-offset: 2px; }
+  /* Special requests (extra seaweed/cucumber/sauce, no sriracha, no salmon...):
+     always bold + underlined + warm warning color so the kitchen cannot miss them. */
+  .item-special { color: var(--warn); font-weight: 800; text-decoration: underline; text-underline-offset: 2px; }
+  .special-req {
+    margin: 8px 0 4px; padding: 8px 11px;
+    border-left: 4px solid var(--warn); border-radius: 8px;
+    background: var(--salmon-soft); color: var(--warn);
+    font-weight: 800; font-size: 0.92rem; line-height: 1.35;
+  }
+  .special-req .sr-label {
+    display: block; font-size: 0.66rem; letter-spacing: 0.1em;
+    text-transform: uppercase; margin-bottom: 2px;
+  }
+  .special-req .sr-text { text-decoration: underline; text-underline-offset: 3px; }
   .pt-roster-row .time { font-family: "Space Mono", monospace; color: var(--ink-soft); font-size: 0.8rem; white-space: nowrap; }
   .pt-roster-row .time.flex-tag { color: var(--matcha); }
 
@@ -5874,7 +5888,7 @@
       name: "Esther Centeno", handle: "estherct",
       items: [
         { qty: 1, name: "Shareable Tray", price: 45 },
-        { qty: 2, name: "green Thai Tea", price: 4, note: "1 comp" }
+        { qty: 2, name: "green Thai Tea", price: 4 }
       ],
       total: 49,
       orderDate: "2026-10-01", orderTime: "09:26",
@@ -7532,6 +7546,7 @@
       badge_paid: "Paid",
       badge_unpaid: "Unpaid",
       label_kitchen_note: "Kitchen note",
+      label_special: "Special request",
       label_manual_note: "Note:",
       label_payment: "Payment:",
       label_reference_code: "Reference code:",
@@ -7760,6 +7775,7 @@
       badge_paid: "Đã trả",
       badge_unpaid: "Chưa trả",
       label_kitchen_note: "Ghi chú bếp",
+      label_special: "Yêu cầu đặc biệt",
       label_manual_note: "Ghi chú:",
       label_payment: "Thanh toán:",
       label_reference_code: "Mã tham chiếu:",
@@ -9043,11 +9059,12 @@
         <ul class="items">
           ${displayItems.map(i => `
             <li>
-              <span><span class="qty">${i.qty}×</span>${translateItemName(i.name)}${i.note ? ` <span style="color:var(--ink-soft)">(${translateItemNote(i.note)})</span>` : ""}</span>
+              <span><span class="qty">${i.qty}×</span>${translateItemName(i.name)}${i.note ? ` <span class="item-special">(${translateItemNote(i.note)})</span>` : ""}</span>
               <span class="price ${i.comp ? "comp" : ""}">${i.comp ? t("comp_label") : fmtMoney(i.price)}</span>
             </li>
           `).join("")}
         </ul>
+        ${o.special ? `<div class="special-req"><span class="sr-label">${t("label_special")}</span><span class="sr-text">${escapeHtml(translateItemNote(o.special))}</span></div>` : ""}
         ${!deletedMode ? `
           <button type="button" class="items-edit-btn" data-idx="${idx}" aria-expanded="${itemsOpen}" title="${t("items_edit_title")}">
             ${t("items_edit_btn")}${wasItemsEdited ? ` <span class="items-edited-tag" title="${t("items_edited_title")}">${t("items_edited_tag")}</span>` : ""}
@@ -9922,7 +9939,7 @@
           ${Object.keys(data.notes).length ? `
             <div class="pt-tally-notes">
               ${Object.entries(data.notes).map(([note, qty]) => `
-                <div class="pt-tally-note"><span class="n">${qty}×</span><span>${translateItemNote(note)}</span></div>
+                <div class="pt-tally-note"><span class="n">${qty}×</span><span class="item-special">${translateItemNote(note)}</span></div>
               `).join("")}
             </div>
           ` : ""}
@@ -9940,7 +9957,7 @@
       }).map(o => `
         <div class="pt-roster-row">
           <span class="who">${o.name}</span>
-          <span class="what">${effectiveItems(o).map(i => `${i.qty}× ${translateItemName(i.name)}${i.note ? ` <span class="item-note">(${translateItemNote(i.note)})</span>` : ""}`).join(", ")}</span>
+          <span class="what">${effectiveItems(o).map(i => `${i.qty}× ${translateItemName(i.name)}${i.note ? ` <span class="item-note">(${translateItemNote(i.note)})</span>` : ""}`).join(", ")}${o.special ? ` <span class="item-note">[${escapeHtml(translateItemNote(o.special))}]</span>` : ""}</span>
           <span class="time${prepTimeToMinutes(effectivePickupTime(o)) === null ? " flex-tag" : ""}">${effectivePickupTime(o)}</span>
         </div>
       `).join("")}
