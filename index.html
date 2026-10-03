@@ -2774,7 +2774,7 @@
 
   </section>
 
-  <footer class="foot" data-i18n="footer">Rice &amp; Shine · Instagram DM order log · orders received Aug 23–Sep 29, 2026 · updated manually until the live bot goes live</footer>
+  <footer class="foot" data-i18n="footer">Rice &amp; Shine · Instagram DM order log · orders received Aug 23–Oct 2, 2026 · updated manually until the live bot goes live</footer>
 </div>
 
 <script>
@@ -5401,14 +5401,14 @@
     {
       name: "🕸️💫🌑🪩🧿", handle: "laidbacktati",
       items: [
-        { qty: 1, name: "Personal Tray", price: 15, note: "no sriracha" },
+        { qty: 1, name: "Personal Tray", price: 0, note: "no sriracha — included in the $45 total per confirm message" },
         { qty: 1, name: "Shareable Tray", price: 45 }
       ],
-      total: 60,
+      total: 45,
       orderDate: "2026-09-28", orderTime: null,
       pickupDate: "2026-10-02", pickupTime: "5:30 PM",
       paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
-      notes: "Repeat customer (Vy's friend \"Tati\")."
+      notes: "Repeat customer (Vy's friend \"Tati\", also called Jackie). Confirm message in the DM says Total: $45 for 1 Personal Tray (no sriracha) + 1 Shareable Tray, so total is $45, not $60. Arrived 5:31pm."
     },
     {
       name: "Valeria", handle: "ilovemeval",
@@ -5674,8 +5674,8 @@
       total: 19,
       orderDate: "2026-09-30", orderTime: "20:19",
       pickupDate: "2026-10-02", pickupTime: "5:30 PM",
-      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
-      notes: "Repeat customer."
+      paid: true, payMethod: "Zelle / Apple Pay",
+      notes: "Repeat customer. Picked up 10/02, payment sent and confirmed (\"Got the payment! Tysm\")."
     },
     {
       name: "Ivette Robledo", handle: "ivetterobledo26",
@@ -5692,14 +5692,14 @@
     {
       name: "Bentley (Jenny)", handle: "bentleybthecorgi",
       items: [
-        { qty: 1, name: "Personal Tray", price: 15 },
+        { qty: 1, name: "Shareable Tray", price: 45 },
         { qty: 1, name: "green Thai Tea", price: 0, comp: true }
       ],
-      total: 15,
+      total: 45,
       orderDate: "2026-10-01", orderTime: "11:17",
-      pickupDate: "2026-10-03", pickupTime: "1:00 PM",
+      pickupDate: "2026-10-03", pickupTime: "5:00 PM",
       paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
-      notes: "First order — complimentary drink. Customer's name is Jenny; messaging from her dog's Instagram account (\"Bentley\")."
+      notes: "First order — complimentary drink (still just 1 after upgrade). Customer's name is Jenny; messaging from her dog's Instagram account (\"Bentley\"). Upgraded from Personal Tray ($15, pickup 1pm) to Shareable Tray ($45) and moved pickup to 5pm — confirmed \"Yes that's correct Ty!\". Plans to pay cash."
     },
     {
       name: "Esther Flores", handle: "esther_flores91",
@@ -5811,18 +5811,6 @@
       notes: "First order — complimentary drink."
     },
     {
-      name: "Jackie", handle: "",
-      items: [
-        { qty: 1, name: "Personal Tray", price: 15, note: "no sriracha" },
-        { qty: 1, name: "Shareable Tray", price: 30 }
-      ],
-      total: 45,
-      orderDate: "2026-10-01", orderTime: "",
-      pickupDate: "2026-10-02", pickupTime: "5:30 PM",
-      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
-      notes: "Logged directly per Tony's confirmation (no DM thread lookup — Tony gave full order details and confirmed this is accurate)."
-    },
-    {
       name: "Rosie", handle: "rosaa_1416_",
       items: [
         { qty: 1, name: "Personal Tray", price: 15 },
@@ -5880,9 +5868,9 @@
       ],
       total: 38,
       orderDate: "2026-10-01", orderTime: "21:02",
-      pickupDate: "2026-10-03", pickupTime: "3:00 PM",
+      pickupDate: "2026-10-03", pickupTime: "4:00 PM",
       paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
-      notes: "Repeat customer (previous order was in July), new order this window."
+      notes: "Repeat customer (previous order was in July), new order this window. Customer asked to move pickup from 3pm to 4pm (\"Of course\"); updated confirm sent, awaiting her reply."
     },
     {
       name: "ken (Kennedy)", handle: "kennedyy.morgann",
@@ -6038,6 +6026,17 @@
       pickupDate: "2026-10-03", pickupTime: "4:15 PM",
       paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
       notes: "First order — complimentary drink."
+    },
+    {
+      name: "reasa_p", handle: "reasa_p",
+      items: [
+        { qty: 1, name: "Personal Tray", price: 15 }
+      ],
+      total: 15,
+      orderDate: "2026-10-02", orderTime: "16:40",
+      pickupDate: "2026-10-03", pickupTime: "3:00 PM",
+      paid: false, payMethod: "Cash — at pickup",
+      notes: "First order — declined the complimentary drink (no sugar/caffeine). Confirmed with a thumbs-up; said \"Cash it is\"."
     }
 
   ];
@@ -7446,7 +7445,7 @@
       th_total_spent: "Total spent",
       hist_biggest_title: "Biggest buyers",
       hist_biggest_sub: "Total spent, all-time — highest first",
-      footer: "Rice & Shine · Instagram DM order log · orders received Aug 23–Sep 29, 2026 · updated manually until the live bot goes live",
+      footer: "Rice & Shine · Instagram DM order log · orders received Aug 23–Oct 2, 2026 · updated manually until the live bot goes live",
       empty_no_active: "All caught up — no active orders right now.",
       empty_no_completed: "No completed orders yet.",
       empty_prep_done: "Nothing left to prep — every order's been completed.",
