@@ -2017,6 +2017,11 @@
   }
 
   .roster-row:last-child { border-bottom: none; }
+  /* Heavier divider after the last order of each pickup time, alternating
+     solid / dashed between consecutive time slots (Prep by Day). */
+  .roster-row.slot-end { padding-bottom: 11px; margin-bottom: 4px; }
+  .roster-row.slot-end-solid { border-bottom: 2px solid var(--ink-soft); }
+  .roster-row.slot-end-dashed { border-bottom: 2px dashed var(--ink-soft); }
 
   .roster-row .who { font-weight: 700; }
   .roster-row .time { font-family: "Space Mono", monospace; color: var(--ink-soft); font-size: 0.8rem; }
@@ -9632,13 +9637,28 @@
             `).join("")}
           </div>
           <div class="roster">
-            ${orders.map(o => `
-              <div class="roster-row">
+            ${(() => {
+              // Time-slot dividers: the last order of each pickup time gets a
+              // heavier line under it, alternating solid / dashed from one
+              // slot to the next so the break between 9:00 and 9:30 (etc.)
+              // is easy to spot when reading down the list.
+              let slotIdx = 0;
+              const slotClass = orders.map((o, i) => {
+                const next = orders[i + 1];
+                if (!next) return "";
+                const ends = effectivePickupTime(next) !== effectivePickupTime(o);
+                const cls = ends ? (slotIdx % 2 === 0 ? " slot-end slot-end-solid" : " slot-end slot-end-dashed") : "";
+                if (ends) slotIdx++;
+                return cls;
+              });
+              return orders.map((o, i) => `
+              <div class="roster-row${slotClass[i]}">
                 <span class="who">${o.name}</span>
                 <span class="what">${effectiveItems(o).slice().sort((a, b) => prepItemRank(a.name) - prepItemRank(b.name)).map(i => `${i.qty}× ${translateItemName(i.name)}`).join(", ")}</span>
                 <span class="time">${effectivePickupTime(o)}</span>
               </div>
-            `).join("")}
+            `).join("");
+            })()}
           </div>
         </div>
       `;
