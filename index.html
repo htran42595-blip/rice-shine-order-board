@@ -7407,7 +7407,7 @@
       subtab_completed: "Completed Orders",
       subtab_deleted: "Deleted",
       label_unreviewed: "unreviewed",
-      stat_open_orders: "Open orders",
+      stat_open_orders: "Open orders / portions",
       stat_total_value: "Total value",
       stat_weekly_portions: "Weekly portions",
       stat_next_pickup: "Next pickup day",
@@ -7635,7 +7635,7 @@
       subtab_completed: "Đơn đã hoàn tất",
       subtab_deleted: "Đã xóa",
       label_unreviewed: "chưa xem",
-      stat_open_orders: "Đơn đang mở",
+      stat_open_orders: "Đơn đang mở / phần ăn",
       stat_total_value: "Tổng giá trị",
       stat_weekly_portions: "Phần ăn trong tuần",
       stat_next_pickup: "Ngày lấy hàng kế tiếp",
@@ -8942,6 +8942,7 @@
   function renderStats() {
     const active = ORDERS.filter(o => !isCompleted(o) && !isDeleted(o) && !o.historical);
     const total = active.length;
+    const openPortions = active.reduce((s, o) => s + trayPortions(effectiveItems(o)).portions, 0);
     const revenue = active.reduce((s, o) => s + effectiveTotal(o), 0);
     const days = [...new Set(active.map(o => effectivePickupDate(o)))].sort();
     const nextDay = days[0];
@@ -8951,7 +8952,7 @@
     const weeklyPct = Math.min(100, Math.round((weeklyPortions / WEEKLY_PORTIONS_TARGET) * 100));
     const el = document.getElementById("statbar");
     el.innerHTML = `
-      <div class="stat accent"><div class="n">${total}</div><div class="l">${t("stat_open_orders")}</div></div>
+      <div class="stat accent"><div class="n">${total} <span class="stat-progress-target">/ ${openPortions}</span></div><div class="l">${t("stat_open_orders")}</div></div>
       <div class="stat"><div class="n">${fmtMoney(revenue)}</div><div class="l">${t("stat_total_value")}</div></div>
       <div class="stat stat-progress">
         <div class="n">${weeklyPortions}<span class="stat-progress-target">/${WEEKLY_PORTIONS_TARGET}</span></div>
