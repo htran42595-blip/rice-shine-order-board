@@ -1018,6 +1018,23 @@
     margin-top: 1px;
   }
 
+  /* ---- Order source tag (top-left of every card) ----
+     Website orders show their Order Reference number (R1, R2, ...);
+     Instagram DM orders show "iG". */
+  .src-tag {
+    display: inline-block;
+    font-family: "Space Mono", ui-monospace, monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    line-height: 1;
+    padding: 4px 8px;
+    border-radius: 7px;
+    margin-bottom: 6px;
+  }
+  .src-tag.src-web { background: var(--matcha-soft); color: var(--matcha); border: 1px solid var(--matcha); }
+  .src-tag.src-ig { background: var(--salmon-soft); color: var(--ink-soft); border: 1px solid var(--line); }
+
   .badge {
     font-size: 0.68rem;
     font-weight: 700;
@@ -7588,6 +7605,8 @@
       label_manual_note: "Note:",
       label_payment: "Payment:",
       label_reference_code: "Reference code:",
+      src_web_title: "Website order, Order Reference number",
+      src_ig_title: "Instagram DM order",
       comp_label: "comp",
       toggle_completed: "Completed",
       toggle_mark_complete: "Mark complete",
@@ -7817,6 +7836,8 @@
       label_manual_note: "Ghi chú:",
       label_payment: "Thanh toán:",
       label_reference_code: "Mã tham chiếu:",
+      src_web_title: "Đơn đặt qua website, mã tham chiếu đơn hàng",
+      src_ig_title: "Đơn đặt qua tin nhắn Instagram",
       comp_label: "Ưu đãi",
       toggle_completed: "Đã hoàn tất",
       toggle_mark_complete: "Đánh dấu hoàn tất",
@@ -9056,6 +9077,18 @@
     return html;
   }
 
+  // Top-left tag on every order card: the Order Reference number for website
+  // orders (R1, R2, ...; falls back to #<last 6 of record id> for old orders
+  // that never got an Rn), or "iG" for Instagram DM orders.
+  function renderSourceTag(o) {
+    if (o.webId) {
+      const r = String(o.ref || "").trim();
+      const label = /^R\d+$/i.test(r) ? r.toUpperCase() : (r ? "#" + r : "WEB");
+      return `<span class="src-tag src-web" title="${escapeHtml(t("src_web_title"))}">${escapeHtml(label)}</span>`;
+    }
+    return `<span class="src-tag src-ig" title="${escapeHtml(t("src_ig_title"))}">iG</span>`;
+  }
+
   function renderTicket(o, idx, groups, deletedMode) {
     const gk = timeGroupKey(o);
     const gcls = groups.classes[gk];
@@ -9082,6 +9115,7 @@
         ` : ""}
         <div class="who">
           <div>
+            ${renderSourceTag(o)}
             <div class="name">${o.name}</div>
             <span class="handle">@${o.handle}</span>
           </div>
@@ -9120,7 +9154,7 @@
           <div class="total">${fmtMoney(effectiveTotal(o))}</div>
         </div>
         ${pickupOpen ? renderPickupEditPanel(o, idx) : ""}
-        ${o.webId ? renderReferenceCode(o.ref) : renderPayMethod(o.payMethod)}
+        ${o.webId ? "" : renderPayMethod(o.payMethod)}
         ${o.notes ? `<div class="note"><b>${t("label_kitchen_note")}</b>${translateOrderNote(o.notes)}</div>` : ""}
         ${hasNote ? `<div class="note manual-note"><b>${t("label_manual_note")}</b>${escapeHtml(getNote(o)).replace(/\n/g, "<br>")}</div>` : ""}
         <div class="ticket-foot">
