@@ -5788,8 +5788,8 @@
       total: 45,
       orderDate: "2026-10-01", orderTime: "11:17",
       pickupDate: "2026-10-03", pickupTime: "5:00 PM",
-      paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
-      notes: "Customer's name is Jenny; messaging from her dog's Instagram account (\"Bentley\"). Upgraded from Personal Tray ($15, pickup 1pm) to Shareable Tray ($45) and moved pickup to 5pm — confirmed \"Yes that's correct Ty!\". Plans to pay cash."
+      paid: true, payMethod: "Zelle",
+      notes: "Customer's name is Jenny; messaging from her dog's Instagram account (\"Bentley\"). Upgraded from Personal Tray ($15, pickup 1pm) to Shareable Tray ($45) and moved pickup to 5pm — confirmed \"Yes that's correct Ty!\". Paid via Zelle, delivered to lock box, picked up."
     },
     {
       name: "Esther Flores", handle: "esther_flores91",
@@ -6225,9 +6225,9 @@
         total: 45,
         orderDate: "2026-10-03", orderTime: "18:13",
         pickupDate: "2026-10-07", pickupTime: "6:00 PM",
-        paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
-        notes: "Repeat customer, new order this window (separate from her earlier 09/26 order). Confirmed (\"Yes this is correct\")."
-      }      ,
+        paid: true, payMethod: "cash",
+        notes: "Repeat customer, new order this window (separate from her earlier 09/26 order). Confirmed (\"Yes this is correct\"). Paid $50 cash, received change at pickup."
+      },
       {
         name: "ariana", handle: "aariana65",
         items: [
@@ -6322,19 +6322,20 @@
         total: 30,
         orderDate: "2026-10-07", orderTime: "17:02",
         pickupDate: "2026-10-07", pickupTime: "6:00 PM",
-        paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
-        notes: "First order — complimentary drink (her pick, Vietnamese coffee). Confirmed (\"Yes that is correct\")."
+        paid: true, payMethod: "Paid — method not specified",
+        notes: "First order — complimentary drink (her pick, Vietnamese coffee). Confirmed (\"Yes that is correct\"). Paid, sent extra as a tip (\"Got the payment! Tysm for the extra\")."
       },
       {
         name: "thequeendree", handle: "thequeendree",
         items: [
-          { qty: 2, name: "Personal Tray", price: 30 }
+          { qty: 2, name: "Personal Tray", price: 30 },
+          { qty: 2, name: "green Thai Tea", price: 4 }
         ],
-        total: 30,
+        total: 38,
         orderDate: "2026-10-06", orderTime: "09:22",
         pickupDate: "2026-10-08", pickupTime: "2:15 PM",
         paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
-        notes: "Confirmed (\"Yes thank you so much\"). She later asked to add 2 green Thai Tea (+$8) but has NOT yet confirmed that addition — check before prepping in case she replies yes."
+        notes: "Confirmed (\"Yes thank you so much\"). Added 2 green Thai Tea, confirmed (\"Yes thank you\")."
       },
       {
         name: "02_celi", handle: "02_celi",
@@ -6358,6 +6359,19 @@
         pickupDate: "2026-10-07", pickupTime: "10:20 AM",
         paid: true, payMethod: "Paid — method not specified",
         notes: "Repeat customer. Delivered (Blue Tesla Model Y), not standard pickup. Item breakdown wasn't visible in the thread (scroll-back got stuck loading — same platform bug as her past orders); Tony confirmed directly it was 3 coffee, $12."
+      },
+      {
+        name: "Pri¢e", handle: "price7o7",
+        items: [
+          { qty: 1, name: "Personal Tray", price: 15 },
+          { qty: 1, name: "orange Thai Tea", price: 0, comp: true },
+          { qty: 1, name: "Vietnamese Coffee", price: 4 }
+        ],
+        total: 19,
+        orderDate: "2026-10-07", orderTime: null,
+        pickupDate: "2026-10-09", pickupTime: "3:30 PM",
+        paid: false, payMethod: "Venmo / Zelle / Apple Pay / cash — at pickup",
+        notes: "First order — complimentary drink (orange Thai Tea). Added a Vietnamese coffee to the order, confirmed (\"Everything looks correct\")."
       }
 
   ];
