@@ -5,8 +5,13 @@ Rice & Shine live bot: merge dm-orders.json into index.html's ORDERS array.
 Run by .github/workflows/sync-dm-orders.yml on every push to dm-orders.json.
 Also safe to run locally for testing.
 
-Rules (from the owner's handoff brief):
-- Idempotent: orders already on the board (same handle + pickupDate) are skipped.
+Rules (from the owner, 2026-10-11):
+- Dedup is TRUE-DUPLICATE only: an incoming order is skipped only when the
+  board already has an order with the SAME handle, SAME pickupDate,
+  SAME pickupTime, SAME items (qty, name, price, comp, note) and SAME total.
+  Anything else (e.g. a second order from the same person on the same day
+  at a different time, or different items) is a SEPARATE order and MUST be
+  kept. When in doubt, keep both.
 - Loud: exits non-zero on bad data (total mismatch, missing fields, bad dates).
   A bad batch must fail the workflow visibly, never merge quietly.
 - New entries are APPENDED at the end of ORDERS. Never hand-sort; the board's
@@ -37,6 +42,9 @@ DEFAULT_PAY_METHOD = "Venmo / Zelle / Apple Pay / cash \u2014 at pickup"
 MONTHS_EN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
              "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
+# Matches a double-quoted JS string's inner content (handles \" and \\).
+STR_FIELD = r'"((?:[^"\\]|\\.)*)"'
+
 
 def fail(msg):
     print(f"MERGE FAILED: {msg}", file=sys.stderr)
@@ -46,6 +54,11 @@ def fail(msg):
 def js_str(s):
     """Escape a Python string for a double-quoted JS string literal."""
     return s.replace("\\", "\\\\").replace('"', '\\"')
+
+
+def js_unescape(s):
+    """Reverse js_str for the two escapes it produces."""
+    return s.replace("\\\\", "\x00").replace('\\"', '"').replace("\x00", "\\")
 
 
 def parse_ymd(s, field):
@@ -122,16 +135,131 @@ def format_entry(o):
     return "\n".join(lines)
 
 
-def existing_identities(array_text):
-    """Set of (handle, pickupDate) already in the ORDERS array."""
-    ids = set()
-    for m in re.finditer(r'handle: "((?:[^"\\]|\\.)*)"', array_text):
-        handle = m.group(1)
-        tail = array_text[m.end():m.end() + 1200]
-        pm = re.search(r'pickupDate: "(\d{4}-\d{2}-\d{2})"', tail)
-        if pm:
-            ids.add((handle, pm.group(1)))
-    return ids
+def order_signature(o):
+    """True-duplicate identity for an incoming (dict) order.
+
+    Two orders are the same only if handle, pickupDate, pickupTime, every
+    item field, and total all match. Anything else is a separate order.
+    """
+    items = o.get("items") or []
+    items_sig = tuple(
+        (int(it.get("qty", 0)), str(it.get("name", "")),
+         float(it.get("price", 0)), bool(it.get("comp")),
+         str(it.get("note") or ""))
+        for it in items
+    )
+    total = o.get("total")
+    return (
+        str(o.get("handle", "")),
+        str(o.get("pickupDate", "")),
+        str(o.get("pickupTime", "")),
+        items_sig,
+        float(total) if isinstance(total, (int, float)) else 0.0,
+    )
+
+
+def split_entries(array_text):
+    """Yield the raw text of each top-level {...} entry in the ORDERS array.
+
+    String-aware: braces inside quoted strings don't affect depth. Empty
+    ",," slots (a past formatting artifact) yield nothing and are ignored.
+    """
+    start = array_text.find("[")
+    if start < 0:
+        return []
+    entries = []
+    i = start + 1
+    n = len(array_text)
+    depth = 0
+    cur = None
+    instr = False
+    esc = False
+    q = None
+    while i < n:
+        ch = array_text[i]
+        if instr:
+            if cur is not None:
+                cur.append(ch)
+            if esc:
+                esc = False
+            elif ch == "\\":
+                esc = True
+            elif ch == q:
+                instr = False
+        elif ch in ('"', "'", "`"):
+            instr, q = True, ch
+            if cur is not None:
+                cur.append(ch)
+        elif ch == "{":
+            if depth == 0:
+                cur = [ch]
+            elif cur is not None:
+                cur.append(ch)
+            depth += 1
+        elif ch == "[":
+            depth += 1
+            if cur is not None:
+                cur.append(ch)
+        elif ch == "}":
+            depth -= 1
+            if cur is not None:
+                cur.append(ch)
+            if depth == 0 and cur is not None:
+                entries.append("".join(cur))
+                cur = None
+        elif ch == "]":
+            if depth == 0:
+                break
+            depth -= 1
+            if cur is not None:
+                cur.append(ch)
+        else:
+            if cur is not None:
+                cur.append(ch)
+        i += 1
+    return entries
+
+
+def entry_signature(text):
+    """True-duplicate identity parsed from one existing board entry's text."""
+    def grab(pat):
+        m = re.search(pat, text)
+        return js_unescape(m.group(1)) if m else ""
+
+    handle = grab(r"handle: " + STR_FIELD)
+    pickup_date = grab(r'pickupDate: "(\d{4}-\d{2}-\d{2})"')
+    pickup_time = grab(r"pickupTime: " + STR_FIELD)
+    tm = re.search(r"total: (\d+(?:\.\d+)?)", text)
+    total = float(tm.group(1)) if tm else 0.0
+
+    items = []
+    im = re.search(r"items: \[(.*?)\],", text, re.S)
+    if im:
+        for itm in re.finditer(
+                r"\{\s*qty: (\d+),\s*name: " + STR_FIELD +
+                r",\s*price: (\d+(?:\.\d+)?)([^}]*)\}", im.group(1), re.S):
+            rest = itm.group(4)
+            comp = "comp: true" in rest
+            nm = re.search(r"note: " + STR_FIELD, rest)
+            note = js_unescape(nm.group(1)) if nm else ""
+            items.append((int(itm.group(1)), js_unescape(itm.group(2)),
+                          float(itm.group(3)), comp, note))
+    return (handle, pickup_date, pickup_time, tuple(items), total)
+
+
+def existing_signatures(array_text):
+    """Set of true-duplicate identities already on the board.
+
+    An entry that doesn't parse is simply not added: it can never cause a
+    legitimate order to be skipped (fail-open toward keeping both).
+    """
+    sigs = set()
+    for entry in split_entries(array_text):
+        try:
+            sigs.add(entry_signature(entry))
+        except Exception:
+            continue
+    return sigs
 
 
 def bump_footers(html, array_text):
@@ -189,11 +317,11 @@ def main():
         fail(f"closing {ARRAY_END!r} not found in {INDEX_HTML}")
     array_text = html[start:end]
 
-    seen = existing_identities(array_text)
+    seen = existing_signatures(array_text)
     new_entries = []
     skipped = 0
     for o in incoming:
-        key = (o.get("handle", ""), o.get("pickupDate", ""))
+        key = order_signature(o)
         if key in seen:
             skipped += 1
             continue
@@ -202,13 +330,16 @@ def main():
 
     if not new_entries:
         print(f"NO_CHANGES: {len(incoming)} order(s) in {ORDERS_JSON}, "
-              f"{skipped} already on the board.")
+              f"{skipped} true-duplicate(s) skipped.")
         return
 
-    # Append before the closing "];"[STRING_PLACEHOLDER_1]"}",
-    # so add a comma then the new entries separated by blank lines.
-    insertion = ",\n\n" + "\n\n".join(new_entries)
-    html = html[:end] + insertion + html[end:]
+    # Append before the closing "];". Entries are formatted WITH a trailing
+    # comma, so only add a separator comma when the array doesn't already end
+    # with one; otherwise we'd create an empty ",," slot.
+    head = html[:end].rstrip()
+    sep = "" if head.endswith(",") else ","
+    insertion = sep + "\n\n" + "\n\n".join(new_entries)
+    html = head + insertion + html[end:]
 
     array_text = html[start:html.find(ARRAY_END, start)]
     html, footer_bump = bump_footers(html, array_text)
@@ -219,7 +350,7 @@ def main():
         json.dump([], f)
 
     print(f"MERGED {len(new_entries)} new order(s) into {INDEX_HTML} "
-          f"({skipped} duplicate(s) skipped).")
+          f"({skipped} true-duplicate(s) skipped).")
     if footer_bump:
         print(f"Footer max DM date bumped to {footer_bump}.")
 
