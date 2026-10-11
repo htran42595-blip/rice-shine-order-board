@@ -1,1 +1,21 @@
-[]
+[
+  {
+    "name": "Tony Tran",
+    "handle": "tonytran2504",
+    "items": [
+      {
+        "qty": 4,
+        "name": "Vietnamese Coffee",
+        "price": 16
+      }
+    ],
+    "total": 16,
+    "orderDate": "2026-10-11",
+    "orderTime": "14:44",
+    "pickupDate": "2026-10-12",
+    "pickupTime": "10:50 PM",
+    "paid": false,
+    "payMethod": "Venmo / Zelle / Apple Pay / cash — at pickup",
+    "notes": ""
+  }
+]
