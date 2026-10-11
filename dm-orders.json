@@ -1,1 +1,17 @@
-[]
+[
+  {
+    "name": "Tony Tran",
+    "handle": "tonytran2504",
+    "items": [
+      { "qty": 1, "name": "Green Thai Tea", "price": 4, "note": "no ice" },
+      { "qty": 1, "name": "Vietnamese Coffee", "price": 4 }
+    ],
+    "total": 8,
+    "orderDate": "2026-10-10",
+    "orderTime": "23:51",
+    "pickupDate": "2026-10-12",
+    "pickupTime": "12:30 PM",
+    "paid": false,
+    "notes": ""
+  }
+]
