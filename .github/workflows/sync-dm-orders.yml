@@ -1,0 +1,48 @@
+name: Sync DM orders to board
+
+# The "live bot" for the Rice & Shine order board.
+# When dm-orders.json changes on main, this merges the new orders into
+# index.html's ORDERS array and commits the result. The manual .bat flow
+# keeps working alongside: this job rebases onto main before pushing, so a
+# .bat push made at the same time is never silently overwritten (a real
+# conflict fails the run loudly instead).
+#
+# Reverting to manual-only: delete this file (or stop pushing dm-orders.json
+# changes). Nothing else in the repo depends on it.
+
+on:
+  push:
+    paths:
+      - dm-orders.json
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dm-order-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Merge DM orders into index.html
+        run: python3 scripts/merge_dm_orders.py
+
+      - name: Commit and push
+        run: |
+          git config user.name "rice-shine-live-bot"
+          git config user.email "live-bot@ricenshine.net"
+          git add index.html dm-orders.json
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git commit -m "live-bot: sync DM orders"
+          git pull --rebase origin main
+          git push origin main
