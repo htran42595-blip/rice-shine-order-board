@@ -1,1 +1,15 @@
-[]
+[
+  {
+    "name": "K. Pat",
+    "handle": "k.pat.56",
+    "items": [
+      { "qty": 1, "name": "Personal Tray", "price": 15 },
+      { "qty": 1, "name": "Green Thai Tea", "price": 0, "comp": true }
+    ],
+    "total": 15,
+    "orderDate": "2026-10-12",
+    "pickupDate": "2026-10-13",
+    "pickupTime": "5:45 PM",
+    "paid": false
+  }
+]
