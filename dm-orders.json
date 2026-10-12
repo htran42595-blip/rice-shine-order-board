@@ -1,1 +1,18 @@
-[]
+[
+  {
+    "name": "xx.daisyyg.xx",
+    "handle": "xx.daisyyg.xx",
+    "items": [
+      { "qty": 1, "name": "Personal Tray", "price": 15 },
+      { "qty": 1, "name": "orange Thai Tea", "price": 0, "comp": true },
+      { "qty": 1, "name": "green Thai Tea", "price": 4 }
+    ],
+    "total": 19,
+    "orderDate": "2026-10-11",
+    "orderTime": "22:33",
+    "pickupDate": "2026-10-13",
+    "pickupTime": "6:30 PM",
+    "paid": false,
+    "notes": "First order."
+  }
+]
