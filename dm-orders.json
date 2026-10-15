@@ -1,15 +1,1 @@
-[
-  {
-    "name": "Ashley Hatfield",
-    "handle": "ashann143",
-    "items": [{"qty": 2, "name": "Personal Tray", "price": 30, "note": "no sriracha"}],
-    "total": 30,
-    "orderDate": "2026-10-15",
-    "orderTime": null,
-    "pickupDate": "2026-10-17",
-    "pickupTime": "4:15 PM",
-    "paid": false,
-    "payMethod": "",
-    "notes": ""
-  }
-]
+[]
