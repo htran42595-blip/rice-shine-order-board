@@ -1,5 +1,1 @@
-[
-  {"name":"Arely Mejia","handle":"arely mejia","items":[{"qty":1,"name":"Personal Tray","price":15},{"qty":1,"name":"orange Thai Tea","price":4}],"total":19,"orderDate":"2026-10-14","pickupDate":"2026-10-15","pickupTime":"12:00 PM","paid":false,"notes":""},
-  {"name":"Kristal","handle":"kristal-rose","items":[{"qty":2,"name":"Personal Tray","price":30},{"qty":1,"name":"orange Thai Tea","price":0,"comp":true}],"total":30,"orderDate":"2026-10-14","pickupDate":"2026-10-15","pickupTime":"11:30 AM","paid":false,"notes":""},
-  {"name":"Coconut milk","handle":"coconut-milk","items":[{"qty":1,"name":"Personal Tray","price":15},{"qty":1,"name":"Personal Tray","price":0,"comp":true},{"qty":1,"name":"orange Thai Tea","price":4},{"qty":1,"name":"orange Thai Tea","price":0,"comp":true}],"total":19,"orderDate":"2026-10-14","pickupDate":"2026-10-17","pickupTime":"10:00 AM","paid":false,"notes":""}
-]
+[]
