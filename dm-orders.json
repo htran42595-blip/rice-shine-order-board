@@ -1,1 +1,35 @@
-[]
+[
+  {
+    "name": "_cuppies14_",
+    "handle": "_cuppies14_",
+    "items": [
+      { "qty": 1, "name": "Personal Tray", "price": 15 },
+      { "qty": 1, "name": "green Thai Tea", "price": 4 },
+      { "qty": 1, "name": "orange Thai Tea", "price": 4 },
+      { "qty": 1, "name": "Vietnamese Coffee", "price": 4 }
+    ],
+    "total": 27,
+    "orderDate": "2026-10-16",
+    "orderTime": "11:24",
+    "pickupDate": "2026-10-16",
+    "pickupTime": "4:00 PM",
+    "paid": false,
+    "payMethod": "Venmo / Zelle / Apple Pay / cash — at pickup",
+    "notes": ""
+  },
+  {
+    "name": "Esther Centeno",
+    "handle": "estherct",
+    "items": [
+      { "qty": 1, "name": "Shareable Tray", "price": 45 }
+    ],
+    "total": 45,
+    "orderDate": "2026-10-16",
+    "orderTime": "10:12",
+    "pickupDate": "2026-10-17",
+    "pickupTime": "12:00 PM",
+    "paid": false,
+    "payMethod": "Venmo / Zelle / Apple Pay / cash — at pickup",
+    "notes": ""
+  }
+]
