@@ -1,1 +1,17 @@
-[]
+[
+  {
+    "name": "Lupe Arias",
+    "handle": "la83_42",
+    "items": [
+      { "qty": 1, "name": "Personal Tray", "price": 15 }
+    ],
+    "total": 15,
+    "orderDate": "2026-10-15",
+    "orderTime": null,
+    "pickupDate": "2026-10-17",
+    "pickupTime": "3:00 PM",
+    "paid": false,
+    "payMethod": "Venmo / Zelle / Apple Pay / cash — at pickup",
+    "notes": ""
+  }
+]
