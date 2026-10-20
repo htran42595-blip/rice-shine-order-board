@@ -1,1 +1,27 @@
-[]
+[
+  {
+    "name": "Shalon Honee",
+    "handle": "shalon_honee",
+    "items": [
+      {
+        "qty": 1,
+        "name": "Personal Tray",
+        "price": 15
+      },
+      {
+        "qty": 1,
+        "name": "Vietnamese Coffee",
+        "price": 0,
+        "comp": true
+      }
+    ],
+    "total": 15,
+    "orderDate": "2026-10-19",
+    "orderTime": "22:22",
+    "pickupDate": "2026-10-20",
+    "pickupTime": "6:00 PM",
+    "paid": false,
+    "payMethod": "cash at pickup",
+    "notes": "First order. Customer will bring cash at pickup. Comp Vietnamese coffee per Tony."
+  }
+]
