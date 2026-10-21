@@ -10447,7 +10447,9 @@
     const wasRescheduled = hasPickupOverride(o);
     const itemsOpen = openItemsPanels.has(orderIdentity(o));
     const wasItemsEdited = hasItemsOverride(o);
-    const displayItems = effectiveItems(o);
+    // Tony's rule (2026-10-21): order cards always list trays before
+    // drinks. Stable sort on a copy, same rank order as the prep view.
+    const displayItems = effectiveItems(o).slice().sort((a, b) => prepItemRank(a.name) - prepItemRank(b.name));
     return `
       <article class="ticket ${gcls || ""} ${completed ? "is-complete" : ""} ${flag ? "is-flagged" : ""} ${deletedMode ? "is-deleted" : ""}" data-oid="${escapeHtml(orderIdentity(o))}">
         ${!deletedMode ? `
@@ -12432,7 +12434,7 @@
         isDeleted(o) ? '<span class="ld-chip deleted">' + t("lookup_chip_deleted") + "</span>" : "",
       ].filter(Boolean).join("");
 
-      const itemsHtml = effectiveItems(o).map((i) =>
+      const itemsHtml = effectiveItems(o).slice().sort((a, b) => prepItemRank(a.name) - prepItemRank(b.name)).map((i) =>
         '<div class="ld-item"><span class="q">' + i.qty + "×</span><span>"
         + escapeHtml(i.name) + (i.comp ? " (comp)" : "") + "</span>"
         + '<span class="p">' + (i.comp ? "comp" : money((i.price || 0) * (i.qty || 0)))
