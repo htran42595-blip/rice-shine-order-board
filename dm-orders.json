@@ -1,18 +1,1 @@
-[
-  {
-    "name": "Amanda Rocha",
-    "handle": "amandarocha1124",
-    "items": [
-      { "qty": 1, "name": "Personal Tray", "price": 15 },
-      { "qty": 1, "name": "Vietnamese Coffee", "price": 0, "comp": true }
-    ],
-    "total": 15,
-    "orderDate": "2026-10-30",
-    "orderTime": "07:45",
-    "pickupDate": "2026-10-30",
-    "pickupTime": "12:00 PM",
-    "paid": false,
-    "payMethod": "Venmo / Zelle / Apple Pay / cash — at pickup",
-    "notes": "Arriving in white Honda"
-  }
-]
+[]
