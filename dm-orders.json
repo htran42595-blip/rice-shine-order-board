@@ -1,1 +1,17 @@
-[]
+[
+  {
+    "name": "Gaby Lopez",
+    "handle": "gabee_lpz",
+    "items": [
+      { "qty": 1, "name": "Shareable Tray", "price": 45 }
+    ],
+    "total": 45,
+    "orderDate": "2026-10-28",
+    "orderTime": "9:49 PM",
+    "pickupDate": "2026-10-31",
+    "pickupTime": "3:00 PM",
+    "paid": false,
+    "payMethod": "Venmo / Zelle / Apple Pay / cash — at pickup",
+    "notes": ""
+  }
+]
