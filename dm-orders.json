@@ -1,18 +1,1 @@
-[
-  {
-    "name": "kaarrrinaa__",
-    "handle": "kaarrrinaa__",
-    "items": [
-      { "qty": 1, "name": "Shareable Tray", "price": 45 },
-      { "qty": 1, "name": "Green Thai Tea", "price": 4 }
-    ],
-    "total": 49,
-    "orderDate": "2026-10-29",
-    "orderTime": "13:57",
-    "pickupDate": "2026-10-31",
-    "pickupTime": "11:00 AM",
-    "paid": false,
-    "payMethod": "Venmo / Zelle / Apple Pay / cash — at pickup",
-    "notes": ""
-  }
-]
+[]
