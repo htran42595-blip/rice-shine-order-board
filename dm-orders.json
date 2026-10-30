@@ -1,17 +1,1 @@
-[
-  {
-    "name": "Dr A",
-    "handle": "dra (phone order)",
-    "items": [
-      { "qty": 1, "name": "Shareable Tray", "price": 45 }
-    ],
-    "total": 45,
-    "orderDate": "2026-10-30",
-    "orderTime": "07:53",
-    "pickupDate": "2026-10-30",
-    "pickupTime": "4:30 PM",
-    "paid": false,
-    "payMethod": "Venmo / Zelle / Apple Pay / cash — at pickup",
-    "notes": "Manual order added by Tony."
-  }
-]
+[]
