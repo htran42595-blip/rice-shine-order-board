@@ -1,17 +1,1 @@
-[
-  {
-    "name": "Katie Merida",
-    "handle": "ktbug2323",
-    "items": [
-      { "qty": 3, "name": "Personal Tray", "price": 45 }
-    ],
-    "total": 45,
-    "orderDate": "2026-11-01",
-    "orderTime": "12:31 PM",
-    "pickupDate": "2026-11-01",
-    "pickupTime": "1:15 PM",
-    "paid": false,
-    "payMethod": "cash",
-    "notes": ""
-  }
-]
+[]
