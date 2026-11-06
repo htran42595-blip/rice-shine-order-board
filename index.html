@@ -9320,7 +9320,27 @@
     });
   }
 
+  // 3D Map access works like Sync: when an allowed account is signed in here, the link
+  // carries that account's short-lived sign-in token after "#rs=" so the map can show live
+  // orders. The part after "#" never goes to a server as part of the address, and the map
+  // removes it from the address bar as soon as it has read it. Anyone else gets the plain
+  // link and the map's public (possibly out-of-date) view.
+  const MAP3D_URL = "https://script.google.com/macros/s/AKfycbzovnE25Is0AjqGtHg1TRSBSnndvCMxJOajwJamrZvQgw6FG1TGrAci-vSPd4l4AXjR/exec";
+  async function refreshMap3dLink() {
+    const link = document.getElementById("map3dLink");
+    if (!link) return;
+    let token = null;
+    try {
+      const sync = window.RiceShineSync;
+      if (sync && sync.isAuthorized && sync.isAuthorized() && sync.getIdToken) token = await sync.getIdToken();
+    } catch (e) {
+      token = null;
+    }
+    link.href = token ? MAP3D_URL + "#rs=" + encodeURIComponent(token) : MAP3D_URL;
+  }
+
   function openPalettePopover() {
+    refreshMap3dLink();
     document.getElementById("palettePopover").hidden = false;
     document.getElementById("palettePopoverBackdrop").hidden = false;
     document.getElementById("paletteToggle").setAttribute("aria-expanded", "true");
@@ -13382,6 +13402,8 @@
   });
   document.getElementById("palettePopoverBackdrop").addEventListener("click", closePalettePopover);
   document.getElementById("map3dLink").addEventListener("click", closePalettePopover);
+  document.getElementById("map3dLink").addEventListener("pointerdown", refreshMap3dLink);
+  document.addEventListener("riceshine-sync-auth-change", refreshMap3dLink);
   document.addEventListener("keydown", (e) => {
     if (e.key !== "Escape") return;
     if (!document.getElementById("palettePopover").hidden) closePalettePopover();
@@ -14173,6 +14195,9 @@
     isSharedMode: () => sharedMode,
     getUserEmail: () => (currentUser ? currentUser.email : null),
     isAuthorized: () => authorized,
+    // Short-lived Firebase sign-in token (refreshed by Firebase when close to expiring),
+    // handed to the 3D map so it can confirm the viewer is an allowed account.
+    getIdToken: () => (currentUser ? currentUser.getIdToken() : Promise.resolve(null)),
     signIn,
     signOut: signOutUser,
     setCompleted,
