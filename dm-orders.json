@@ -1,1 +1,18 @@
-[]
+[
+  {
+    "name": "Coconut milk",
+    "handle": "esmi_thats_it",
+    "items": [
+      { "qty": 2, "name": "Personal Tray", "price": 30 },
+      { "qty": 2, "name": "Orange Thai Tea", "price": 8 }
+    ],
+    "total": 38,
+    "orderDate": "2026-11-05",
+    "orderTime": "09:31",
+    "pickupDate": "2026-11-07",
+    "pickupTime": "11:00 AM",
+    "paid": false,
+    "payMethod": "Venmo / Zelle / Apple Pay / cash — at pickup",
+    "notes": ""
+  }
+]
