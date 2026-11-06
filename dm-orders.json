@@ -1,18 +1,1 @@
-[
-  {
-    "name": "MEL.",
-    "handle": "hellamel",
-    "items": [
-      { "qty": 1, "name": "Shareable Tray", "price": 45 },
-      { "qty": 1, "name": "Vietnamese Coffee", "price": 0, "comp": true }
-    ],
-    "total": 45,
-    "orderDate": "2026-11-05",
-    "orderTime": "15:37",
-    "pickupDate": "2026-11-08",
-    "pickupTime": "12:00 PM",
-    "paid": false,
-    "payMethod": "Venmo / Zelle / Apple Pay / cash — at pickup",
-    "notes": "First order, complimentary Vietnamese Coffee per Tony"
-  }
-]
+[]
