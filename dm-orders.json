@@ -1,18 +1,1 @@
-[
-  {
-    "name": "Myra Valete Anunciacion",
-    "handle": "mhai03",
-    "items": [
-      { "qty": 1, "name": "Shareable Tray", "price": 45 },
-      { "qty": 1, "name": "Green Thai Tea", "price": 4 }
-    ],
-    "total": 49,
-    "orderDate": "2026-11-05",
-    "orderTime": "20:08",
-    "pickupDate": "2026-11-07",
-    "pickupTime": "12:00 PM",
-    "paid": false,
-    "payMethod": "Venmo / Zelle / Apple Pay / cash — at pickup",
-    "notes": ""
-  }
-]
+[]
