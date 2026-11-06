@@ -774,6 +774,13 @@
   .palette-option-check { flex: none; width: 18px; height: 18px; color: var(--tea); visibility: hidden; }
   .palette-option[aria-pressed="true"] .palette-option-check { visibility: visible; }
 
+  /* 3D Map link: last row of the Customize popover, styled like a palette row */
+  .palette-extra { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); }
+  a.palette-option { text-decoration: none; color: inherit; box-sizing: border-box; }
+  .map3d-icon { flex: none; width: 44px; height: 26px; border-radius: 8px; display: grid; place-items: center; background: var(--rice-2); color: var(--tea); box-shadow: 0 0 0 1px var(--line); }
+  .map3d-icon svg { width: 22px; height: 22px; }
+  .map3d-go { flex: none; width: 18px; height: 18px; color: var(--ink-soft); }
+
   /* ---- History PIN gate ---- */
   .pin-modal-backdrop {
     position: fixed;
@@ -2630,6 +2637,16 @@
         <p class="palette-popover-title" data-i18n="customize_title">Dashboard colors</p>
         <p class="palette-popover-sub" data-i18n="customize_sub">Pick a color palette for this dashboard. Saved on this device.</p>
         <div class="palette-list" id="paletteList"></div>
+        <div class="palette-extra">
+          <a class="palette-option map3d-link" id="map3dLink" href="https://script.google.com/macros/s/AKfycbzovnE25Is0AjqGtHg1TRSBSnndvCMxJOajwJamrZvQgw6FG1TGrAci-vSPd4l4AXjR/exec" target="_blank" rel="noopener">
+            <span class="map3d-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 14.5h18l-2.4 4a2 2 0 0 1-1.7 1H7.1a2 2 0 0 1-1.7-1L3 14.5z" fill="currentColor"/><rect x="7.5" y="9.5" width="7.5" height="5" rx="1.3" fill="currentColor" opacity=".55"/><rect x="11.3" y="6" width="2.2" height="4" rx=".7" fill="currentColor"/><circle cx="14.6" cy="3.9" r="1.4" fill="currentColor" opacity=".4"/><circle cx="17.2" cy="2.6" r="1" fill="currentColor" opacity=".28"/><path d="M3 21.5c1.5 0 1.5-.8 3-.8s1.5.8 3 .8 1.5-.8 3-.8 1.5.8 3 .8 1.5-.8 3-.8 1.5.8 3 .8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" opacity=".5"/></svg></span>
+            <span class="palette-option-label">
+              <span class="palette-option-name" data-i18n="map3d_name">3D Map</span>
+              <span class="palette-option-tag" data-i18n="map3d_tag">Upcoming pickups as boats on a river</span>
+            </span>
+            <span class="map3d-go" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 5h7v7M15 5l-9 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          </a>
+        </div>
       </div>
       <button type="button" id="langToggle" class="lang-toggle">
         <span class="lang-globe" aria-hidden="true">🌐</span><span class="lang-code" id="langCode">EN</span>
@@ -9366,6 +9383,8 @@
       palette_ember_tag: "Grey, slate & orange",
       palette_graphite: "Graphite",
       palette_graphite_tag: "Black, white & shades of grey",
+      map3d_name: "3D Map",
+      map3d_tag: "Upcoming pickups as boats on a river",
       tab_orders: "Orders",
       tab_prep: "Prep by Day",
       tab_history: "History",
@@ -9597,6 +9616,8 @@
       palette_ember_tag: "Xám, xanh đá & cam",
       palette_graphite: "Than Chì",
       palette_graphite_tag: "Đen, trắng & các sắc xám",
+      map3d_name: "Bản đồ 3D",
+      map3d_tag: "Đơn sắp nhận dạng thuyền trên sông",
       tab_orders: "Đơn hàng",
       tab_prep: "Chuẩn bị theo ngày",
       tab_history: "Lịch sử",
@@ -13360,6 +13381,7 @@
     else openPalettePopover();
   });
   document.getElementById("palettePopoverBackdrop").addEventListener("click", closePalettePopover);
+  document.getElementById("map3dLink").addEventListener("click", closePalettePopover);
   document.addEventListener("keydown", (e) => {
     if (e.key !== "Escape") return;
     if (!document.getElementById("palettePopover").hidden) closePalettePopover();
