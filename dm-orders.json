@@ -1,1 +1,18 @@
-[]
+[
+  {
+    "name": "_espressoswithritz",
+    "handle": "_espressoswithritz",
+    "items": [
+      { "qty": 1, "name": "Personal Tray", "price": 15 },
+      { "qty": 2, "name": "Vietnamese Coffee", "price": 8 }
+    ],
+    "total": 23,
+    "orderDate": "2026-11-06",
+    "orderTime": "18:01",
+    "pickupDate": "2026-11-07",
+    "pickupTime": "9:00 AM",
+    "paid": false,
+    "payMethod": "Venmo / Zelle / Apple Pay / cash — at pickup",
+    "notes": ""
+  }
+]
