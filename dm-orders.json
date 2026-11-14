@@ -1,17 +1,1 @@
-[
-  {
-    "name": "Janel Walker",
-    "handle": "jrosewalker23",
-    "items": [
-      { "qty": 1, "name": "Shareable Tray", "price": 45, "note": "1/2 no sriracha" }
-    ],
-    "total": 45,
-    "orderDate": "2026-11-14",
-    "orderTime": "14:34",
-    "pickupDate": "2026-11-14",
-    "pickupTime": "3:00 PM",
-    "paid": false,
-    "payMethod": "Venmo / Zelle / Apple Pay / cash — at pickup",
-    "notes": ""
-  }
-]
+[]
