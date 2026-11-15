@@ -1,1 +1,27 @@
-[]
+[
+  {
+    "name": "Noemi Calderon",
+    "handle": "medicinal.mimi",
+    "items": [
+      {
+        "qty": 1,
+        "name": "Personal Tray",
+        "price": 15
+      },
+      {
+        "qty": 1,
+        "name": "Orange Thai Tea",
+        "price": 0,
+        "comp": true
+      }
+    ],
+    "total": 15,
+    "orderDate": "2026-11-15",
+    "orderTime": "15:01",
+    "pickupDate": "2026-11-16",
+    "pickupTime": "4:00 PM",
+    "paid": false,
+    "payMethod": "Venmo / Zelle / Apple Pay / cash — at pickup",
+    "notes": ""
+  }
+]
