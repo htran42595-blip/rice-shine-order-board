@@ -1,1 +1,18 @@
-[]
+[
+  {
+    "name": "yeygo",
+    "handle": "yeygo",
+    "items": [
+      { "qty": 2, "name": "Personal Tray", "price": 30 },
+      { "qty": 1, "name": "Vietnamese Coffee", "price": 0, "comp": true, "note": "iced" }
+    ],
+    "total": 30,
+    "orderDate": "2026-11-19",
+    "orderTime": "2:40 PM",
+    "pickupDate": "2026-11-19",
+    "pickupTime": "5:30 PM",
+    "paid": false,
+    "payMethod": "Venmo / Zelle / Apple Pay / cash — at pickup",
+    "notes": ""
+  }
+]
