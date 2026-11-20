@@ -1,1 +1,51 @@
-[]
+[
+  {
+    "name": "Edith Tafoya",
+    "handle": "3dithxo",
+    "items": [
+      { "qty": 1, "name": "Shareable Tray", "price": 45 },
+      { "qty": 1, "name": "Green Thai Tea", "price": 4 },
+      { "qty": 1, "name": "Green Thai Tea", "price": 0, "comp": true }
+    ],
+    "total": 49,
+    "orderDate": "2026-11-19",
+    "orderTime": "7:23 PM",
+    "pickupDate": "2026-11-22",
+    "pickupTime": "1:00 PM",
+    "paid": false,
+    "payMethod": "Venmo / Zelle / Apple Pay / cash — at pickup",
+    "notes": ""
+  },
+  {
+    "name": "layondooo",
+    "handle": "layondooo",
+    "items": [
+      { "qty": 1, "name": "Personal Tray", "price": 15 },
+      { "qty": 1, "name": "Green Thai Tea", "price": 0, "comp": true }
+    ],
+    "total": 15,
+    "orderDate": "2026-11-19",
+    "orderTime": "7:49 PM",
+    "pickupDate": "2026-11-20",
+    "pickupTime": "11:00 AM",
+    "paid": false,
+    "payMethod": "Venmo / Zelle / Apple Pay / cash — at pickup",
+    "notes": ""
+  },
+  {
+    "name": "love.riss_",
+    "handle": "love.riss_",
+    "items": [
+      { "qty": 1, "name": "Personal Tray", "price": 15 },
+      { "qty": 1, "name": "Vietnamese Coffee", "price": 0, "comp": true }
+    ],
+    "total": 15,
+    "orderDate": "2026-11-19",
+    "orderTime": "7:28 PM",
+    "pickupDate": "2026-11-21",
+    "pickupTime": "2:30 PM",
+    "paid": false,
+    "payMethod": "Venmo / Zelle / Apple Pay / cash — at pickup",
+    "notes": ""
+  }
+]
