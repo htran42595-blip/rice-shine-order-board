@@ -1,1 +1,18 @@
-[]
+[
+  {
+    "name": "Mabel",
+    "handle": "mabelge__",
+    "items": [
+      { "qty": 1, "name": "Personal Tray", "price": 15 },
+      { "qty": 1, "name": "Vietnamese Coffee", "price": 0, "comp": true }
+    ],
+    "total": 15,
+    "orderDate": "2026-11-19",
+    "orderTime": "7:00 PM",
+    "pickupDate": "2026-11-21",
+    "pickupTime": "11:00 AM",
+    "paid": false,
+    "payMethod": "Venmo / Zelle / Apple Pay / cash — at pickup",
+    "notes": ""
+  }
+]
