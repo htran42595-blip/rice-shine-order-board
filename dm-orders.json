@@ -1,1 +1,34 @@
-[]
+[
+  {
+    "name": "Alicia Lemos",
+    "handle": "aliciarrrose",
+    "items": [
+      { "qty": 1, "name": "Personal Tray", "price": 15, "note": "spicy" },
+      { "qty": 1, "name": "Personal Tray", "price": 15, "note": "no spicy" },
+      { "qty": 1, "name": "Vietnamese Coffee", "price": 4 }
+    ],
+    "total": 34,
+    "orderDate": "2026-11-23",
+    "orderTime": "2:26 PM",
+    "pickupDate": "2026-11-25",
+    "pickupTime": "7:00 AM",
+    "paid": false,
+    "payMethod": "Venmo / Zelle / Apple Pay / cash — at pickup",
+    "notes": ""
+  },
+  {
+    "name": "emmalyyya",
+    "handle": "emmalyyya",
+    "items": [
+      { "qty": 1, "name": "Shareable Tray", "price": 45 }
+    ],
+    "total": 45,
+    "orderDate": "2026-11-23",
+    "orderTime": "2:30 PM",
+    "pickupDate": "2026-11-26",
+    "pickupTime": "12:00 PM",
+    "paid": false,
+    "payMethod": "cash",
+    "notes": ""
+  }
+]
