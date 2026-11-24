@@ -1,1 +1,32 @@
-[]
+[
+  {
+    "name": "Talla",
+    "handle": "ilytmxo",
+    "items": [
+      {
+        "qty": 1,
+        "name": "Personal Tray",
+        "price": 15
+      },
+      {
+        "qty": 1,
+        "name": "Green Thai Tea",
+        "price": 4
+      },
+      {
+        "qty": 1,
+        "name": "Green Thai Tea",
+        "price": 0,
+        "comp": true
+      }
+    ],
+    "total": 19,
+    "orderDate": "2026-11-23",
+    "orderTime": "5:55 PM",
+    "pickupDate": "2026-11-24",
+    "pickupTime": "3:45 PM",
+    "paid": false,
+    "payMethod": "Venmo / Zelle / Apple Pay / cash — at pickup",
+    "notes": ""
+  }
+]
