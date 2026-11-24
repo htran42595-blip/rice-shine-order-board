@@ -1,18 +1,1 @@
-[
-  {
-    "name": "Diana Isela Campos",
-    "handle": "d.camposss",
-    "items": [
-      { "qty": 1, "name": "Shareable Tray", "price": 45 },
-      { "qty": 1, "name": "Vietnamese Coffee", "price": 0, "comp": true }
-    ],
-    "total": 45,
-    "orderDate": "2026-11-23",
-    "orderTime": "2:09 PM",
-    "pickupDate": "2026-11-24",
-    "pickupTime": "5:30 PM",
-    "paid": false,
-    "payMethod": "Venmo / Zelle / Apple Pay / cash — at pickup",
-    "notes": ""
-  }
-]
+[]
